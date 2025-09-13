@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ploytech 과제 제출 시스템</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #a8e6cf, #7fcdcd);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #7fcdcd;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo::before {
+            content: "💡";
+            font-size: 24px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .question {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 80px;
+        }
+
+        .type-selection {
+            display: flex;
+            gap: 100px;
+            margin-bottom: 80px;
+        }
+
+        .type-option {
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .type-option:hover {
+            transform: scale(1.05);
+        }
+
+        .icon-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 30px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s;
+        }
+
+        .type-option:hover .icon-container {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .student-icon {
+            width: 80px;
+            height: 80px;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="30" r="15" fill="none" stroke="%23333" stroke-width="3"/><path d="M25 85 Q25 65 50 65 Q75 65 75 85" fill="none" stroke="%23333" stroke-width="3"/><rect x="35" y="50" width="30" height="20" fill="none" stroke="%23333" stroke-width="3" rx="5"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+        }
+
+        .professor-icon {
+            width: 80px;
+            height: 80px;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="25" r="12" fill="none" stroke="%23333" stroke-width="3"/><path d="M30 85 Q30 65 50 65 Q70 65 70 85" fill="none" stroke="%23333" stroke-width="3"/><rect x="20" y="40" width="60" height="35" fill="none" stroke="%23333" stroke-width="3" rx="5"/><rect x="35" y="45" width="30" height="4" fill="%23333"/><rect x="35" y="52" width="30" height="4" fill="%23333"/><rect x="35" y="59" width="30" height="4" fill="%23333"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+        }
+
+        .type-button {
+            background: white;
+            border: 3px solid #e1e8ed;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+
+        .type-button:hover {
+            border-color: #7fcdcd;
+            background: #f8fdfd;
+            transform: translateY(-2px);
+        }
+
+        .page-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .indicator-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dee2e6;
+        }
+
+        .indicator-dot.active {
+            background: #7fcdcd;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="logo"></div>
+    <div class="title">Ploytech 과제 제출 시스템</div>
+</div>
+
+<div class="container">
+    <div class="question">당신은 누구인가요?</div>
+
+    <div class="type-selection">
+        <div class="type-option" onclick="selectType('student')">
+            <div class="icon-container">
+                <div class="student-icon"></div>
+            </div>
+            <button class="type-button" type="button">학생</button>
+        </div>
+
+        <div class="type-option" onclick="selectType('professor')">
+            <div class="icon-container">
+                <div class="professor-icon"></div>
+            </div>
+            <button class="type-button" type="button">교수</button>
+        </div>
+    </div>
+
+    <div class="page-indicator">
+        <div class="indicator-dot active"></div>
+        <div class="indicator-dot"></div>
+        <div class="indicator-dot"></div>
+    </div>
+</div>
+
+<script>
+    function selectType(type) {
+        window.location.href = '/register-' + type;
+    }
+</script>
+</body>
+</html>

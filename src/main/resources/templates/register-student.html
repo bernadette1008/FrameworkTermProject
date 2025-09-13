@@ -182,9 +182,7 @@
 
         <div th:if="${error}" class="error-message" th:text="${error}"></div>
 
-        <form th:action="@{/register-success}" method="post">
-            <input type="hidden" name="userType" th:value="${userType}">
-
+        <form th:action="@{/register-student}" method="post">
             <div class="form-group">
                 <label for="name">이름</label>
                 <input type="text" class="form-control" id="name" name="name"
@@ -194,13 +192,13 @@
             <div class="form-group">
                 <label for="studentNumber">학번</label>
                 <input type="text" class="form-control" id="studentNumber" name="studentNumber"
-                       placeholder="학번을 입력해주세요 (6자에서 30자 이내로 입력해주세요)" required>
+                       placeholder="학번을 입력해주세요 (학번이 아이디로 사용됩니다)" required>
             </div>
 
             <div class="form-group">
                 <label for="password">비밀번호</label>
                 <input type="password" class="form-control" id="password" name="password"
-                       placeholder="비밀번호를 입력해주세요 (6자에서 30자 이내로 입력해주세요)" required>
+                       placeholder="비밀번호를 입력해주세요 (숫자만 입력)" required>
             </div>
 
             <button type="submit" class="btn-primary">회원가입</button>

@@ -3,12 +3,16 @@ package com.example.demo.domain;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Data
+@Setter
+@Getter
 public class Professor {
     @Id
-    private String p_id;
-    private String p_name;
-    private String p_password;
+    private String pid;
+    private String name;
+    private String password;
 }

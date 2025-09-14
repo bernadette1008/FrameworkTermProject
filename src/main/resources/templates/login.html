@@ -179,24 +179,6 @@
         .register-link a:hover {
             text-decoration: underline;
         }
-
-        .page-indicator {
-            display: flex;
-            justify-content: center;
-            margin-top: 30px;
-            gap: 10px;
-        }
-
-        .indicator-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #dee2e6;
-        }
-
-        .indicator-dot.active {
-            background: #7fcdcd;
-        }
     </style>
 </head>
 <body>
@@ -231,12 +213,6 @@
         <div class="register-link">
             계정이 없으신가요? <a th:href="@{/register-type}">회원가입</a>
         </div>
-    </div>
-
-    <div class="page-indicator">
-        <div class="indicator-dot"></div>
-        <div class="indicator-dot"></div>
-        <div class="indicator-dot active"></div>
     </div>
 </div>
 </body>

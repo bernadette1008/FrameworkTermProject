@@ -145,4 +145,6 @@ public class ProjectController {
     public String professorMain(Model model) {
         return "professor-main"; // 교수용 메인 페이지 (추후 구현)
     }
+
+
 }

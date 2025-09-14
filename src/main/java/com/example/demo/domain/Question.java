@@ -42,4 +42,14 @@ public class Question {
     protected void onCreate() {
         questionTime = LocalDateTime.now();
     }
+
+    // JavaScript와의 호환성을 위한 getter 추가
+    public LocalDateTime getCreatedDate() {
+        return this.questionTime;
+    }
+
+    // 기존 필드명도 유지
+    public LocalDateTime getQuestionTime() {
+        return this.questionTime;
+    }
 }

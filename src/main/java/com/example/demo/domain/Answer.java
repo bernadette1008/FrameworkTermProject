@@ -38,4 +38,14 @@ public class Answer {
     protected void onCreate() {
         answerTime = LocalDateTime.now();
     }
+
+    // JavaScript와의 호환성을 위한 getter 추가
+    public LocalDateTime getCreatedDate() {
+        return this.answerTime;
+    }
+
+    // 기존 필드명도 유지
+    public LocalDateTime getAnswerTime() {
+        return this.answerTime;
+    }
 }

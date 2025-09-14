@@ -547,15 +547,15 @@
                     등록된 과제가 없습니다.
                 </div>
                 <div class="assignment-item" th:each="assignment : ${courseAssignments.get(course)}"
-                     th:onclick="'showAssignment(' + ${assignment.assignmentId} + ')'"
+                     th:onclick="'showAssignment(\'' + ${assignment.assignmentCode} + '\')'"
                      th:classappend="${assignment.submitted} ? 'submitted' : ''">
                     <div class="assignment-name" th:text="${assignment.title}">과제명</div>
                     <div class="assignment-due-date" th:text="${#temporals.format(assignment.dueDate, 'MM/dd HH:mm')}">12/31 23:59</div>
                     <span class="assignment-status"
                           th:classappend="${assignment.submitted} ? 'status-submitted' :
-                                         (${assignment.overdue} ? 'status-overdue' : 'status-pending')"
+                         (${assignment.overdue} ? 'status-overdue' : 'status-pending')"
                           th:text="${assignment.submitted} ? '제출완료' :
-                                   (${assignment.overdue} ? '기한초과' : '미제출')">미제출</span>
+                   (${assignment.overdue} ? '기한초과' : '미제출')">미제출</span>
                 </div>
             </div>
         </div>
@@ -672,12 +672,14 @@
 </div>
 
 <script>
+    // 수정된 JavaScript 함수들
+
     let currentAssignmentId = null;
     let currentSubmissionId = null;
 
-    // 과제 선택 함수
-    function showAssignment(assignmentId) {
-        currentAssignmentId = assignmentId;
+    // 과제 선택 함수 - assignmentCode를 받도록 수정
+    function showAssignment(assignmentCode) {
+        currentAssignmentId = assignmentCode; // 변수명은 유지하지만 실제로는 assignmentCode
 
         // 모든 과제 아이템에서 active 클래스 제거
         document.querySelectorAll('.assignment-item').forEach(item => {
@@ -692,25 +694,34 @@
         document.getElementById('assignmentView').style.display = 'flex';
 
         // 과제 정보 로드
-        loadAssignmentDetails(assignmentId);
+        loadAssignmentDetails(assignmentCode);
     }
 
     // 과제 상세 정보 로드
-    function loadAssignmentDetails(assignmentId) {
-        fetch(`/api/student/assignment/${assignmentId}`)
-            .then(response => response.json())
+    function loadAssignmentDetails(assignmentCode) {
+        fetch(`/api/student/assignment/${assignmentCode}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                if (!data.success && data.success === false) {
+                    throw new Error(data.message || '과제 정보를 불러올 수 없습니다.');
+                }
+
                 // 과제 정보 업데이트
-                document.getElementById('currentAssignmentTitle').textContent = data.title;
-                document.getElementById('assignmentTitle').textContent = data.title;
-                document.getElementById('assignmentContent').textContent = data.content;
+                document.getElementById('currentAssignmentTitle').textContent = data.title || '과제 제목';
+                document.getElementById('assignmentTitle').textContent = data.title || '과제 제목';
+                document.getElementById('assignmentContent').textContent = data.content || '과제 내용이 없습니다.';
                 document.getElementById('assignmentDueDate').textContent = formatDate(data.dueDate);
                 document.getElementById('assignmentCreatedDate').textContent = formatDate(data.createdDate);
 
                 // 제출 정보 업데이트
                 if (data.submission) {
-                    currentSubmissionId = data.submission.submissionId;
-                    document.getElementById('submissionContent').value = data.submission.content;
+                    currentSubmissionId = data.submission.submissionId || data.submission.submissionCode;
+                    document.getElementById('submissionContent').value = data.submission.content || '';
                     document.getElementById('assignmentStatus').textContent = '제출완료';
                     document.getElementById('submissionSectionTitle').textContent = '제출한 과제';
                     document.getElementById('submissionDate').textContent = formatDate(data.submission.submittedDate);
@@ -731,26 +742,33 @@
                 }
 
                 // 질문 목록 로드
-                loadQuestions(assignmentId);
+                loadQuestions(assignmentCode);
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('과제 정보를 불러오는데 실패했습니다.');
+                alert('과제 정보를 불러오는데 실패했습니다: ' + error.message);
             });
     }
 
     // 질문 목록 로드
-    function loadQuestions(assignmentId) {
-        fetch(`/api/student/assignment/${assignmentId}/questions`)
-            .then(response => response.json())
+    function loadQuestions(assignmentCode) {
+        fetch(`/api/student/assignment/${assignmentCode}/questions`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(questions => {
                 const questionsList = document.getElementById('questionsList');
                 questionsList.innerHTML = '';
 
-                questions.forEach(question => {
-                    const questionElement = createQuestionElement(question);
-                    questionsList.appendChild(questionElement);
-                });
+                if (Array.isArray(questions)) {
+                    questions.forEach(question => {
+                        const questionElement = createQuestionElement(question);
+                        questionsList.appendChild(questionElement);
+                    });
+                }
             })
             .catch(error => {
                 console.error('Error loading questions:', error);
@@ -763,27 +781,27 @@
         questionDiv.className = 'question-item';
 
         let answersHtml = '';
-        if (question.answers && question.answers.length > 0) {
+        if (question.answers && Array.isArray(question.answers) && question.answers.length > 0) {
             question.answers.forEach(answer => {
                 const authorName = answer.professor ? answer.professor.name + ' 교수님' :
                     (answer.student ? answer.student.name + ' 학생' : '익명');
                 answersHtml += `
-                    <div class="answer">
-                        <div class="answer-header">${authorName} 답변 - ${formatDate(answer.createdDate)}</div>
-                        <div class="answer-content">${answer.content}</div>
-                    </div>
-                `;
+                <div class="answer">
+                    <div class="answer-header">${authorName} 답변 - ${formatDate(answer.createdDate || answer.answerTime)}</div>
+                    <div class="answer-content">${answer.content || ''}</div>
+                </div>
+            `;
             });
         }
 
         questionDiv.innerHTML = `
-            <div class="question-header">
-                <strong>내 질문</strong>
-                <span class="question-date">${formatDate(question.createdDate)}</span>
-            </div>
-            <div class="question-content">${question.content}</div>
-            ${answersHtml}
-        `;
+        <div class="question-header">
+            <strong>내 질문</strong>
+            <span class="question-date">${formatDate(question.createdDate || question.questionTime)}</span>
+        </div>
+        <div class="question-content">${question.content || ''}</div>
+        ${answersHtml}
+    `;
 
         return questionDiv;
     }
@@ -797,7 +815,7 @@
         }
 
         const data = {
-            assignmentId: currentAssignmentId,
+            assignmentId: currentAssignmentId, // API에서 assignmentId로 받지만 실제로는 assignmentCode
             content: content
         };
 
@@ -815,7 +833,7 @@
                     loadAssignmentDetails(currentAssignmentId);
                     location.reload(); // 사이드바 상태 업데이트
                 } else {
-                    alert('제출에 실패했습니다: ' + result.message);
+                    alert('제출에 실패했습니다: ' + (result.message || '알 수 없는 오류'));
                 }
             })
             .catch(error => {
@@ -850,7 +868,7 @@
                     alert('과제가 성공적으로 수정되었습니다.');
                     loadAssignmentDetails(currentAssignmentId);
                 } else {
-                    alert('수정에 실패했습니다: ' + result.message);
+                    alert('수정에 실패했습니다: ' + (result.message || '알 수 없는 오류'));
                 }
             })
             .catch(error => {
@@ -875,7 +893,7 @@
                     loadAssignmentDetails(currentAssignmentId);
                     location.reload(); // 사이드바 상태 업데이트
                 } else {
-                    alert('삭제에 실패했습니다: ' + result.message);
+                    alert('삭제에 실패했습니다: ' + (result.message || '알 수 없는 오류'));
                 }
             })
             .catch(error => {
@@ -893,7 +911,7 @@
         }
 
         const data = {
-            assignmentId: currentAssignmentId,
+            assignmentId: currentAssignmentId, // API에서 assignmentId로 받지만 실제로는 assignmentCode
             content: content
         };
 
@@ -911,7 +929,7 @@
                     document.getElementById('newQuestionContent').value = '';
                     loadQuestions(currentAssignmentId);
                 } else {
-                    alert('질문 등록에 실패했습니다: ' + result.message);
+                    alert('질문 등록에 실패했습니다: ' + (result.message || '알 수 없는 오류'));
                 }
             })
             .catch(error => {
@@ -954,7 +972,7 @@
                     closeAddCourseModal();
                     location.reload(); // 페이지 새로고침
                 } else {
-                    alert('수업 등록에 실패했습니다: ' + result.message);
+                    alert('수업 등록에 실패했습니다: ' + (result.message || '알 수 없는 오류'));
                 }
             })
             .catch(error => {
@@ -973,36 +991,21 @@
     // 날짜 포맷 함수
     function formatDate(dateString) {
         if (!dateString) return '-';
-        const date = new Date(dateString);
-        return date.toLocaleString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '-';
+            return date.toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            console.error('Date formatting error:', error);
+            return '-';
+        }
     }
-
-    // 모달 외부 클릭시 닫기
-    document.getElementById('addCourseModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeAddCourseModal();
-        }
-    });
-
-    // ESC 키로 모달 닫기
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeAddCourseModal();
-        }
-    });
-
-    // Enter 키로 수업 등록
-    document.getElementById('courseKeyInput').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            enrollCourse();
-        }
-    });
 </script>
 </body>
 </html>

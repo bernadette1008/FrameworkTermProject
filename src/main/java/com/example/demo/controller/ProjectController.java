@@ -69,6 +69,13 @@ public class ProjectController {
         return "login";
     }
 
+    // 로그아웃 처리
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/";
+    }
+
     // 회원가입 타입 선택 페이지
     @GetMapping("/register-type")
     public String registerTypeForm(Model model){
@@ -94,7 +101,7 @@ public class ProjectController {
                                          @RequestParam String password,
                                          Model model) {
 
-        // 아이디 중복 체크 (학생과 교수 모두 같은 P_id 필드 사용하므로 둘 다 확인)
+        // 아이디 중복 체크 (학생과 교수 모두 확인)
         if (studentRepository.existsByStudentId(studentNumber) || professorRepository.existsByProfessorId(studentNumber)) {
             model.addAttribute("error", "이미 사용 중인 아이디입니다.");
             return "register-student";
@@ -118,11 +125,11 @@ public class ProjectController {
     // 교수 회원가입 처리
     @PostMapping("/register-professor")
     public String processProfessorRegister(@RequestParam String name,
-                                           @RequestParam String professorNumber, // 실제로는 교수 아이디
+                                           @RequestParam String professorNumber,
                                            @RequestParam String password,
                                            Model model) {
 
-        // 아이디 중복 체크 (학생과 교수 모두 같은 P_id 필드 사용하므로 둘 다 확인)
+        // 아이디 중복 체크 (학생과 교수 모두 확인)
         if (professorRepository.existsByProfessorId(professorNumber) || studentRepository.existsByStudentId(professorNumber)) {
             model.addAttribute("error", "이미 사용 중인 아이디입니다.");
             return "register-professor";
@@ -149,7 +156,7 @@ public class ProjectController {
         return "register-success";
     }
 
-    // 임시 메인 페이지들
+    // 학생 메인 페이지
     @GetMapping("/student-main")
     public String studentMain(Model model, HttpSession session) {
         String studentId = (String) session.getAttribute("userId");
@@ -175,7 +182,7 @@ public class ProjectController {
             Map<Course, List<Assignment>> courseAssignments = new HashMap<>();
             for (Course course : courses) {
                 List<Assignment> courseAssignmentList = assignments.stream()
-                        .filter(assignment -> assignment.getCourse().getCourseCode().equals(course.getCourseCode()))
+                        .filter(assignment -> assignment.getCourseCode().equals(course.getCourseCode()))
                         .collect(Collectors.toList());
                 courseAssignments.put(course, courseAssignmentList);
             }
@@ -186,14 +193,23 @@ public class ProjectController {
             model.addAttribute("userName", userName);
 
         } catch (Exception e) {
-            model.addAttribute("error", "데이터를 불러오는데 실패했습니다.");
+            model.addAttribute("error", "데이터를 불러오는데 실패했습니다: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return "student-main";
     }
 
     @GetMapping("/professor-main")
-    public String professorMain(Model model) {
+    public String professorMain(Model model, HttpSession session) {
+        String professorId = (String) session.getAttribute("userId");
+        String userName = (String) session.getAttribute("userName");
+
+        if (professorId == null) {
+            return "redirect:/";
+        }
+
+        model.addAttribute("userName", userName);
         return "professor-main"; // 교수용 메인 페이지 (추후 구현)
     }
 }

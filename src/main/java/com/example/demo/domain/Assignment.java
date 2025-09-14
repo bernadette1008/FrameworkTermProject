@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 public class Assignment {
     @Id
-    private String assignmentCode;  // 과제코드(PK)
+    private String assignmentCode;  // 과제코드(PK) - 일관성을 위해 코드명 유지
 
     @Column(name = "course_code")
     private String courseCode;      // 수업코드(FK)
@@ -49,6 +49,11 @@ public class Assignment {
         if (createdDate == null) {
             createdDate = LocalDateTime.now();
         }
+    }
+
+    // JavaScript와의 호환성을 위한 getter 추가
+    public String getAssignmentId() {
+        return this.assignmentCode;
     }
 
     // Helper methods

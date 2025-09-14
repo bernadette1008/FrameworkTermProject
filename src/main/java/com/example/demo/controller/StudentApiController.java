@@ -21,19 +21,20 @@ public class StudentApiController {
     private StudentService studentService;
 
     // 과제 상세 정보 조회
-    @GetMapping("/assignment/{assignmentId}")
-    public ResponseEntity<?> getAssignmentDetails(@PathVariable String assignmentId, HttpSession session) {
+    @GetMapping("/assignment/{assignmentCode}")
+    public ResponseEntity<?> getAssignmentDetails(@PathVariable String assignmentCode, HttpSession session) {
         try {
             String studentId = (String) session.getAttribute("userId");
             if (studentId == null) {
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
 
-            Assignment assignment = studentService.getAssignmentDetails(assignmentId);
-            Optional<Submission> submission = studentService.getSubmission(assignmentId, studentId);
+            Assignment assignment = studentService.getAssignmentDetails(assignmentCode);
+            Optional<Submission> submission = studentService.getSubmission(assignmentCode, studentId);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("assignmentId", assignment.getAssignmentCode());
+            response.put("assignmentId", assignment.getAssignmentCode()); // JavaScript 호환성을 위해
+            response.put("assignmentCode", assignment.getAssignmentCode());
             response.put("title", assignment.getTitle());
             response.put("content", assignment.getContent());
             response.put("dueDate", assignment.getDueDate());
@@ -42,6 +43,7 @@ public class StudentApiController {
             if (submission.isPresent()) {
                 Map<String, Object> submissionData = new HashMap<>();
                 submissionData.put("submissionId", submission.get().getSubmissionCode());
+                submissionData.put("submissionCode", submission.get().getSubmissionCode());
                 submissionData.put("content", submission.get().getContent());
                 submissionData.put("submittedDate", submission.get().getSubmissionTime());
                 submissionData.put("lastModifiedDate", submission.get().getLastModifiedDate());
@@ -55,15 +57,21 @@ public class StudentApiController {
     }
 
     // 과제의 질문 목록 조회
-    @GetMapping("/assignment/{assignmentId}/questions")
-    public ResponseEntity<?> getAssignmentQuestions(@PathVariable String assignmentId, HttpSession session) {
+    @GetMapping("/assignment/{assignmentCode}/questions")
+    public ResponseEntity<?> getAssignmentQuestions(@PathVariable String assignmentCode, HttpSession session) {
         try {
             String studentId = (String) session.getAttribute("userId");
             if (studentId == null) {
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
 
-            List<Question> questions = studentService.getAssignmentQuestions(assignmentId, studentId);
+            List<Question> questions = studentService.getAssignmentQuestions(assignmentCode, studentId);
+
+            // createdDate 필드 추가 (questionTime을 createdDate로 매핑)
+            questions.forEach(question -> {
+                question.getQuestionTime(); // 이미 있는 필드지만 명시적으로 확인
+            });
+
             return ResponseEntity.ok(questions);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
@@ -79,15 +87,22 @@ public class StudentApiController {
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
 
-            String assignmentId = request.get("assignmentId").toString();
+            // assignmentId 또는 assignmentCode 모두 허용
+            String assignmentCode = request.get("assignmentId") != null ?
+                    request.get("assignmentId").toString() : request.get("assignmentCode").toString();
             String content = request.get("content").toString();
 
-            Submission submission = studentService.submitAssignment(assignmentId, studentId, content);
+            if (assignmentCode == null || content == null) {
+                return ResponseEntity.badRequest().body(createErrorResponse("필수 정보가 누락되었습니다."));
+            }
+
+            Submission submission = studentService.submitAssignment(assignmentCode, studentId, content);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "과제가 성공적으로 제출되었습니다.");
             response.put("submissionId", submission.getSubmissionCode());
+            response.put("submissionCode", submission.getSubmissionCode());
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -104,10 +119,16 @@ public class StudentApiController {
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
 
-            String submissionId = request.get("submissionId").toString();
+            // submissionId 또는 submissionCode 모두 허용
+            String submissionCode = request.get("submissionId") != null ?
+                    request.get("submissionId").toString() : request.get("submissionCode").toString();
             String content = request.get("content").toString();
 
-            studentService.updateSubmission(submissionId, content);
+            if (submissionCode == null || content == null) {
+                return ResponseEntity.badRequest().body(createErrorResponse("필수 정보가 누락되었습니다."));
+            }
+
+            studentService.updateSubmission(submissionCode, content);
 
             return ResponseEntity.ok(createSuccessResponse("과제가 성공적으로 수정되었습니다."));
         } catch (Exception e) {
@@ -116,15 +137,15 @@ public class StudentApiController {
     }
 
     // 제출물 삭제
-    @DeleteMapping("/submission/{submissionId}")
-    public ResponseEntity<?> deleteSubmission(@PathVariable String submissionId, HttpSession session) {
+    @DeleteMapping("/submission/{submissionCode}")
+    public ResponseEntity<?> deleteSubmission(@PathVariable String submissionCode, HttpSession session) {
         try {
             String studentId = (String) session.getAttribute("userId");
             if (studentId == null) {
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
 
-            studentService.deleteSubmission(submissionId);
+            studentService.deleteSubmission(submissionCode);
 
             return ResponseEntity.ok(createSuccessResponse("제출물이 성공적으로 삭제되었습니다."));
         } catch (Exception e) {
@@ -141,15 +162,22 @@ public class StudentApiController {
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
 
-            String assignmentId = request.get("assignmentId").toString();
+            // assignmentId 또는 assignmentCode 모두 허용
+            String assignmentCode = request.get("assignmentId") != null ?
+                    request.get("assignmentId").toString() : request.get("assignmentCode").toString();
             String content = request.get("content").toString();
 
-            Question question = studentService.submitQuestion(assignmentId, studentId, content);
+            if (assignmentCode == null || content == null) {
+                return ResponseEntity.badRequest().body(createErrorResponse("필수 정보가 누락되었습니다."));
+            }
+
+            Question question = studentService.submitQuestion(assignmentCode, studentId, content);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "질문이 성공적으로 등록되었습니다.");
             response.put("questionId", question.getQuestionCode());
+            response.put("questionCode", question.getQuestionCode());
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -167,13 +195,66 @@ public class StudentApiController {
             }
 
             String courseCode = request.get("courseKey");
-            boolean success = studentService.enrollInCourse(studentId, courseCode);
+            if (courseCode == null || courseCode.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(createErrorResponse("수업 코드를 입력해주세요."));
+            }
+
+            boolean success = studentService.enrollInCourse(studentId, courseCode.trim());
 
             if (success) {
                 return ResponseEntity.ok(createSuccessResponse("수업이 성공적으로 등록되었습니다."));
             } else {
                 return ResponseEntity.badRequest().body(createErrorResponse("유효하지 않은 수업 코드입니다."));
             }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    // 수업 등록 해제
+    @DeleteMapping("/enroll/{courseCode}")
+    public ResponseEntity<?> unenrollFromCourse(@PathVariable String courseCode, HttpSession session) {
+        try {
+            String studentId = (String) session.getAttribute("userId");
+            if (studentId == null) {
+                return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
+            }
+
+            studentService.unenrollFromCourse(studentId, courseCode);
+
+            return ResponseEntity.ok(createSuccessResponse("수업 등록이 해제되었습니다."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    // 학생의 모든 제출물 조회
+    @GetMapping("/submissions")
+    public ResponseEntity<?> getStudentSubmissions(HttpSession session) {
+        try {
+            String studentId = (String) session.getAttribute("userId");
+            if (studentId == null) {
+                return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
+            }
+
+            List<Submission> submissions = studentService.getStudentSubmissions(studentId);
+            return ResponseEntity.ok(submissions);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    // 학생의 모든 질문 조회
+    @GetMapping("/questions")
+    public ResponseEntity<?> getStudentQuestions(HttpSession session) {
+        try {
+            String studentId = (String) session.getAttribute("userId");
+            if (studentId == null) {
+                return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
+            }
+
+            List<Question> questions = studentService.getStudentQuestions(studentId);
+            return ResponseEntity.ok(questions);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }

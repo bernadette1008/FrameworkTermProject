@@ -70,6 +70,11 @@ public class StudentService {
             throw new RuntimeException("학생을 찾을 수 없습니다.");
         }
 
+        // 마감일 확인
+        if (assignment.getDueDate() != null && assignment.getDueDate().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("과제 제출 기한이 지났습니다.");
+        }
+
         // 이미 제출된 과제인지 확인
         Optional<Submission> existingSubmission = submissionRepository.findByAssignmentCodeAndStudentId(assignmentCode, studentId);
         if (existingSubmission.isPresent()) {
@@ -81,6 +86,8 @@ public class StudentService {
         submission.setAssignmentCode(assignmentCode);
         submission.setStudentId(studentId);
         submission.setContent(content);
+        submission.setSubmissionTime(LocalDateTime.now());
+        submission.setLastModifiedDate(LocalDateTime.now());
 
         return submissionRepository.save(submission);
     }
@@ -90,6 +97,12 @@ public class StudentService {
         Submission submission = submissionRepository.findById(submissionCode)
                 .orElseThrow(() -> new RuntimeException("제출물을 찾을 수 없습니다."));
 
+        // 마감일 확인
+        Assignment assignment = getAssignmentDetails(submission.getAssignmentCode());
+        if (assignment.getDueDate() != null && assignment.getDueDate().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("과제 제출 기한이 지나 수정할 수 없습니다.");
+        }
+
         submission.setContent(content);
         submission.setLastModifiedDate(LocalDateTime.now());
 
@@ -98,9 +111,15 @@ public class StudentService {
 
     // 제출물 삭제
     public void deleteSubmission(String submissionCode) {
-        if (!submissionRepository.existsById(submissionCode)) {
-            throw new RuntimeException("제출물을 찾을 수 없습니다.");
+        Submission submission = submissionRepository.findById(submissionCode)
+                .orElseThrow(() -> new RuntimeException("제출물을 찾을 수 없습니다."));
+
+        // 마감일 확인
+        Assignment assignment = getAssignmentDetails(submission.getAssignmentCode());
+        if (assignment.getDueDate() != null && assignment.getDueDate().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("과제 제출 기한이 지나 삭제할 수 없습니다.");
         }
+
         submissionRepository.deleteById(submissionCode);
     }
 
@@ -118,6 +137,7 @@ public class StudentService {
         question.setAssignmentCode(assignmentCode);
         question.setStudentId(studentId);
         question.setContent(content);
+        question.setQuestionTime(LocalDateTime.now());
 
         return questionRepository.save(question);
     }
@@ -162,17 +182,54 @@ public class StudentService {
         Enrollment enrollment = new Enrollment();
         enrollment.setStudentId(studentId);
         enrollment.setCourseCode(courseCode);
+        enrollment.setEnrollmentDate(LocalDateTime.now());
 
         enrollmentRepository.save(enrollment);
         return true;
     }
 
+    // 수업 등록 해제
+    @Transactional
+    public void unenrollFromCourse(String studentId, String courseCode) {
+        if (!enrollmentRepository.existsByStudentIdAndCourseCode(studentId, courseCode)) {
+            throw new RuntimeException("등록되지 않은 수업입니다.");
+        }
+
+        enrollmentRepository.deleteByStudentIdAndCourseCode(studentId, courseCode);
+    }
+
+    // 학생의 제출물 목록 조회
+    public List<Submission> getStudentSubmissions(String studentId) {
+        return submissionRepository.findByStudentId(studentId);
+    }
+
+    // 학생의 질문 목록 조회
+    public List<Question> getStudentQuestions(String studentId) {
+        List<Question> questions = questionRepository.findByStudentId(studentId);
+
+        // 각 질문에 대한 답변 로드
+        for (Question question : questions) {
+            List<Answer> answers = answerRepository.findByQuestionCodeOrderByAnswerTimeAsc(question.getQuestionCode());
+            question.setAnswers(answers);
+        }
+
+        return questions;
+    }
+
     // 유니크한 코드 생성 메서드들
     private String generateSubmissionCode() {
-        return "SUB_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String code;
+        do {
+            code = "SUB_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        } while (submissionRepository.existsById(code));
+        return code;
     }
 
     private String generateQuestionCode() {
-        return "QST_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String code;
+        do {
+            code = "QST_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        } while (questionRepository.existsById(code));
+        return code;
     }
 }

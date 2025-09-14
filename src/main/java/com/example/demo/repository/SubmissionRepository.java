@@ -1,21 +1,19 @@
 package com.example.demo.repository;
 
 import com.example.demo.domain.Submission;
-import com.example.demo.domain.Assignment;
-import com.example.demo.domain.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SubmissionRepository extends JpaRepository<Submission, Long> {
+public interface SubmissionRepository extends JpaRepository<Submission, String> {
 
-    Optional<Submission> findByAssignmentAndStudent(Assignment assignment, Student student);
+    Optional<Submission> findByAssignmentCodeAndStudentId(String assignmentCode, String studentId);
 
-    List<Submission> findByStudent(Student student);
+    List<Submission> findByStudentId(String studentId);
 
-    List<Submission> findByAssignment(Assignment assignment);
+    List<Submission> findByAssignmentCode(String assignmentCode);
 
-    boolean existsByAssignmentAndStudent(Assignment assignment, Student student);
+    boolean existsByAssignmentCodeAndStudentId(String assignmentCode, String studentId);
 }

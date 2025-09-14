@@ -7,24 +7,25 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
+@Table(name = "course")
 @Data
 @Setter
 @Getter
 public class Course {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long courseId;
+    private String courseCode;  // 수업코드(PK)
+    private String courseName;  // 수업명
 
-    private String courseName;
-    private String courseCode;
+    @Column(name = "professor_id")
+    private String professorId; // 담당교수아이디(FK)
 
-    @ManyToOne
-    @JoinColumn(name = "professor_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "professor_id", insertable = false, updatable = false)
     private Professor professor;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private List<Assignment> assignments;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    private List<StudentCourse> studentCourses;
+    private List<Enrollment> enrollments;
 }

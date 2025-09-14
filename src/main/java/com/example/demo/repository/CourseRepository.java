@@ -10,13 +10,13 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CourseRepository extends JpaRepository<Course, Long> {
+public interface CourseRepository extends JpaRepository<Course, String> {
 
-    List<Course> findByProfessor(Professor professor);
+    Course findByCourseCode(String courseCode);
+    boolean existsByCourseCode(String courseCode);
 
-    @Query("SELECT c FROM Course c JOIN c.studentCourses sc WHERE sc.student = :student")
-    List<Course> findByStudent(@Param("student") Student student);
+    List<Course> findByProfessorId(String professorId);
 
-    @Query("SELECT c FROM Course c WHERE c.professor.pid = :professorId")
-    List<Course> findByProfessorId(@Param("professorId") String professorId);
+    @Query("SELECT c FROM Course c JOIN c.enrollments e WHERE e.studentId = :studentId")
+    List<Course> findByStudentId(@Param("studentId") String studentId);
 }

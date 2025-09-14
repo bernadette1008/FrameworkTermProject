@@ -8,25 +8,31 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@Table(name = "question")
 @Data
 @Setter
 @Getter
 public class Question {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long questionId;
+    private String questionCode;    // 질문코드(PK)
+
+    @Column(name = "assignment_code")
+    private String assignmentCode;  // 과제코드(FK)
+
+    @Column(name = "student_id")
+    private String studentId;       // 학번(FK)
 
     @Column(columnDefinition = "TEXT")
-    private String content;
+    private String content;         // 내용
 
-    private LocalDateTime createdDate;
+    private LocalDateTime questionTime;  // 질문시간
 
-    @ManyToOne
-    @JoinColumn(name = "assignment_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignment_code", insertable = false, updatable = false)
     private Assignment assignment;
 
-    @ManyToOne
-    @JoinColumn(name = "student_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", insertable = false, updatable = false)
     private Student student;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
@@ -34,6 +40,6 @@ public class Question {
 
     @PrePersist
     protected void onCreate() {
-        createdDate = LocalDateTime.now();
+        questionTime = LocalDateTime.now();
     }
 }

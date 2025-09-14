@@ -7,31 +7,43 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "submission")
 @Data
 @Setter
 @Getter
 public class Submission {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long submissionId;
+    private String submissionCode;   // 제출물코드(PK)
+
+    @Column(name = "assignment_code")
+    private String assignmentCode;   // 과제코드(FK)
+
+    @Column(name = "student_id")
+    private String studentId;        // 학번(FK)
+
+    private LocalDateTime submissionTime;    // 제출시간
 
     @Column(columnDefinition = "TEXT")
-    private String content;
+    private String content;          // 제출내용
 
-    private LocalDateTime submittedDate;
-    private LocalDateTime lastModifiedDate;
+    private Integer score;           // 점수
 
-    @ManyToOne
-    @JoinColumn(name = "assignment_id")
+    @Column(columnDefinition = "TEXT")
+    private String feedback;         // 피드백
+
+    private LocalDateTime lastModifiedDate;  // 최종 수정일
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignment_code", insertable = false, updatable = false)
     private Assignment assignment;
 
-    @ManyToOne
-    @JoinColumn(name = "student_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", insertable = false, updatable = false)
     private Student student;
 
     @PrePersist
     protected void onCreate() {
-        submittedDate = LocalDateTime.now();
+        submissionTime = LocalDateTime.now();
         lastModifiedDate = LocalDateTime.now();
     }
 

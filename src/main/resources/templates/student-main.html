@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -134,6 +135,17 @@
             border-left: 4px solid #7fcdcd;
         }
 
+        .assignment-name {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .assignment-due-date {
+            font-size: 11px;
+            color: #6c757d;
+            margin-right: 10px;
+        }
+
         .assignment-status {
             font-size: 12px;
             padding: 2px 6px;
@@ -203,6 +215,7 @@
             line-height: 1.6;
             color: #495057;
             margin-bottom: 30px;
+            white-space: pre-wrap;
         }
 
         .assignment-meta {
@@ -336,6 +349,7 @@
             color: #495057;
             line-height: 1.5;
             margin-bottom: 15px;
+            white-space: pre-wrap;
         }
 
         .answer {
@@ -353,40 +367,17 @@
             font-weight: bold;
         }
 
+        .answer-content {
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+
         .new-question-form {
             background: white;
             border: 2px dashed #dee2e6;
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
-        }
-
-        .actions-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-top: 1px solid #dee2e6;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .back-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .back-btn:hover {
-            background: #545b62;
         }
 
         .welcome-screen {
@@ -451,6 +442,71 @@
         .logout-btn:hover {
             background: #c82333;
         }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 400px;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #7fcdcd;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 <body>
@@ -469,23 +525,37 @@
 
 <div class="container">
     <div class="sidebar">
+        <!-- 수업이 없는 경우 -->
+        <div th:if="${#lists.isEmpty(courseAssignments)}" class="empty-state">
+            <div class="empty-state-icon">📚</div>
+            <div class="empty-state-text">
+                등록된 수업이 없습니다.<br>
+                하단의 + 버튼을 클릭해서<br>
+                수업을 등록해보세요!
+            </div>
+        </div>
+
         <!-- 수업 목록 -->
-        <div class="course-section" th:each="course : ${courses}">
+        <div class="course-section" th:each="course : ${courseAssignments.keySet()}">
             <div class="course-header">
                 <span th:text="${course.courseName}">OO 수업</span>
-                <div class="notification-badge" th:if="${course.hasNewNotifications}" th:text="${course.notificationCount}">1</div>
+                <div class="notification-badge" th:if="${courseAssignments.get(course).size() > 0}"
+                     th:text="${courseAssignments.get(course).size()}">1</div>
             </div>
             <div class="course-assignments">
-                <div class="assignment-item"
-                     th:each="assignment : ${course.assignments}"
+                <div th:if="${#lists.isEmpty(courseAssignments.get(course))}" class="assignment-item" style="color: #6c757d; font-style: italic;">
+                    등록된 과제가 없습니다.
+                </div>
+                <div class="assignment-item" th:each="assignment : ${courseAssignments.get(course)}"
                      th:onclick="'showAssignment(' + ${assignment.assignmentId} + ')'"
-                     th:classappend="${assignment.submissionStatus == 'SUBMITTED'} ? 'submitted' : ''">
-                    <span th:text="${assignment.title}">과제명</span>
+                     th:classappend="${assignment.submitted} ? 'submitted' : ''">
+                    <div class="assignment-name" th:text="${assignment.title}">과제명</div>
+                    <div class="assignment-due-date" th:text="${#temporals.format(assignment.dueDate, 'MM/dd HH:mm')}">12/31 23:59</div>
                     <span class="assignment-status"
-                          th:classappend="${assignment.submissionStatus == 'SUBMITTED'} ? 'status-submitted' :
-                                             (${assignment.isOverdue} ? 'status-overdue' : 'status-pending')"
-                          th:text="${assignment.submissionStatus == 'SUBMITTED'} ? '제출완료' :
-                                       (${assignment.isOverdue} ? '기한초과' : '미제출')">미제출</span>
+                          th:classappend="${assignment.submitted} ? 'status-submitted' :
+                                         (${assignment.overdue} ? 'status-overdue' : 'status-pending')"
+                          th:text="${assignment.submitted} ? '제출완료' :
+                                   (${assignment.overdue} ? '기한초과' : '미제출')">미제출</span>
                 </div>
             </div>
         </div>
@@ -537,9 +607,8 @@
                         </div>
 
                         <div class="new-question-form">
-                                <textarea class="textarea-large"
-                                          id="newQuestionContent"
-                                          placeholder="과제에 대해 궁금한 점을 질문해보세요..."></textarea>
+                            <textarea class="textarea-large" id="newQuestionContent"
+                                      placeholder="과제에 대해 궁금한 점을 질문해보세요..."></textarea>
                             <div class="button-group">
                                 <button class="btn btn-primary" onclick="submitQuestion()">질문하기</button>
                             </div>
@@ -559,9 +628,8 @@
                     </div>
 
                     <div class="submission-area">
-                            <textarea class="textarea-large"
-                                      id="submissionContent"
-                                      placeholder="과제 내용을 작성해주세요..."></textarea>
+                        <textarea class="textarea-large" id="submissionContent"
+                                  placeholder="과제 내용을 작성해주세요..."></textarea>
 
                         <div class="button-group">
                             <button class="btn btn-primary" id="submitBtn" onclick="submitAssignment()">제출하기</button>
@@ -592,12 +660,11 @@
 <button class="add-course-btn" onclick="addCourse()" title="수업 추가">+</button>
 
 <!-- 수업 추가 모달 -->
-<div id="addCourseModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; width: 400px;">
-        <h3 style="margin-bottom: 20px; color: #2c3e50;">수업 등록 키 입력</h3>
-        <input type="text" id="courseKeyInput" placeholder="수업 등록 키를 입력하세요"
-               style="width: 100%; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; margin-bottom: 20px; font-size: 16px;">
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+<div id="addCourseModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">수업 등록 키 입력</div>
+        <input type="text" id="courseKeyInput" class="form-input" placeholder="수업 등록 키를 입력하세요">
+        <div class="modal-buttons">
             <button class="btn btn-secondary" onclick="closeAddCourseModal()">취소</button>
             <button class="btn btn-primary" onclick="enrollCourse()">등록</button>
         </div>
@@ -636,7 +703,7 @@
                 // 과제 정보 업데이트
                 document.getElementById('currentAssignmentTitle').textContent = data.title;
                 document.getElementById('assignmentTitle').textContent = data.title;
-                document.getElementById('assignmentContent').innerHTML = data.content.replace(/\n/g, '<br>');
+                document.getElementById('assignmentContent').textContent = data.content;
                 document.getElementById('assignmentDueDate').textContent = formatDate(data.dueDate);
                 document.getElementById('assignmentCreatedDate').textContent = formatDate(data.createdDate);
 
@@ -698,23 +765,25 @@
         let answersHtml = '';
         if (question.answers && question.answers.length > 0) {
             question.answers.forEach(answer => {
+                const authorName = answer.professor ? answer.professor.name + ' 교수님' :
+                    (answer.student ? answer.student.name + ' 학생' : '익명');
                 answersHtml += `
-                        <div class="answer">
-                            <div class="answer-header">교수님 답변 - ${formatDate(answer.createdDate)}</div>
-                            <div>${answer.content.replace(/\n/g, '<br>')}</div>
-                        </div>
-                    `;
+                    <div class="answer">
+                        <div class="answer-header">${authorName} 답변 - ${formatDate(answer.createdDate)}</div>
+                        <div class="answer-content">${answer.content}</div>
+                    </div>
+                `;
             });
         }
 
         questionDiv.innerHTML = `
-                <div class="question-header">
-                    <strong>내 질문</strong>
-                    <span class="question-date">${formatDate(question.createdDate)}</span>
-                </div>
-                <div class="question-content">${question.content.replace(/\n/g, '<br>')}</div>
-                ${answersHtml}
-            `;
+            <div class="question-header">
+                <strong>내 질문</strong>
+                <span class="question-date">${formatDate(question.createdDate)}</span>
+            </div>
+            <div class="question-content">${question.content}</div>
+            ${answersHtml}
+        `;
 
         return questionDiv;
     }
@@ -744,6 +813,7 @@
                 if (result.success) {
                     alert('과제가 성공적으로 제출되었습니다.');
                     loadAssignmentDetails(currentAssignmentId);
+                    location.reload(); // 사이드바 상태 업데이트
                 } else {
                     alert('제출에 실패했습니다: ' + result.message);
                 }
@@ -803,6 +873,7 @@
                 if (result.success) {
                     alert('제출물이 삭제되었습니다.');
                     loadAssignmentDetails(currentAssignmentId);
+                    location.reload(); // 사이드바 상태 업데이트
                 } else {
                     alert('삭제에 실패했습니다: ' + result.message);
                 }
@@ -895,7 +966,7 @@
     // 로그아웃
     function logout() {
         if (confirm('로그아웃 하시겠습니까?')) {
-            window.location.href = '/';
+            window.location.href = '/logout';
         }
     }
 

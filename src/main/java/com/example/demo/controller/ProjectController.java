@@ -1,23 +1,22 @@
 package com.example.demo.controller;
 
-import com.example.demo.domain.*;
+import com.example.demo.domain.Student;
+import com.example.demo.domain.Professor;
+import com.example.demo.domain.Course;
+import com.example.demo.domain.Assignment;
 import com.example.demo.repository.StudentRepository;
 import com.example.demo.repository.ProfessorRepository;
-import com.example.demo.service.StudentService;
-import jakarta.servlet.http.HttpSession;
+import com.example.demo.repository.CourseRepository;
+import com.example.demo.repository.AssignmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Controller
 public class ProjectController {
@@ -29,7 +28,10 @@ public class ProjectController {
     private ProfessorRepository professorRepository;
 
     @Autowired
-    private StudentService studentService;
+    private CourseRepository courseRepository;
+
+    @Autowired
+    private AssignmentRepository assignmentRepository;
 
     // 메인 로그인 페이지
     @GetMapping("/")
@@ -41,39 +43,30 @@ public class ProjectController {
     @PostMapping("/login")
     public String processLogin(@RequestParam String userId,
                                @RequestParam String password,
-                               Model model,
-                               HttpSession session) {
+                               HttpSession session,
+                               Model model) {
 
         // 학생 테이블에서 확인
         Student student = studentRepository.findByStudentIdAndPassword(userId, password);
         if (student != null) {
-            // 학생 로그인 성공 - 세션에 정보 저장
-            session.setAttribute("userId", student.getStudentId());
-            session.setAttribute("userName", student.getName());
+            // 학생 로그인 성공
+            session.setAttribute("user", student);
             session.setAttribute("userType", "학생");
-            return "redirect:/student-main"; // 학생용 메인 페이지로 리다이렉트
+            return "redirect:/student-main";
         }
 
         // 교수 테이블에서 확인
         Professor professor = professorRepository.findByProfessorIdAndPassword(userId, password);
         if (professor != null) {
-            // 교수 로그인 성공 - 세션에 정보 저장
-            session.setAttribute("userId", professor.getProfessorId());
-            session.setAttribute("userName", professor.getName());
+            // 교수 로그인 성공
+            session.setAttribute("user", professor);
             session.setAttribute("userType", "교수");
-            return "redirect:/professor-main"; // 교수용 메인 페이지로 리다이렉트
+            return "redirect:/professor-main";
         }
 
         // 로그인 실패
         model.addAttribute("error", "아이디 또는 비밀번호가 틀렸습니다.");
         return "login";
-    }
-
-    // 로그아웃 처리
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/";
     }
 
     // 회원가입 타입 선택 페이지
@@ -101,13 +94,11 @@ public class ProjectController {
                                          @RequestParam String password,
                                          Model model) {
 
-        // 아이디 중복 체크 (학생과 교수 모두 확인)
         if (studentRepository.existsByStudentId(studentNumber) || professorRepository.existsByProfessorId(studentNumber)) {
             model.addAttribute("error", "이미 사용 중인 아이디입니다.");
             return "register-student";
         }
 
-        // 새 학생 생성
         Student newStudent = new Student();
         newStudent.setStudentId(studentNumber);
         newStudent.setName(name);
@@ -115,7 +106,6 @@ public class ProjectController {
 
         studentRepository.save(newStudent);
 
-        // 성공 페이지로 리다이렉트
         model.addAttribute("userType", "학생");
         model.addAttribute("userName", name);
 
@@ -129,13 +119,11 @@ public class ProjectController {
                                            @RequestParam String password,
                                            Model model) {
 
-        // 아이디 중복 체크 (학생과 교수 모두 확인)
         if (professorRepository.existsByProfessorId(professorNumber) || studentRepository.existsByStudentId(professorNumber)) {
             model.addAttribute("error", "이미 사용 중인 아이디입니다.");
             return "register-professor";
         }
 
-        // 새 교수 생성
         Professor newProfessor = new Professor();
         newProfessor.setProfessorId(professorNumber);
         newProfessor.setName(name);
@@ -143,7 +131,6 @@ public class ProjectController {
 
         professorRepository.save(newProfessor);
 
-        // 성공 페이지로 리다이렉트
         model.addAttribute("userType", "교수");
         model.addAttribute("userName", name);
 
@@ -159,57 +146,127 @@ public class ProjectController {
     // 학생 메인 페이지
     @GetMapping("/student-main")
     public String studentMain(Model model, HttpSession session) {
-        String studentId = (String) session.getAttribute("userId");
-        String userName = (String) session.getAttribute("userName");
-
-        if (studentId == null) {
+        Student student = (Student) session.getAttribute("user");
+        if (student == null) {
             return "redirect:/";
         }
-
-        try {
-            // 학생의 수강 과목 및 과제 정보 조회
-            List<Course> courses = studentService.getStudentCourses(studentId);
-            List<Assignment> assignments = studentService.getStudentAssignments(studentId);
-
-            // 과제별 제출 상태 확인
-            for (Assignment assignment : assignments) {
-                Optional<Submission> submission = studentService.getSubmission(assignment.getAssignmentCode(), studentId);
-                assignment.setSubmitted(submission.isPresent());
-                assignment.setOverdue(assignment.getDueDate().isBefore(LocalDateTime.now()));
-            }
-
-            // 과목별 과제 그룹화
-            Map<Course, List<Assignment>> courseAssignments = new HashMap<>();
-            for (Course course : courses) {
-                List<Assignment> courseAssignmentList = assignments.stream()
-                        .filter(assignment -> assignment.getCourseCode().equals(course.getCourseCode()))
-                        .collect(Collectors.toList());
-                courseAssignments.put(course, courseAssignmentList);
-            }
-
-            model.addAttribute("courses", courses);
-            model.addAttribute("assignments", assignments);
-            model.addAttribute("courseAssignments", courseAssignments);
-            model.addAttribute("userName", userName);
-
-        } catch (Exception e) {
-            model.addAttribute("error", "데이터를 불러오는데 실패했습니다: " + e.getMessage());
-            e.printStackTrace();
-        }
-
+        model.addAttribute("student", student);
         return "student-main";
     }
 
+    // 교수 메인 페이지
     @GetMapping("/professor-main")
     public String professorMain(Model model, HttpSession session) {
-        String professorId = (String) session.getAttribute("userId");
-        String userName = (String) session.getAttribute("userName");
-
-        if (professorId == null) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
             return "redirect:/";
         }
 
-        model.addAttribute("userName", userName);
-        return "professor-main"; // 교수용 메인 페이지 (추후 구현)
+        // 교수가 담당하는 강의 목록 조회
+        List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+        // 교수가 등록한 과제 목록 조회
+        List<Assignment> assignments = assignmentRepository.findByProfessorId(professor.getProfessorId());
+
+        model.addAttribute("professor", professor);
+        model.addAttribute("courses", courses);
+        model.addAttribute("assignments", assignments);
+        return "professor-main";
+    }
+
+    // 강의 생성 페이지
+    @GetMapping("/create-course")
+    public String createCourseForm(Model model, HttpSession session) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            return "redirect:/";
+        }
+        model.addAttribute("professor", professor);
+        return "create-course";
+    }
+
+    // 강의 생성 처리
+    @PostMapping("/create-course")
+    public String processCreateCourse(@RequestParam String courseName,
+                                      @RequestParam String courseCode,
+                                      @RequestParam String description,
+                                      HttpSession session,
+                                      Model model) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            return "redirect:/";
+        }
+
+        // 강의 코드 중복 체크
+        if (courseRepository.existsByCourseCode(courseCode)) {
+            model.addAttribute("error", "이미 사용 중인 강의 코드입니다.");
+            return "create-course";
+        }
+
+        Course newCourse = new Course();
+        newCourse.setCourseName(courseName);
+        newCourse.setCourseCode(courseCode);
+        newCourse.setProfessorId(professor.getProfessorId());
+
+        courseRepository.save(newCourse);
+
+        return "redirect:/professor-main?courseCreated=true";
+    }
+
+    // 과제 생성 페이지
+    @GetMapping("/create-assignment")
+    public String createAssignmentForm(Model model, HttpSession session) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            return "redirect:/";
+        }
+
+        // 교수가 담당하는 강의 목록
+        List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+
+        model.addAttribute("professor", professor);
+        model.addAttribute("courses", courses);
+        return "create-assignment";
+    }
+
+    // 과제 생성 처리
+    @PostMapping("/create-assignment")
+    public String processCreateAssignment(@RequestParam String courseId,
+                                          @RequestParam String title,
+                                          @RequestParam String content,
+                                          @RequestParam String dueDate,
+                                          @RequestParam String dueTime,
+                                          HttpSession session,
+                                          Model model) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            return "redirect:/";
+        }
+
+        // 선택된 강의 정보 가져오기
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course == null) {
+            model.addAttribute("error", "잘못된 강의를 선택했습니다.");
+            return "create-assignment";
+        }
+
+        Assignment newAssignment = new Assignment();
+        newAssignment.setCourseCode(courseId);
+        newAssignment.setCourse(course);
+        newAssignment.setTitle(title);
+        newAssignment.setContent(content);
+        newAssignment.setDueDate(LocalDateTime.parse(dueDate));
+        newAssignment.setDueDate(LocalDateTime.parse(dueTime));
+        newAssignment.setCreatedDate(LocalDateTime.parse(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+
+        assignmentRepository.save(newAssignment);
+
+        return "redirect:/professor-main?assignmentCreated=true";
+    }
+
+    // 로그아웃
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/";
     }
 }

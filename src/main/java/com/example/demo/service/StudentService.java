@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -94,8 +93,8 @@ public class StudentService {
     }
 
     // 제출물 수정
-    public Submission updateSubmission(String submissionCode, String content) {
-        Submission submission = submissionRepository.findById(submissionCode)
+    public Submission updateSubmission(int submissionCode, String content) {
+        Submission submission = submissionRepository.findBySubmissionCode(submissionCode)
                 .orElseThrow(() -> new RuntimeException("제출물을 찾을 수 없습니다."));
 
         // 마감일 확인
@@ -111,8 +110,8 @@ public class StudentService {
     }
 
     // 제출물 삭제
-    public void deleteSubmission(String submissionCode) {
-        Submission submission = submissionRepository.findById(submissionCode)
+    public void deleteSubmission(int submissionCode) {
+        Submission submission = submissionRepository.findBySubmissionCode(submissionCode)
                 .orElseThrow(() -> new RuntimeException("제출물을 찾을 수 없습니다."));
 
         // 마감일 확인

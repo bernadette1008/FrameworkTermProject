@@ -67,11 +67,6 @@ public class StudentApiController {
 
             List<Question> questions = studentService.getAssignmentQuestions(assignmentCode, studentId);
 
-            // createdDate 필드 추가 (questionTime을 createdDate로 매핑)
-            questions.forEach(question -> {
-                question.getQuestionTime(); // 이미 있는 필드지만 명시적으로 확인
-            });
-
             return ResponseEntity.ok(questions);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
@@ -87,13 +82,21 @@ public class StudentApiController {
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
 
-            // assignmentId 또는 assignmentCode 모두 허용
-            int assignmentCode = (int) (request.get("assignmentId") != null ?
-                                request.get("assignmentId") : request.get("assignmentCode"));
-            String content = request.get("content").toString();
+            // 안전한 타입 변환
+            Object assignmentCodeObj = request.get("assignmentId") != null ?
+                    request.get("assignmentId") : request.get("assignmentCode");
+            Object contentObj = request.get("content");
 
-            if (content == null) {
+            if (assignmentCodeObj == null || contentObj == null) {
                 return ResponseEntity.badRequest().body(createErrorResponse("필수 정보가 누락되었습니다."));
+            }
+
+            // Object를 안전하게 int로 변환
+            int assignmentCode = parseToInt(assignmentCodeObj);
+            String content = contentObj.toString();
+
+            if (content.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(createErrorResponse("제출 내용을 입력해주세요."));
             }
 
             Submission submission = studentService.submitAssignment(assignmentCode, studentId, content);
@@ -105,6 +108,8 @@ public class StudentApiController {
             response.put("submissionCode", submission.getSubmissionCode());
 
             return ResponseEntity.ok(response);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body(createErrorResponse("유효하지 않은 과제 ID입니다."));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
@@ -119,18 +124,28 @@ public class StudentApiController {
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
 
-            // submissionId 또는 submissionCode 모두 허용
-            String submissionCode = request.get("submissionId") != null ?
-                    request.get("submissionId").toString() : request.get("submissionCode").toString();
-            String content = request.get("content").toString();
+            // 안전한 타입 변환
+            Object submissionCodeObj = request.get("submissionId") != null ?
+                    request.get("submissionId") : request.get("submissionCode");
+            Object contentObj = request.get("content");
 
-            if (submissionCode == null || content == null) {
+            if (submissionCodeObj == null || contentObj == null) {
                 return ResponseEntity.badRequest().body(createErrorResponse("필수 정보가 누락되었습니다."));
+            }
+
+            // Object를 안전하게 int로 변환
+            int submissionCode = parseToInt(submissionCodeObj);
+            String content = contentObj.toString();
+
+            if (content.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(createErrorResponse("수정할 내용을 입력해주세요."));
             }
 
             studentService.updateSubmission(submissionCode, content);
 
             return ResponseEntity.ok(createSuccessResponse("과제가 성공적으로 수정되었습니다."));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body(createErrorResponse("유효하지 않은 제출물 ID입니다."));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
@@ -138,7 +153,7 @@ public class StudentApiController {
 
     // 제출물 삭제
     @DeleteMapping("/submission/{submissionCode}")
-    public ResponseEntity<?> deleteSubmission(@PathVariable String submissionCode, HttpSession session) {
+    public ResponseEntity<?> deleteSubmission(@PathVariable int submissionCode, HttpSession session) {
         try {
             String studentId = (String) session.getAttribute("userId");
             if (studentId == null) {
@@ -162,13 +177,21 @@ public class StudentApiController {
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
 
-            // assignmentId 또는 assignmentCode 모두 허용
-            int assignmentCode = (int) (request.get("assignmentId") != null ?
-                    request.get("assignmentId") : request.get("assignmentCode"));
-            String content = request.get("content").toString();
+            // 안전한 타입 변환
+            Object assignmentCodeObj = request.get("assignmentId") != null ?
+                    request.get("assignmentId") : request.get("assignmentCode");
+            Object contentObj = request.get("content");
 
-            if (content == null) {
+            if (assignmentCodeObj == null || contentObj == null) {
                 return ResponseEntity.badRequest().body(createErrorResponse("필수 정보가 누락되었습니다."));
+            }
+
+            // Object를 안전하게 int로 변환
+            int assignmentCode = parseToInt(assignmentCodeObj);
+            String content = contentObj.toString();
+
+            if (content.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(createErrorResponse("질문 내용을 입력해주세요."));
             }
 
             Question question = studentService.submitQuestion(assignmentCode, studentId, content);
@@ -180,6 +203,8 @@ public class StudentApiController {
             response.put("questionCode", question.getQuestionCode());
 
             return ResponseEntity.ok(response);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body(createErrorResponse("유효하지 않은 과제 ID입니다."));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
@@ -257,6 +282,19 @@ public class StudentApiController {
             return ResponseEntity.ok(questions);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    // Object를 안전하게 int로 변환하는 유틸리티 메서드
+    private int parseToInt(Object obj) throws NumberFormatException {
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        } else if (obj instanceof String) {
+            return Integer.parseInt((String) obj);
+        } else if (obj instanceof Number) {
+            return ((Number) obj).intValue();
+        } else {
+            throw new NumberFormatException("Cannot convert " + obj.getClass().getSimpleName() + " to int");
         }
     }
 

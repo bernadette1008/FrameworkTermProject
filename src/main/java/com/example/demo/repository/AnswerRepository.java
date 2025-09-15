@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AnswerRepository extends JpaRepository<Answer, String> {
+public interface AnswerRepository extends JpaRepository<Answer, Integer> {
 
     List<Answer> findByQuestionCode(int questionCode);
 

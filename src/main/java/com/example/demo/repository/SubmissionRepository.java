@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SubmissionRepository extends JpaRepository<Submission, String> {
+public interface SubmissionRepository extends JpaRepository<Submission, Integer> {
 
     Optional<Submission> findByAssignmentCodeAndStudentId(int assignmentCode, String studentId);
 
     List<Submission> findByStudentId(String studentId);
 
-    Submission findBySubmissionCode(int submissionCode);
+    Optional<Submission> findBySubmissionCode(int submissionCode);
 
     List<Submission> findByAssignmentCode(int assignmentCode);
 

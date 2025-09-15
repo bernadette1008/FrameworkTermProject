@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -56,8 +55,8 @@ public class ProfessorService {
 
     // 제출물 상세 정보 조회
     public Submission getSubmissionDetails(int submissionCode) {
-
-        return submissionRepository.findBySubmissionCode(submissionCode);
+        return submissionRepository.findBySubmissionCode(submissionCode)
+                .orElseThrow(() -> new RuntimeException("제출물을 찾을 수 없습니다."));
     }
 
     // 채점 처리
@@ -96,7 +95,8 @@ public class ProfessorService {
 
     // 질문 상세 정보 조회
     public Question getQuestionDetails(int questionCode) {
-        Question question = questionRepository.findByQuestionCode(questionCode);
+        Question question = questionRepository.findByQuestionCode(questionCode)
+                .orElseThrow(() -> new RuntimeException("질문을 찾을 수 없습니다."));
 
         // 답변 목록도 함께 로드
         List<Answer> answers = answerRepository.findByQuestionCodeOrderByAnswerTimeAsc(questionCode);

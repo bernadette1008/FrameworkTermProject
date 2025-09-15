@@ -78,91 +78,356 @@
 
         .container {
             flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
             padding: 20px;
         }
 
-        .main-content {
+        .welcome-section {
             background: white;
-            padding: 60px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
             text-align: center;
-            max-width: 600px;
-            width: 100%;
         }
 
         .welcome-title {
-            font-size: 36px;
+            font-size: 32px;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .welcome-subtitle {
-            font-size: 20px;
-            color: #7f8c8d;
-            margin-bottom: 40px;
-        }
-
-        .student-icon {
-            width: 120px;
-            height: 120px;
-            margin: 20px auto 40px;
-            background: #f8f9fa;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-        }
-
-        .coming-soon {
-            background: linear-gradient(45deg, #ffeaa7, #fdcb6e);
-            color: #2d3436;
-            padding: 20px 30px;
-            border-radius: 15px;
             font-size: 18px;
-            font-weight: bold;
+            color: #7f8c8d;
             margin-bottom: 30px;
-            border: none;
-            display: inline-block;
         }
 
-        .features-list {
-            text-align: left;
-            background: #f8f9fa;
-            padding: 30px;
-            border-radius: 15px;
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(127, 205, 205, 0.3);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
             margin-top: 30px;
         }
 
-        .features-list h3 {
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .course-list, .assignment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .course-item, .assignment-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #7fcdcd;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .course-item:hover, .assignment-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .item-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .item-info {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .item-description {
+            color: #5a6c7d;
+            font-size: 14px;
+            line-height: 1.4;
+            margin-top: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .status-submitted {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-overdue {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f1aeb5;
+        }
+
+        .stats-section {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #7fcdcd;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .action-btn {
+                width: 200px;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
             color: #2c3e50;
             margin-bottom: 20px;
             text-align: center;
         }
 
-        .features-list ul {
-            list-style: none;
-            padding: 0;
+        .form-group {
+            margin-bottom: 20px;
         }
 
-        .features-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid #e9ecef;
-            color: #5a6c7d;
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
         }
 
-        .features-list li:last-child {
-            border-bottom: none;
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
         }
 
-        .features-list li::before {
-            content: "🚀";
+        .form-control:focus {
+            outline: none;
+            border-color: #7fcdcd;
+            box-shadow: 0 0 0 3px rgba(127, 205, 205, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
             margin-right: 10px;
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: -10px;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .course-card, .assignment-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 5px solid #7fcdcd;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .course-card:hover, .assignment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: opacity 0.3s ease;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f1aeb5;
         }
     </style>
 </head>
@@ -180,28 +445,174 @@
 </div>
 
 <div class="container">
-    <div class="main-content">
-        <div class="student-icon">🎓</div>
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <div class="welcome-title" th:text="${student.name + '님, 환영합니다! 🎓'}">학생님, 환영합니다!</div>
+        <div class="welcome-subtitle">학습 관리를 효율적으로 해보세요</div>
 
-        <div class="welcome-title" th:text="${student.name + '님, 환영합니다!'}">학생님, 환영합니다!</div>
-        <div class="welcome-subtitle">학습 여정을 함께 시작해보세요</div>
+        <div class="action-buttons">
+            <button class="action-btn" onclick="openEnrollModal()">
+                📚 수업 등록
+            </button>
+            <a href="javascript:void(0)" class="action-btn" onclick="loadAssignments()">
+                📝 과제 목록
+            </a>
+            <a href="javascript:void(0)" class="action-btn" onclick="loadSubmissions()">
+                📋 제출 현황
+            </a>
+            <a href="javascript:void(0)" class="action-btn" onclick="loadQuestions()">
+                ❓ 내 질문
+            </a>
+        </div>
+    </div>
 
-        <div class="coming-soon">
-            ✨ 학생 기능 준비 중입니다! ✨
+    <!-- Main Content Grid -->
+    <div class="main-grid">
+        <!-- 수강 중인 과목 -->
+        <div class="section-card">
+            <div class="section-title">
+                📚 수강 중인 과목
+            </div>
+            <div class="stats-section">
+                <div class="stat-item">
+                    <div class="stat-number" id="courseCount" th:text="${#lists.size(courses)}">0</div>
+                    <div class="stat-label">수강 과목</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="assignmentCount" th:text="${#lists.size(assignments)}">0</div>
+                    <div class="stat-label">전체 과제</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="submissionCount">0</div>
+                    <div class="stat-label">제출 완료</div>
+                </div>
+            </div>
+            <div id="courseList" class="course-list">
+                <div th:if="${#lists.isEmpty(courses)}" class="empty-state">
+                    <div class="empty-state-icon">📚</div>
+                    <div>아직 수강된 강의가 없습니다.<br>새 강의를 추가해보세요!</div>
+                </div>
+                <div th:unless="${#lists.isEmpty(courses)}" class="course-grid">
+                    <div th:each="course : ${courses}" class="course-card">
+                        <div class="card-title" th:text="${course.courseName}">강의명</div>
+                        <div class="card-info">강의 코드: <span th:text="${course.courseCode}">CS101</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="features-list">
-            <h3>곧 만나볼 수 있는 기능들</h3>
-            <ul>
-                <li>수강 신청 및 강의 목록 조회</li>
-                <li>과제 목록 및 제출 현황 확인</li>
-                <li>과제 파일 업로드 및 제출</li>
-                <li>성적 및 피드백 확인</li>
-                <li>알림 및 공지사항 확인</li>
-                <li>개인 프로필 관리</li>
-            </ul>
+        <!-- 최근 과제 -->
+        <div class="section-card">
+            <div class="section-title">
+                📝 최근 과제
+            </div>
+            <div id="assignmentList" class="assignment-list">
+                <!-- 최근 과제 목록 -->
+                <div class="content-section">
+                    <div th:if="${#lists.isEmpty(assignments)}" class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <div>아직 등록된 과제가 없습니다.</div>
+                    </div>
+                    <div th:unless="${#lists.isEmpty(assignments)}" class="assignment-grid">
+                        <div th:each="assignment : ${assignments}" class="assignment-card">
+                            <div class="card-title" th:text="${assignment.title}">과제명</div>
+                            <div class="card-info">강의: <span th:text="${assignment.course.courseName}">강의명</span></div>
+                            <div class="card-info">마감일: <span th:text="${assignment.dueDate}">마감일</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- 수업 등록 Modal -->
+<div id="enrollModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEnrollModal()">&times;</span>
+        <div class="modal-title">수업 등록</div>
+        <form onsubmit="enrollInCourse(event)">
+            <div class="form-group">
+                <label for="courseKey">수업 코드</label>
+                <input type="text" id="courseKey" class="form-control" placeholder="교수님이 제공한 수업 코드를 입력하세요" required>
+            </div>
+            <div style="text-align: center;">
+                <button type="submit" class="btn-primary">등록하기</button>
+                <button type="button" class="btn-secondary" onclick="closeEnrollModal()">취소</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // 페이지 로드 시 초기 데이터 로드
+    document.addEventListener('DOMContentLoaded', function() {
+        // 세션에서 학생 ID 저장 (실제로는 서버에서 설정해야 함)
+        sessionStorage.setItem('userId', /*[[${student.studentId}]]*/ 'STUDENT001');
+
+        loadCourses();
+        loadAssignments();
+    });
+
+    // 수업 등록 모달 열기
+    function openEnrollModal() {
+        document.getElementById('enrollModal').style.display = 'block';
+    }
+
+    // 수업 등록 모달 닫기
+    function closeEnrollModal() {
+        document.getElementById('enrollModal').style.display = 'none';
+        document.getElementById('courseKey').value = '';
+    }
+
+    // 수업 등록
+    function enrollInCourse(event) {
+        event.preventDefault();
+        const courseKey = document.getElementById('courseKey').value.trim();
+
+        if (!courseKey) {
+            alert('수업 코드를 입력해주세요.');
+            return;
+        }
+
+        fetch('/api/student/enroll', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                courseKey: courseKey
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closeEnrollModal();
+                    loadCourses(); // 수업 목록 새로고침
+                    loadAssignments(); // 과제 목록 새로고침
+                } else {
+                    alert(data.message || '등록에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('네트워크 오류가 발생했습니다.');
+            });
+    }
+
+    // 과제 클릭 시 상세 페이지로 이동
+    function viewAssignment(assignmentId) {
+        window.location.href = `/student/assignment/${assignmentId}`;
+    }
+
+    // Modal 외부 클릭 시 닫기
+    window.onclick = function(event) {
+        const modal = document.getElementById('enrollModal');
+        if (event.target === modal) {
+            closeEnrollModal();
+        }
+    }
+</script>
 </body>
 </html>

@@ -1,13 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.domain.Student;
-import com.example.demo.domain.Professor;
-import com.example.demo.domain.Course;
-import com.example.demo.domain.Assignment;
-import com.example.demo.repository.StudentRepository;
-import com.example.demo.repository.ProfessorRepository;
-import com.example.demo.repository.CourseRepository;
-import com.example.demo.repository.AssignmentRepository;
+import com.example.demo.domain.*;
+import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,6 +29,8 @@ public class ProjectController {
 
     @Autowired
     private AssignmentRepository assignmentRepository;
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
 
     // 메인 로그인 페이지
     @GetMapping("/")
@@ -42,7 +38,6 @@ public class ProjectController {
         return "login";
     }
 
-    // 로그인 처리
     @PostMapping("/login")
     public String processLogin(@RequestParam String userId,
                                @RequestParam String password,
@@ -55,7 +50,8 @@ public class ProjectController {
             // 학생 로그인 성공
             session.setAttribute("user", student);
             session.setAttribute("userType", "학생");
-            return "redirect:/student-main";
+            session.setAttribute("userId", student.getStudentId()); // API용 세션 추가
+            return "redirect:/student/main"; // 경로 변경
         }
 
         // 교수 테이블에서 확인
@@ -70,6 +66,12 @@ public class ProjectController {
         // 로그인 실패
         model.addAttribute("error", "아이디 또는 비밀번호가 틀렸습니다.");
         return "login";
+    }
+
+    // 기존의 /student-main 경로도 유지 (호환성을 위해)
+    @GetMapping("/student-main")
+    public String studentMainRedirect() {
+        return "redirect:/student/main";
     }
 
     // 회원가입 타입 선택 페이지
@@ -147,15 +149,15 @@ public class ProjectController {
     }
 
     // 학생 메인 페이지
-    @GetMapping("/student-main")
-    public String studentMain(Model model, HttpSession session) {
-        Student student = (Student) session.getAttribute("user");
-        if (student == null) {
-            return "redirect:/";
-        }
-        model.addAttribute("student", student);
-        return "student-main";
-    }
+//    @GetMapping("/student-main")
+//    public String studentMain(Model model, HttpSession session) {
+//        Student student = (Student) session.getAttribute("user");
+//        if (student == null) {
+//            return "redirect:/";
+//        }
+//        model.addAttribute("student", student);
+//        return "student-main";
+//    }
 
     // 교수 메인 페이지
     @GetMapping("/professor-main")
@@ -170,11 +172,16 @@ public class ProjectController {
         // 교수가 등록한 과제 목록 조회
         List<Assignment> assignments = assignmentRepository.findByProfessorId(professor.getProfessorId());
 
+        int enrollments = 0;
 
+        for(Course course : courses) {
+            enrollments += enrollmentRepository.findByCourseCode(course.getCourseCode()).size();
+        }
 
         model.addAttribute("professor", professor);
         model.addAttribute("courses", courses);
         model.addAttribute("assignments", assignments);
+        model.addAttribute("enrollments", enrollments);
 
         return "professor-main";
     }

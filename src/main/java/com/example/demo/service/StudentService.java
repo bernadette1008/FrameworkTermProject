@@ -38,11 +38,11 @@ public class StudentService {
 
     // 학생의 수강 과목 목록 조회
     public List<Course> getStudentCourses(String studentId) {
-        Student student = studentRepository.findByStudentId(studentId);
-        if (student == null) {
-            throw new RuntimeException("학생을 찾을 수 없습니다.");
+        List<Course> courses = courseRepository.findByStudentId(studentId);
+        if (courses.isEmpty()) {
+            return null;
         }
-        return courseRepository.findByStudentId(studentId);
+        return courses;
     }
 
     // 학생의 과제 목록 조회

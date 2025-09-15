@@ -91,7 +91,7 @@
             border-radius: 20px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 700px;
+            max-width: 600px;
         }
 
         .form-title {
@@ -102,18 +102,15 @@
             margin-bottom: 30px;
         }
 
-        .form-row {
-            display: flex;
-            gap: 20px;
+        .form-title::before {
+            content: "📚";
+            display: block;
+            font-size: 48px;
+            margin-bottom: 15px;
         }
 
         .form-group {
             margin-bottom: 25px;
-            flex: 1;
-        }
-
-        .form-group.full-width {
-            flex: none;
         }
 
         .form-group label {
@@ -124,7 +121,7 @@
             font-size: 16px;
         }
 
-        .form-control, .form-select {
+        .form-control {
             width: 100%;
             padding: 15px;
             border: 2px solid #e1e8ed;
@@ -134,7 +131,7 @@
             transition: border-color 0.3s;
         }
 
-        .form-control:focus, .form-select:focus {
+        .form-control:focus {
             outline: none;
             border-color: #7fcdcd;
             box-shadow: 0 0 0 3px rgba(127, 205, 205, 0.1);
@@ -147,7 +144,7 @@
 
         textarea.form-control {
             resize: vertical;
-            min-height: 140px;
+            min-height: 120px;
         }
 
         .btn-primary {
@@ -196,29 +193,59 @@
             color: #e74c3c;
         }
 
-        .no-courses-message {
-            background: #fff3cd;
-            color: #856404;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #ffeaa7;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .datetime-container {
+        .form-row {
             display: flex;
-            gap: 15px;
-            align-items: end;
+            gap: 20px;
         }
 
-        .datetime-group {
+        .form-group.half {
             flex: 1;
         }
 
-        .datetime-icon {
-            font-size: 20px;
-            margin-bottom: 10px;
+        .code-preview {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #495057;
+            margin-top: 5px;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+        }
+
+        .code-preview.empty {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        .preview-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+            font-weight: normal;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        .info-box p {
+            color: #1565c0;
+            margin: 0;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -236,81 +263,99 @@
 
 <div class="container">
     <div class="form-container">
-        <div class="form-title">새 과제 등록</div>
+        <div class="form-title">새 강의 개설</div>
 
         <div th:if="${error}" class="error-message" th:text="${error}"></div>
 
-        <div th:if="${#lists.isEmpty(courses)}" class="no-courses-message">
-            <strong>등록된 강의가 없습니다!</strong><br>
-            과제를 등록하려면 먼저 강의를 개설해야 합니다.<br>
-            <a th:href="@{/create-course}" style="color: #007bff; text-decoration: none;">→ 강의 개설하기</a>
+        <div class="info-box">
+            <h4>💡 강의 개설 안내</h4>
+            <p>강의를 개설하면 학생들이 강의 코드로 수강 신청할 수 있습니다. 강의 코드는 자동으로 생성되거나 직접 입력할 수 있습니다.</p>
         </div>
 
-        <form th:action="@{/create-assignment}" method="post" th:unless="${#lists.isEmpty(courses)}">
+        <form th:action="@{/create-course}" method="post">
             <div class="form-group">
-                <label for="courseId">강의 선택 <span class="required">*</span></label>
-                <select class="form-select" id="courseId" name="courseId" required>
-                    <option value="">과제를 등록할 강의를 선택해주세요</option>
-                    <option th:each="course : ${courses}"
-                            th:value="${course.courseCode}"
-                            th:text="${course.courseName + ' (' + course.courseCode + ')'}">
-                        강의명 (강의코드)
-                    </option>
-                </select>
-                <div class="form-help">과제가 속할 강의를 선택해주세요.</div>
+                <label for="courseName">강의명 <span class="required">*</span></label>
+                <input type="text" class="form-control" id="courseName" name="courseName"
+                       placeholder="예: 컴퓨터 프로그래밍" required>
+                <div class="form-help">학생들에게 표시될 강의 이름을 입력해주세요.</div>
             </div>
 
-            <div class="form-group">
-                <label for="title">과제 제목 <span class="required">*</span></label>
-                <input type="text" class="form-control" id="title" name="title"
-                       placeholder="예: 1차 프로젝트 - 웹사이트 구현" required>
-                <div class="form-help">학생들에게 표시될 과제 제목을 입력해주세요.</div>
-            </div>
-
-            <div class="form-group full-width">
-                <label for="content">과제 설명 <span class="required">*</span></label>
-                <textarea class="form-control" id="content" name="content"
-                          placeholder="과제의 상세 내용, 요구사항, 제출 형식 등을 입력해주세요..." required></textarea>
-                <div class="form-help">과제 요구사항, 평가 기준, 제출 방법 등을 자세히 작성해주세요.</div>
-            </div>
-
-            <div class="form-group full-width">
-                <label>과제 마감일시 <span class="required">*</span></label>
-                <div class="datetime-container">
-                    <div class="datetime-group">
-                        <div class="datetime-icon">📅</div>
-                        <input type="date" class="form-control" id="dueDate" name="dueDate" required>
-                        <div class="form-help">마감 날짜</div>
-                    </div>
-                    <div class="datetime-group">
-                        <div class="datetime-icon">🕐</div>
-                        <input type="time" class="form-control" id="dueTime" name="dueTime" value="23:59" required>
-                        <div class="form-help">마감 시간</div>
-                    </div>
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="courseCode">강의 코드 <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="courseCode" name="courseCode"
+                           placeholder="예: CS101" required maxlength="10">
+                    <div class="form-help">영문과 숫자로 구성된 고유 코드</div>
+                </div>
+                <div class="form-group half">
+                    <div class="preview-label">생성될 강의 코드 미리보기</div>
+                    <div id="codePreview" class="code-preview empty">강의 코드를 입력하세요</div>
                 </div>
             </div>
 
-            <button type="submit" class="btn-primary">과제 등록하기</button>
+            <button type="submit" class="btn-primary">강의 개설하기</button>
         </form>
-
-        <div th:if="${#lists.isEmpty(courses)}" style="text-align: center; margin-top: 20px;">
-            <a th:href="@{/professor-main}" class="back-btn">메인으로 돌아가기</a>
-        </div>
     </div>
 </div>
 
 <script>
-    // 오늘 날짜를 최소값으로 설정
     document.addEventListener('DOMContentLoaded', function() {
-        const dateInput = document.getElementById('dueDate');
-        if (dateInput) {
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.min = today;
+        const courseCodeInput = document.getElementById('courseCode');
+        const codePreview = document.getElementById('codePreview');
 
-            // 기본값을 내일로 설정
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            dateInput.value = tomorrow.toISOString().split('T')[0];
+        // 강의 코드 입력 시 실시간 미리보기
+        courseCodeInput.addEventListener('input', function() {
+            const code = this.value.trim().toUpperCase();
+            if (code) {
+                codePreview.textContent = code;
+                codePreview.classList.remove('empty');
+            } else {
+                codePreview.textContent = '강의 코드를 입력하세요';
+                codePreview.classList.add('empty');
+            }
+        });
+
+        // 강의 코드 자동 대문자 변환
+        courseCodeInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+
+        // 강의 코드 유효성 검사
+        courseCodeInput.addEventListener('blur', function() {
+            const code = this.value.trim();
+            if (code && !/^[A-Z0-9]+$/.test(code)) {
+                alert('강의 코드는 영문 대문자와 숫자만 사용할 수 있습니다.');
+                this.focus();
+            }
+        });
+
+        // 강의명 입력 시 자동 강의 코드 제안 (선택적)
+        const courseNameInput = document.getElementById('courseName');
+        courseNameInput.addEventListener('blur', function() {
+            if (!courseCodeInput.value && this.value) {
+                const suggestion = generateCourseCode(this.value);
+                if (suggestion) {
+                    courseCodeInput.value = suggestion;
+                    courseCodeInput.dispatchEvent(new Event('input'));
+                }
+            }
+        });
+
+        function generateCourseCode(courseName) {
+            // 간단한 강의 코드 자동 생성 로직
+            const words = courseName.split(' ');
+            let code = '';
+
+            for (let word of words) {
+                if (code.length < 6) {
+                    code += word.charAt(0).toUpperCase();
+                }
+            }
+
+            // 숫자 추가 (예: 101)
+            code += '101';
+
+            return code.length <= 10 ? code : code.substring(0, 10);
         }
     });
 </script>

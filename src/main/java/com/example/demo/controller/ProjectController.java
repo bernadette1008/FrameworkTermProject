@@ -14,7 +14,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -167,9 +170,12 @@ public class ProjectController {
         // 교수가 등록한 과제 목록 조회
         List<Assignment> assignments = assignmentRepository.findByProfessorId(professor.getProfessorId());
 
+
+
         model.addAttribute("professor", professor);
         model.addAttribute("courses", courses);
         model.addAttribute("assignments", assignments);
+
         return "professor-main";
     }
 
@@ -188,7 +194,6 @@ public class ProjectController {
     @PostMapping("/create-course")
     public String processCreateCourse(@RequestParam String courseName,
                                       @RequestParam String courseCode,
-                                      @RequestParam String description,
                                       HttpSession session,
                                       Model model) {
         Professor professor = (Professor) session.getAttribute("user");
@@ -229,6 +234,40 @@ public class ProjectController {
     }
 
     // 과제 생성 처리
+//    @PostMapping("/create-assignment")
+//    public String processCreateAssignment(@RequestParam String courseId,
+//                                          @RequestParam String title,
+//                                          @RequestParam String content,
+//                                          @RequestParam String dueDate,
+//                                          @RequestParam String dueTime,
+//                                          HttpSession session,
+//                                          Model model) {
+//        Professor professor = (Professor) session.getAttribute("user");
+//        if (professor == null) {
+//            return "redirect:/";
+//        }
+//
+//        // 선택된 강의 정보 가져오기
+//        Course course = courseRepository.findById(courseId).orElse(null);
+//        if (course == null) {
+//            model.addAttribute("error", "잘못된 강의를 선택했습니다.");
+//            return "create-assignment";
+//        }
+//
+//        Assignment newAssignment = new Assignment();
+//        newAssignment.setCourseCode(courseId);
+//        newAssignment.setCourse(course);
+//        newAssignment.setTitle(title);
+//        newAssignment.setContent(content);
+//        newAssignment.setDueDate(LocalDateTime.parse(dueDate));
+//        newAssignment.setDueDate(LocalDateTime.parse(dueTime));
+//        newAssignment.setCreatedDate(LocalDateTime.parse(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+//
+//        assignmentRepository.save(newAssignment);
+//
+//        return "redirect:/professor-main?assignmentCreated=true";
+//    }
+
     @PostMapping("/create-assignment")
     public String processCreateAssignment(@RequestParam String courseId,
                                           @RequestParam String title,
@@ -242,7 +281,6 @@ public class ProjectController {
             return "redirect:/";
         }
 
-        // 선택된 강의 정보 가져오기
         Course course = courseRepository.findById(courseId).orElse(null);
         if (course == null) {
             model.addAttribute("error", "잘못된 강의를 선택했습니다.");
@@ -254,9 +292,14 @@ public class ProjectController {
         newAssignment.setCourse(course);
         newAssignment.setTitle(title);
         newAssignment.setContent(content);
-        newAssignment.setDueDate(LocalDateTime.parse(dueDate));
-        newAssignment.setDueDate(LocalDateTime.parse(dueTime));
-        newAssignment.setCreatedDate(LocalDateTime.parse(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+
+        // 날짜와 시간을 합쳐서 LocalDateTime으로 변환
+        LocalDate date = LocalDate.parse(dueDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalTime time = LocalTime.parse(dueTime, DateTimeFormatter.ofPattern("HH:mm"));
+        LocalDateTime dueDateTime = LocalDateTime.of(date, time);
+        newAssignment.setDueDate(dueDateTime);
+
+        newAssignment.setCreatedDate(LocalDateTime.now());
 
         assignmentRepository.save(newAssignment);
 

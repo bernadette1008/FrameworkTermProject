@@ -328,8 +328,6 @@
                 <div th:each="course : ${courses}" class="course-card">
                     <div class="card-title" th:text="${course.courseName}">강의명</div>
                     <div class="card-info">강의 코드: <span th:text="${course.courseCode}">CS101</span></div>
-                    <div class="card-info">개설일: <span th:text="${course.createdDate}">2024-03-15</span></div>
-                    <div class="card-description" th:text="${course.description}">강의 설명</div>
                 </div>
             </div>
         </div>
@@ -344,9 +342,8 @@
             <div th:unless="${#lists.isEmpty(assignments)}" class="assignment-grid">
                 <div th:each="assignment : ${assignments}" class="assignment-card">
                     <div class="card-title" th:text="${assignment.title}">과제명</div>
-                    <div class="card-info">강의: <span th:text="${assignment.courseName}">강의명</span></div>
-                    <div class="card-info">마감일: <span th:text="${assignment.dueDate + ' ' + assignment.dueTime}">2024-03-25 23:59</span></div>
-                    <div class="card-description" th:text="${assignment.description}">과제 설명</div>
+                    <div class="card-info">강의: <span th:text="${assignment.course.courseName}">강의명</span></div>
+                    <div class="card-info">마감일: <span th:text="${assignment.dueDate}">마감일</span></div>
                 </div>
             </div>
         </div>

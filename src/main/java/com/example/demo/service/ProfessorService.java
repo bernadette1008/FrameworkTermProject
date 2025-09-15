@@ -55,13 +55,13 @@ public class ProfessorService {
     }
 
     // 제출물 상세 정보 조회
-    public Submission getSubmissionDetails(String submissionCode) {
-        return submissionRepository.findById(submissionCode)
-                .orElseThrow(() -> new RuntimeException("제출물을 찾을 수 없습니다."));
+    public Submission getSubmissionDetails(int submissionCode) {
+
+        return submissionRepository.findBySubmissionCode(submissionCode);
     }
 
     // 채점 처리
-    public void gradeSubmission(String submissionCode, Integer score, String feedback) {
+    public void gradeSubmission(int submissionCode, Integer score, String feedback) {
         Submission submission = getSubmissionDetails(submissionCode);
 
         if (score < 0 || score > 100) {
@@ -82,7 +82,7 @@ public class ProfessorService {
         List<Question> allQuestions = new java.util.ArrayList<>();
 
         for (Assignment assignment : assignments) {
-            List<Question> questions = questionRepository.findByAssignmentCode(String.valueOf(assignment.getAssignmentCode()));
+            List<Question> questions = questionRepository.findByAssignmentCode(assignment.getAssignmentCode());
             // 각 질문에 대한 답변도 로드
             for (Question question : questions) {
                 List<Answer> answers = answerRepository.findByQuestionCodeOrderByAnswerTimeAsc(question.getQuestionCode());
@@ -95,9 +95,8 @@ public class ProfessorService {
     }
 
     // 질문 상세 정보 조회
-    public Question getQuestionDetails(String questionCode) {
-        Question question = questionRepository.findById(questionCode)
-                .orElseThrow(() -> new RuntimeException("질문을 찾을 수 없습니다."));
+    public Question getQuestionDetails(int questionCode) {
+        Question question = questionRepository.findByQuestionCode(questionCode);
 
         // 답변 목록도 함께 로드
         List<Answer> answers = answerRepository.findByQuestionCodeOrderByAnswerTimeAsc(questionCode);
@@ -107,7 +106,7 @@ public class ProfessorService {
     }
 
     // 질문 답변 등록
-    public Answer answerQuestion(String questionCode, String professorId, String content) {
+    public Answer answerQuestion(int questionCode, String professorId, String content) {
         Question question = getQuestionDetails(questionCode);
         Professor professor = professorRepository.findByProfessorId(professorId);
 
@@ -116,7 +115,6 @@ public class ProfessorService {
         }
 
         Answer answer = new Answer();
-        answer.setAnswerCode(generateAnswerCode());
         answer.setQuestionCode(questionCode);
         answer.setProfessorId(professorId);
         answer.setContent(content);
@@ -158,19 +156,10 @@ public class ProfessorService {
 
         for (Assignment assignment : courseAssignments) {
             submissionRepository.findByAssignmentCodeAndStudentId(
-                    String.valueOf(assignment.getAssignmentCode()), studentId
+                    assignment.getAssignmentCode(), studentId
             ).ifPresent(submissions::add);
         }
 
         return submissions;
-    }
-
-    // 유니크한 답변 코드 생성
-    private String generateAnswerCode() {
-        String code;
-        do {
-            code = "ANS_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        } while (answerRepository.existsById(code));
-        return code;
     }
 }

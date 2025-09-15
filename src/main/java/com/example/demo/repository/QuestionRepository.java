@@ -12,5 +12,7 @@ public interface QuestionRepository extends JpaRepository<Question, String> {
 
     List<Question> findByStudentId(String studentId);
 
+    Question findByQuestionCode(int questionCode);
+
     List<Question> findByAssignmentCodeAndStudentId(int assignmentCode, String studentId);
 }

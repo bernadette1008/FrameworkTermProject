@@ -22,7 +22,7 @@ public class StudentApiController {
 
     // 과제 상세 정보 조회
     @GetMapping("/assignment/{assignmentCode}")
-    public ResponseEntity<?> getAssignmentDetails(@PathVariable String assignmentCode, HttpSession session) {
+    public ResponseEntity<?> getAssignmentDetails(@PathVariable int assignmentCode, HttpSession session) {
         try {
             String studentId = (String) session.getAttribute("userId");
             if (studentId == null) {
@@ -58,7 +58,7 @@ public class StudentApiController {
 
     // 과제의 질문 목록 조회
     @GetMapping("/assignment/{assignmentCode}/questions")
-    public ResponseEntity<?> getAssignmentQuestions(@PathVariable String assignmentCode, HttpSession session) {
+    public ResponseEntity<?> getAssignmentQuestions(@PathVariable int assignmentCode, HttpSession session) {
         try {
             String studentId = (String) session.getAttribute("userId");
             if (studentId == null) {
@@ -88,11 +88,11 @@ public class StudentApiController {
             }
 
             // assignmentId 또는 assignmentCode 모두 허용
-            String assignmentCode = request.get("assignmentId") != null ?
-                    request.get("assignmentId").toString() : request.get("assignmentCode").toString();
+            int assignmentCode = (int) (request.get("assignmentId") != null ?
+                                request.get("assignmentId") : request.get("assignmentCode"));
             String content = request.get("content").toString();
 
-            if (assignmentCode == null || content == null) {
+            if (content == null) {
                 return ResponseEntity.badRequest().body(createErrorResponse("필수 정보가 누락되었습니다."));
             }
 
@@ -163,11 +163,11 @@ public class StudentApiController {
             }
 
             // assignmentId 또는 assignmentCode 모두 허용
-            String assignmentCode = request.get("assignmentId") != null ?
-                    request.get("assignmentId").toString() : request.get("assignmentCode").toString();
+            int assignmentCode = (int) (request.get("assignmentId") != null ?
+                    request.get("assignmentId") : request.get("assignmentCode"));
             String content = request.get("content").toString();
 
-            if (assignmentCode == null || content == null) {
+            if (content == null) {
                 return ResponseEntity.badRequest().body(createErrorResponse("필수 정보가 누락되었습니다."));
             }
 

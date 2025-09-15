@@ -70,7 +70,7 @@ public class ProfessorController {
 
     // 제출물 상세 보기 및 채점
     @GetMapping("/submission/{submissionCode}")
-    public String submissionDetail(@PathVariable String submissionCode,
+    public String submissionDetail(@PathVariable int submissionCode,
                                    Model model,
                                    HttpSession session) {
         Professor professor = (Professor) session.getAttribute("user");
@@ -99,7 +99,7 @@ public class ProfessorController {
 
     // 채점 처리
     @PostMapping("/submission/{submissionCode}/grade")
-    public String gradeSubmission(@PathVariable String submissionCode,
+    public String gradeSubmission(@PathVariable int submissionCode,
                                   @RequestParam Integer score,
                                   @RequestParam(required = false) String feedback,
                                   HttpSession session,
@@ -140,7 +140,7 @@ public class ProfessorController {
 
     // 질문 상세 보기
     @GetMapping("/question/{questionCode}")
-    public String questionDetail(@PathVariable String questionCode,
+    public String questionDetail(@PathVariable int questionCode,
                                  Model model,
                                  HttpSession session) {
         Professor professor = (Professor) session.getAttribute("user");
@@ -169,7 +169,7 @@ public class ProfessorController {
 
     // 질문 답변 처리
     @PostMapping("/question/{questionCode}/answer")
-    public String answerQuestion(@PathVariable String questionCode,
+    public String answerQuestion(@PathVariable int questionCode,
                                  @RequestParam String content,
                                  HttpSession session,
                                  RedirectAttributes redirectAttributes) {

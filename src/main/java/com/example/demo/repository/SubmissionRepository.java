@@ -13,6 +13,8 @@ public interface SubmissionRepository extends JpaRepository<Submission, String> 
 
     List<Submission> findByStudentId(String studentId);
 
+    Submission findBySubmissionCode(int submissionCode);
+
     List<Submission> findByAssignmentCode(int assignmentCode);
 
     boolean existsByAssignmentCodeAndStudentId(int assignmentCode, String studentId);

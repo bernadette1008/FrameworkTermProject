@@ -14,10 +14,11 @@ import java.util.List;
 @Getter
 public class Question {
     @Id
-    private String questionCode;    // 질문코드(PK)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int questionCode;    // 질문코드(PK)
 
     @Column(name = "assignment_code")
-    private String assignmentCode;  // 과제코드(FK)
+    private int assignmentCode;  // 과제코드(FK)
 
     @Column(name = "student_id")
     private String studentId;       // 학번(FK)

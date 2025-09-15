@@ -14,10 +14,10 @@ import java.time.LocalDateTime;
 public class Answer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String answerCode;      // 답변코드(PK)
+    private int answerCode;      // 답변코드(PK)
 
     @Column(name = "question_code")
-    private String questionCode;    // 질문코드(FK)
+    private int questionCode;    // 질문코드(FK)
 
     @Column(name = "professor_id")
     private String professorId;     // 교수아이디(FK)

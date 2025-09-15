@@ -39,7 +39,7 @@ public class StudentController {
             // 과제별 제출 상태 설정
             for (Assignment assignment : assignments) {
                 boolean isSubmitted = studentService.getSubmission(
-                        String.valueOf(assignment.getAssignmentCode()),
+                        assignment.getAssignmentCode(),
                         student.getStudentId()
                 ).isPresent();
 
@@ -60,7 +60,7 @@ public class StudentController {
 
     // 과제 상세 페이지
     @GetMapping("/assignment/{assignmentCode}")
-    public String assignmentDetail(@PathVariable String assignmentCode,
+    public String assignmentDetail(@PathVariable int assignmentCode,
                                    Model model,
                                    HttpSession session) {
         Student student = (Student) session.getAttribute("user");
@@ -126,7 +126,7 @@ public class StudentController {
             // 과제별 제출 상태 설정
             for (Assignment assignment : assignments) {
                 boolean isSubmitted = studentService.getSubmission(
-                        String.valueOf(assignment.getAssignmentCode()),
+                        assignment.getAssignmentCode(),
                         student.getStudentId()
                 ).isPresent();
 

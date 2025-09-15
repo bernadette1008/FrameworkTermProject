@@ -53,18 +53,18 @@ public class StudentService {
     }
 
     // 특정 과제의 상세 정보 조회
-    public Assignment getAssignmentDetails(String assignmentCode) {
-        return assignmentRepository.findById(Integer.valueOf(assignmentCode))
+    public Assignment getAssignmentDetails(int assignmentCode) {
+        return assignmentRepository.findById(assignmentCode)
                 .orElseThrow(() -> new RuntimeException("과제를 찾을 수 없습니다."));
     }
 
     // 학생의 특정 과제에 대한 제출물 조회
-    public Optional<Submission> getSubmission(String assignmentCode, String studentId) {
-        return submissionRepository.findByAssignmentCodeAndStudentId(Integer.parseInt(assignmentCode), studentId);
+    public Optional<Submission> getSubmission(int assignmentCode, String studentId) {
+        return submissionRepository.findByAssignmentCodeAndStudentId(assignmentCode, studentId);
     }
 
     // 과제 제출
-    public Submission submitAssignment(String assignmentCode, String studentId, String content) {
+    public Submission submitAssignment(int assignmentCode, String studentId, String content) {
         Assignment assignment = getAssignmentDetails(assignmentCode);
         Student student = studentRepository.findByStudentId(studentId);
 
@@ -78,14 +78,13 @@ public class StudentService {
         }
 
         // 이미 제출된 과제인지 확인
-        Optional<Submission> existingSubmission = submissionRepository.findByAssignmentCodeAndStudentId(Integer.parseInt(assignmentCode), studentId);
+        Optional<Submission> existingSubmission = submissionRepository.findByAssignmentCodeAndStudentId(assignmentCode, studentId);
         if (existingSubmission.isPresent()) {
             throw new RuntimeException("이미 제출된 과제입니다.");
         }
 
         Submission submission = new Submission();
-        submission.setSubmissionCode(Integer.parseInt(generateSubmissionCode()));
-        submission.setAssignmentCode(Integer.parseInt(assignmentCode));
+        submission.setAssignmentCode(assignmentCode);
         submission.setStudentId(studentId);
         submission.setContent(content);
         submission.setSubmissionTime(LocalDateTime.now());
@@ -100,7 +99,7 @@ public class StudentService {
                 .orElseThrow(() -> new RuntimeException("제출물을 찾을 수 없습니다."));
 
         // 마감일 확인
-        Assignment assignment = getAssignmentDetails(String.valueOf(submission.getAssignmentCode()));
+        Assignment assignment = getAssignmentDetails(submission.getAssignmentCode());
         if (assignment.getDueDate() != null && assignment.getDueDate().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("과제 제출 기한이 지나 수정할 수 없습니다.");
         }
@@ -117,7 +116,7 @@ public class StudentService {
                 .orElseThrow(() -> new RuntimeException("제출물을 찾을 수 없습니다."));
 
         // 마감일 확인
-        Assignment assignment = getAssignmentDetails(String.valueOf(submission.getAssignmentCode()));
+        Assignment assignment = getAssignmentDetails(submission.getAssignmentCode());
         if (assignment.getDueDate() != null && assignment.getDueDate().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("과제 제출 기한이 지나 삭제할 수 없습니다.");
         }
@@ -126,7 +125,7 @@ public class StudentService {
     }
 
     // 질문 등록
-    public Question submitQuestion(String assignmentCode, String studentId, String content) {
+    public Question submitQuestion(int assignmentCode, String studentId, String content) {
         Assignment assignment = getAssignmentDetails(assignmentCode);
         Student student = studentRepository.findByStudentId(studentId);
 
@@ -135,7 +134,6 @@ public class StudentService {
         }
 
         Question question = new Question();
-        question.setQuestionCode(generateQuestionCode());
         question.setAssignmentCode(assignmentCode);
         question.setStudentId(studentId);
         question.setContent(content);
@@ -145,7 +143,7 @@ public class StudentService {
     }
 
     // 특정 과제의 질문 목록 조회 (답변 포함)
-    public List<Question> getAssignmentQuestions(String assignmentCode, String studentId) {
+    public List<Question> getAssignmentQuestions(int assignmentCode, String studentId) {
         Assignment assignment = getAssignmentDetails(assignmentCode);
         Student student = studentRepository.findByStudentId(studentId);
 
@@ -153,7 +151,7 @@ public class StudentService {
             throw new RuntimeException("학생을 찾을 수 없습니다.");
         }
 
-        List<Question> questions = questionRepository.findByAssignmentCodeAndStudentId(Integer.parseInt(assignmentCode), studentId);
+        List<Question> questions = questionRepository.findByAssignmentCodeAndStudentId(assignmentCode, studentId);
 
         // 각 질문에 대한 답변 로드
         for (Question question : questions) {
@@ -216,22 +214,5 @@ public class StudentService {
         }
 
         return questions;
-    }
-
-    // 유니크한 코드 생성 메서드들
-    private String generateSubmissionCode() {
-        String code;
-        do {
-            code = "SUB_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        } while (submissionRepository.existsById(code));
-        return code;
-    }
-
-    private String generateQuestionCode() {
-        String code;
-        do {
-            code = "QST_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        } while (questionRepository.existsById(code));
-        return code;
     }
 }

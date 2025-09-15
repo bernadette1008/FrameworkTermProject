@@ -451,10 +451,13 @@
         <div class="welcome-subtitle">학습 관리를 효율적으로 해보세요</div>
 
         <div class="action-buttons">
-            <button class="action-btn" onclick="openEnrollModal()">
-                📚 수업 등록
-            </button>
-            <a href="javascript:void(0)" class="action-btn" onclick="loadAssignments()">
+<!--            <button class="action-btn" onclick="openEnrollModal()">-->
+<!--                📚 수업 목록 & 등록-->
+<!--            </button>-->
+            <a class="action-btn" href="/student/courses">
+                📚 수업 목록 & 등록
+            </a>
+            <a href="javascript:void(0)" class="action-btn" th:href="@{/student/assignments}">
                 📝 과제 목록
             </a>
             <a href="javascript:void(0)" class="action-btn" onclick="loadSubmissions()">

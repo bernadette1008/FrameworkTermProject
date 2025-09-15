@@ -8,9 +8,9 @@ import java.util.List;
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, String> {
 
-    List<Question> findByAssignmentCode(String assignmentCode);
+    List<Question> findByAssignmentCode(int assignmentCode);
 
     List<Question> findByStudentId(String studentId);
 
-    List<Question> findByAssignmentCodeAndStudentId(String assignmentCode, String studentId);
+    List<Question> findByAssignmentCodeAndStudentId(int assignmentCode, String studentId);
 }

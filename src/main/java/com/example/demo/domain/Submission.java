@@ -13,10 +13,11 @@ import java.time.LocalDateTime;
 @Getter
 public class Submission {
     @Id
-    private String submissionCode;   // 제출물코드(PK)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int submissionCode;   // 제출물코드(PK)
 
     @Column(name = "assignment_code")
-    private String assignmentCode;   // 과제코드(FK)
+    private int assignmentCode;   // 과제코드(FK)
 
     @Column(name = "student_id")
     private String studentId;        // 학번(FK)

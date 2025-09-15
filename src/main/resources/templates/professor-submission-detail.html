@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>제출물 채점 - Ploytech</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #a8e6cf, #7fcdcd);
+      font-family: 'Arial', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background-color: #7fcdcd;
+      padding: 15px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .logo::before {
+      content: "💡";
+      font-size: 24px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      color: #2c3e50;
+      font-weight: bold;
+    }
+
+    .back-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+      text-decoration: none;
+    }
+
+    .back-btn:hover {
+      background: #5a6268;
+    }
+
+    .container {
+      flex: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+    }
+
+    .submission-content, .grading-panel {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    .submission-header {
+      border-bottom: 2px solid #f8f9fa;
+      padding-bottom: 20px;
+      margin-bottom: 25px;
+    }
+
+    .submission-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 15px;
+    }
+
+    .submission-meta {
+      display: flex;
+      gap: 25px;
+      color: #7f8c8d;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .student-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+    }
+
+    .student-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .student-avatar {
+      width: 50px;
+      height: 50px;
+      background: #7fcdcd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .student-details h3 {
+      margin: 0 0 5px 0;
+      color: #2c3e50;
+    }
+
+    .student-id {
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+
+    .submission-text {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 10px;
+      border-left: 4px solid #7fcdcd;
+      line-height: 1.8;
+      color: #2c3e50;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      min-height: 200px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .current-grade {
+      background: #e8f5e8;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .current-score {
+      font-size: 32px;
+      font-weight: bold;
+      color: #28a745;
+      margin-bottom: 5px;
+    }
+
+    .grade-label {
+      color: #6c757d;
+      font-size: 14px;
+    }
+
+    .grading-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+
+    .score-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-control {
+      padding: 12px;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #7fcdcd;
+      box-shadow: 0 0 0 3px rgba(127, 205, 205, 0.1);
+    }
+
+    .score-slider {
+      flex: 1;
+    }
+
+    .score-display {
+      min-width: 50px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 18px;
+      color: #2c3e50;
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+      margin-top: 10px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-danger {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f1aeb5;
+    }
+
+    .submission-status {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .status-graded {
+      background: #cce5ff;
+      color: #0066cc;
+    }
+
+    .status-submitted {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-late {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .grade-quick-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .quick-grade-btn {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .quick-grade-btn:hover {
+      background: #e9ecef;
+      border-color: #7fcdcd;
+    }
+
+    .quick-grade-btn.active {
+      background: #7fcdcd;
+      border-color: #7fcdcd;
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .submission-meta {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .grade-quick-buttons {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <div class="logo"></div>
+    <div class="title">Ploytech 과제 제출 시스템</div>
+  </div>
+  <div class="user-info">
+    <span th:text="${professor.name + ' 교수님'}">교수님</span>
+    <a th:href="@{'/professor/assignment/' + ${submission.assignment.assignmentCode} + '/submissions'}" class="back-btn">← 제출물 목록</a>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Success/Error Messages -->
+  <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+  <div class="main-grid">
+    <!-- Left: Submission Content -->
+    <div class="submission-content">
+      <div class="submission-header">
+        <div class="submission-title" th:text="${submission.assignment.title}">과제 제목</div>
+        <div class="submission-meta">
+          <div class="meta-item">
+            <span>📚</span>
+            <span th:text="${submission.assignment.course.courseName}">강의명</span>
+          </div>
+          <div class="meta-item">
+            <span>📅</span>
+            <span th:text="'제출일: ' + ${#temporals.format(submission.submissionTime, 'yyyy-MM-dd HH:mm')}">제출일</span>
+          </div>
+          <div class="meta-item">
+            <span>⏰</span>
+            <span th:text="'마감일: ' + ${#temporals.format(submission.assignment.dueDate, 'yyyy-MM-dd HH:mm')}">마감일</span>
+          </div>
+          <div class="meta-item">
+            <span th:if="${submission.score != null}" class="submission-status status-graded">채점완료</span>
+            <span th:if="${submission.score == null and submission.submissionTime.isBefore(submission.assignment.dueDate)}"
+                  class="submission-status status-submitted">제출완료</span>
+            <span th:if="${submission.score == null and submission.submissionTime.isAfter(submission.assignment.dueDate)}"
+                  class="submission-status status-late">지각제출</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="student-card">
+        <div class="student-info">
+          <div class="student-avatar" th:text="${submission.student.name.substring(0,1)}">학</div>
+          <div class="student-details">
+            <h3 th:text="${submission.student.name}">학생 이름</h3>
+            <div class="student-id" th:text="${submission.student.studentId}">학번</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">
+        📝 제출 내용
+      </div>
+      <div class="submission-text" th:text="${submission.content}">
+        학생이 제출한 과제 내용이 여기에 표시됩니다...
+      </div>
+
+      <!-- 기존 피드백 표시 (있는 경우) -->
+      <div th:if="${submission.feedback != null and !#strings.isEmpty(submission.feedback)}" style="margin-top: 25px;">
+        <div class="section-title">
+          💬 이전 피드백
+        </div>
+        <div class="submission-text" th:text="${submission.feedback}">
+          기존 피드백 내용...
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Grading Panel -->
+    <div class="grading-panel">
+      <!-- 현재 점수 표시 -->
+      <div th:if="${submission.score != null}" class="current-grade">
+        <div class="current-score" th:text="${submission.score + '점'}">85점</div>
+        <div class="grade-label">현재 점수</div>
+      </div>
+
+      <div class="section-title">
+        🎯 채점하기
+      </div>
+
+      <form th:action="@{'/professor/submission/' + ${submission.submissionCode} + '/grade'}" method="post" class="grading-form">
+        <div class="form-group">
+          <label for="score">점수 (0-100점)</label>
+
+          <!-- 빠른 점수 버튼들 -->
+          <div class="grade-quick-buttons">
+            <button type="button" class="quick-grade-btn" onclick="setScore(100)">A+ (100)</button>
+            <button type="button" class="quick-grade-btn" onclick="setScore(95)">A (95)</button>
+            <button type="button" class="quick-grade-btn" onclick="setScore(90)">A- (90)</button>
+            <button type="button" class="quick-grade-btn" onclick="setScore(85)">B+ (85)</button>
+            <button type="button" class="quick-grade-btn" onclick="setScore(80)">B (80)</button>
+            <button type="button" class="quick-grade-btn" onclick="setScore(75)">B- (75)</button>
+            <button type="button" class="quick-grade-btn" onclick="setScore(70)">C+ (70)</button>
+            <button type="button" class="quick-grade-btn" onclick="setScore(0)">F (0)</button>
+          </div>
+
+          <!-- 점수 슬라이더 -->
+          <div class="score-input">
+            <input type="range" id="scoreSlider" class="score-slider" min="0" max="100"
+                   th:value="${submission.score ?: '0'}" oninput="updateScoreDisplay(this.value)">
+            <input type="number" id="score" name="score" class="form-control score-display"
+                   min="0" max="100" th:value="${submission.score ?: '0'}"
+                   oninput="updateScoreSlider(this.value)" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="feedback">피드백 (선택사항)</label>
+          <textarea id="feedback" name="feedback" class="form-control"
+                    placeholder="학생에게 전달할 피드백을 입력하세요..."
+                    th:text="${submission.feedback}"></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary" id="gradeBtn">
+          <span th:if="${submission.score != null}">점수 수정하기</span>
+          <span th:if="${submission.score == null}">채점하기</span>
+        </button>
+      </form>
+
+      <!-- 제출 정보 -->
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+        <div class="section-title" style="font-size: 16px;">
+          ℹ️ 제출 정보
+        </div>
+        <div style="font-size: 14px; color: #7f8c8d; line-height: 1.6;">
+          <p><strong>제출일시:</strong><br>
+            <span th:text="${#temporals.format(submission.submissionTime, 'yyyy-MM-dd (E) HH:mm:ss')}">2024-01-15 (월) 14:30:25</span></p>
+
+          <p th:if="${submission.lastModifiedDate != null and !submission.lastModifiedDate.equals(submission.submissionTime)}">
+            <strong>최종 수정:</strong><br>
+            <span th:text="${#temporals.format(submission.lastModifiedDate, 'yyyy-MM-dd (E) HH:mm:ss')}">수정일시</span>
+          </p>
+
+          <p><strong>제출 상태:</strong><br>
+            <span th:if="${submission.submissionTime.isBefore(submission.assignment.dueDate)}" style="color: #28a745;">정시 제출</span>
+            <span th:if="${submission.submissionTime.isAfter(submission.assignment.dueDate)}" style="color: #dc3545;">지각 제출</span>
+          </p>
+
+          <p><strong>글자 수:</strong> <span id="contentLength">0</span>자</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 제출 내용 글자 수 계산
+    const submissionText = document.querySelector('.submission-text').textContent;
+    document.getElementById('contentLength').textContent = submissionText.trim().length.toLocaleString();
+
+    // 초기 점수 동기화
+    const scoreInput = document.getElementById('score');
+    const scoreSlider = document.getElementById('scoreSlider');
+
+    // 초기값 설정
+    updateScoreSlider(scoreInput.value);
+    updateScoreDisplay(scoreInput.value);
+  });
+
+  // 슬라이더 값이 변경될 때 숫자 입력 필드 업데이트
+  function updateScoreDisplay(value) {
+    const scoreInput = document.getElementById('score');
+    const scoreSlider = document.getElementById('scoreSlider');
+
+    scoreInput.value = value;
+    scoreSlider.value = value;
+
+    // 버튼 활성화 상태 업데이트
+    updateActiveButton(parseInt(value));
+
+    // 점수에 따른 색상 변경
+    updateScoreColor(parseInt(value));
+  }
+
+  // 숫자 입력 필드 값이 변경될 때 슬라이더 업데이트
+  function updateScoreSlider(value) {
+    const scoreSlider = document.getElementById('scoreSlider');
+    const scoreInput = document.getElementById('score');
+
+    // 범위 체크
+    if (value < 0) value = 0;
+    if (value > 100) value = 100;
+
+    scoreSlider.value = value;
+    scoreInput.value = value;
+
+    // 버튼 활성화 상태 업데이트
+    updateActiveButton(parseInt(value));
+
+    // 점수에 따른 색상 변경
+    updateScoreColor(parseInt(value));
+  }
+
+  // 빠른 점수 설정
+  function setScore(score) {
+    updateScoreDisplay(score);
+  }
+
+  // 활성 버튼 업데이트
+  function updateActiveButton(score) {
+    const buttons = document.querySelectorAll('.quick-grade-btn');
+    buttons.forEach(button => {
+      button.classList.remove('active');
+      const buttonScore = parseInt(button.textContent.match(/\((\d+)\)/)[1]);
+      if (buttonScore === score) {
+        button.classList.add('active');
+      }
+    });
+  }
+
+  // 점수에 따른 색상 변경
+  function updateScoreColor(score) {
+    const scoreInput = document.getElementById('score');
+
+    // 기존 클래스 제거
+    scoreInput.classList.remove('score-good', 'score-average', 'score-poor');
+
+    // 점수에 따른 클래스 추가
+    if (score >= 90) {
+      scoreInput.style.color = '#28a745'; // 초록색
+    } else if (score >= 70) {
+      scoreInput.style.color = '#ffc107'; // 노란색
+    } else if (score >= 0) {
+      scoreInput.style.color = '#dc3545'; // 빨간색
+    }
+  }
+
+  // 폼 제출 시 확인
+  document.querySelector('.grading-form').addEventListener('submit', function(e) {
+    const score = document.getElementById('score').value;
+    const isUpdate = document.querySelector('[th\\:if="${submission.score != null}"]') !== null;
+
+    const message = isUpdate ?
+            `점수를 ${score}점으로 수정하시겠습니까?` :
+            `${score}점으로 채점하시겠습니까?`;
+
+    if (!confirm(message)) {
+      e.preventDefault();
+    } else {
+      // 제출 버튼 비활성화
+      const submitBtn = document.getElementById('gradeBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '처리 중...';
+    }
+  });
+</script>
+</body>
+</html>

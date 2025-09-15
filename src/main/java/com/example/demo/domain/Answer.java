@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 public class Answer {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String answerCode;      // 답변코드(PK)
 
     @Column(name = "question_code")

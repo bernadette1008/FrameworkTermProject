@@ -8,6 +8,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -184,7 +186,7 @@ public class StudentController {
     @PostMapping("/enroll")
     public String enrollInCourse(@RequestParam String courseCode,
                                  HttpSession session,
-                                 Model model) {
+                                 RedirectAttributes redirectAttributes) {
         Student student = (Student) session.getAttribute("user");
         if (student == null) {
             return "redirect:/";
@@ -194,16 +196,16 @@ public class StudentController {
             boolean success = studentService.enrollInCourse(student.getStudentId(), courseCode.trim());
 
             if (success) {
-                model.addAttribute("successMessage", "수업이 성공적으로 등록되었습니다.");
+                redirectAttributes.addFlashAttribute("successMessage", "수업이 성공적으로 등록되었습니다.");
+                return "redirect:/student/main?enrolled=success";
             } else {
-                model.addAttribute("errorMessage", "유효하지 않은 수업 코드입니다.");
+                redirectAttributes.addFlashAttribute("errorMessage", "유효하지 않은 수업 코드입니다.");
+                return "redirect:/student/main?enrolled=error";
             }
         } catch (Exception e) {
-            model.addAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/student/main?enrolled=error";
         }
-
-        // 메인 페이지로 리다이렉트하면서 메시지 전달
-        return "redirect:/student/main?enrolled=" + (model.containsAttribute("successMessage") ? "success" : "error");
     }
 
     // 수강취소 처리

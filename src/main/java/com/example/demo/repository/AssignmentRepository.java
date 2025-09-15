@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AssignmentRepository extends JpaRepository<Assignment, String> {
+public interface AssignmentRepository extends JpaRepository<Assignment, Integer> {
 
     List<Assignment> findByCourseCode(String courseCode);
 

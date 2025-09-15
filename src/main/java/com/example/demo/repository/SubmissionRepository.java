@@ -9,11 +9,11 @@ import java.util.Optional;
 @Repository
 public interface SubmissionRepository extends JpaRepository<Submission, String> {
 
-    Optional<Submission> findByAssignmentCodeAndStudentId(String assignmentCode, String studentId);
+    Optional<Submission> findByAssignmentCodeAndStudentId(int assignmentCode, String studentId);
 
     List<Submission> findByStudentId(String studentId);
 
-    List<Submission> findByAssignmentCode(String assignmentCode);
+    List<Submission> findByAssignmentCode(int assignmentCode);
 
-    boolean existsByAssignmentCodeAndStudentId(String assignmentCode, String studentId);
+    boolean existsByAssignmentCodeAndStudentId(int assignmentCode, String studentId);
 }

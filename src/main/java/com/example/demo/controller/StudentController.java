@@ -55,7 +55,7 @@ public class StudentController {
             model.addAttribute("error", "데이터를 불러오는데 실패했습니다.");
         }
 
-        return "student-main";
+        return "student/student-main";
     }
 
     // 과제 상세 페이지
@@ -90,7 +90,7 @@ public class StudentController {
             return "error";
         }
 
-        return "student-assignment-detail";
+        return "student/student-assignment-detail";
     }
 
     // 수강 중인 과목 목록 페이지
@@ -109,7 +109,7 @@ public class StudentController {
             model.addAttribute("error", "수강 과목을 불러오는데 실패했습니다.");
         }
 
-        return "student-courses";
+        return "student/student-courses";
     }
 
     // 전체 과제 목록 페이지
@@ -141,7 +141,7 @@ public class StudentController {
             model.addAttribute("error", "과제 목록을 불러오는데 실패했습니다.");
         }
 
-        return "student-assignments";
+        return "student/student-assignments";
     }
 
     // 제출 현황 페이지
@@ -160,7 +160,7 @@ public class StudentController {
             model.addAttribute("error", "제출 현황을 불러오는데 실패했습니다.");
         }
 
-        return "student-submissions";
+        return "student/student-submissions";
     }
 
     // 내 질문 목록 페이지
@@ -179,7 +179,7 @@ public class StudentController {
             model.addAttribute("error", "질문 목록을 불러오는데 실패했습니다.");
         }
 
-        return "student-questions";
+        return "student/student-questions";
     }
 
     // 수업 등록 처리 (메인 페이지에서)

@@ -34,7 +34,7 @@ public class ProfessorController {
             model.addAttribute("error", "과제 목록을 불러오는데 실패했습니다.");
         }
 
-        return "professor-assignments";
+        return "professor/professor-assignments";
     }
 
     // 특정 과제의 제출물 목록 조회
@@ -65,7 +65,7 @@ public class ProfessorController {
             return "error";
         }
 
-        return "professor-submissions";
+        return "professor/professor-submissions";
     }
 
     // 제출물 상세 보기 및 채점
@@ -94,7 +94,7 @@ public class ProfessorController {
             return "error";
         }
 
-        return "professor-submission-detail";
+        return "professor/professor-submission-detail";
     }
 
     // 채점 처리
@@ -135,7 +135,7 @@ public class ProfessorController {
             model.addAttribute("error", "질문 목록을 불러오는데 실패했습니다.");
         }
 
-        return "professor-question-management";
+        return "professor/professor-question-management";
     }
 
     // 질문 상세 보기
@@ -164,7 +164,7 @@ public class ProfessorController {
             return "error";
         }
 
-        return "professor-question-detail";
+        return "professor/professor-question-detail";
     }
 
     // 질문 답변 처리
@@ -204,7 +204,7 @@ public class ProfessorController {
             model.addAttribute("error", "강의 목록을 불러오는데 실패했습니다.");
         }
 
-        return "professor-student-management";
+        return "professor/professor-student-management";
     }
 
     // 특정 강의의 수강생 목록
@@ -236,6 +236,6 @@ public class ProfessorController {
             return "error";
         }
 
-        return "professor-course-students";
+        return "professor/professor-course-students";
     }
 }

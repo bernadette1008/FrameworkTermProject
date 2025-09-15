@@ -183,7 +183,7 @@ public class ProjectController {
         model.addAttribute("assignments", assignments);
         model.addAttribute("enrollments", enrollments);
 
-        return "professor-main";
+        return "professor/professor-main";
     }
 
     // 강의 생성 페이지
@@ -194,7 +194,7 @@ public class ProjectController {
             return "redirect:/";
         }
         model.addAttribute("professor", professor);
-        return "create-course";
+        return "professor/create-course";
     }
 
     // 강의 생성 처리
@@ -211,7 +211,7 @@ public class ProjectController {
         // 강의 코드 중복 체크
         if (courseRepository.existsByCourseCode(courseCode)) {
             model.addAttribute("error", "이미 사용 중인 강의 코드입니다.");
-            return "create-course";
+            return "professor/create-course";
         }
 
         Course newCourse = new Course();
@@ -237,43 +237,8 @@ public class ProjectController {
 
         model.addAttribute("professor", professor);
         model.addAttribute("courses", courses);
-        return "create-assignment";
+        return "professor/create-assignment";
     }
-
-    // 과제 생성 처리
-//    @PostMapping("/create-assignment")
-//    public String processCreateAssignment(@RequestParam String courseId,
-//                                          @RequestParam String title,
-//                                          @RequestParam String content,
-//                                          @RequestParam String dueDate,
-//                                          @RequestParam String dueTime,
-//                                          HttpSession session,
-//                                          Model model) {
-//        Professor professor = (Professor) session.getAttribute("user");
-//        if (professor == null) {
-//            return "redirect:/";
-//        }
-//
-//        // 선택된 강의 정보 가져오기
-//        Course course = courseRepository.findById(courseId).orElse(null);
-//        if (course == null) {
-//            model.addAttribute("error", "잘못된 강의를 선택했습니다.");
-//            return "create-assignment";
-//        }
-//
-//        Assignment newAssignment = new Assignment();
-//        newAssignment.setCourseCode(courseId);
-//        newAssignment.setCourse(course);
-//        newAssignment.setTitle(title);
-//        newAssignment.setContent(content);
-//        newAssignment.setDueDate(LocalDateTime.parse(dueDate));
-//        newAssignment.setDueDate(LocalDateTime.parse(dueTime));
-//        newAssignment.setCreatedDate(LocalDateTime.parse(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
-//
-//        assignmentRepository.save(newAssignment);
-//
-//        return "redirect:/professor-main?assignmentCreated=true";
-//    }
 
     @PostMapping("/create-assignment")
     public String processCreateAssignment(@RequestParam String courseId,
@@ -291,7 +256,7 @@ public class ProjectController {
         Course course = courseRepository.findById(courseId).orElse(null);
         if (course == null) {
             model.addAttribute("error", "잘못된 강의를 선택했습니다.");
-            return "create-assignment";
+            return "professor/create-assignment";
         }
 
         Assignment newAssignment = new Assignment();

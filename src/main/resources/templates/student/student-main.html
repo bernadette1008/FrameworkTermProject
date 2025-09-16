@@ -451,19 +451,16 @@
         <div class="welcome-subtitle">학습 관리를 효율적으로 해보세요</div>
 
         <div class="action-buttons">
-<!--            <button class="action-btn" onclick="openEnrollModal()">-->
-<!--                📚 수업 목록 & 등록-->
-<!--            </button>-->
-            <a class="action-btn" href="/student/courses">
+            <a class="action-btn" th:href="@{/student/courses}">
                 📚 수업 목록 & 등록
             </a>
-            <a href="javascript:void(0)" class="action-btn" th:href="@{/student/assignments}">
+            <a class="action-btn" th:href="@{/student/assignments}">
                 📝 과제 목록
             </a>
-            <a href="javascript:void(0)" class="action-btn" onclick="loadSubmissions()">
+            <a class="action-btn" th:href="@{/student/submissions}">
                 📋 제출 현황
             </a>
-            <a href="javascript:void(0)" class="action-btn" onclick="loadQuestions()">
+            <a class="action-btn" th:href="@{/student/questions}">
                 ❓ 내 질문
             </a>
         </div>
@@ -486,7 +483,7 @@
                     <div class="stat-label">전체 과제</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number" id="submissionCount">0</div>
+                    <div class="stat-number" id="submissionCount" th:text="${#lists.size(submissions)}">0</div>
                     <div class="stat-label">제출 완료</div>
                 </div>
             </div>
@@ -507,7 +504,7 @@
         <!-- 최근 과제 -->
         <div class="section-card">
             <div class="section-title">
-                📝 최근 과제
+                📝 미제출 과제
             </div>
             <div id="assignmentList" class="assignment-list">
                 <!-- 최근 과제 목록 -->

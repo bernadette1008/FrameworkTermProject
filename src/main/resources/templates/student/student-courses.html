@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>수강 과목 - Ploytech</title>
+    <title>수업 목록 - Ploytech 과제 제출 시스템</title>
     <style>
         body {
             margin: 0;
@@ -60,8 +60,8 @@
             font-weight: bold;
         }
 
-        .back-btn, .add-btn {
-            background: #6c757d;
+        .logout-btn, .back-btn {
+            background: #e74c3c;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -70,20 +70,21 @@
             font-weight: bold;
             transition: background 0.3s;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn {
+            background: #3498db;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
         }
 
         .back-btn:hover {
-            background: #5a6268;
-        }
-
-        .add-btn {
-            background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
-            margin-left: 10px;
-        }
-
-        .add-btn:hover {
-            transform: translateY(-2px);
+            background: #2980b9;
         }
 
         .container {
@@ -106,204 +107,43 @@
             font-weight: bold;
             color: #2c3e50;
             margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            text-align: center;
         }
 
         .page-subtitle {
-            font-size: 18px;
-            color: #7f8c8d;
-            margin-bottom: 20px;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .courses-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
-        }
-
-        .course-card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
-            cursor: pointer;
-        }
-
-        .course-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-
-        .course-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
-
-        .course-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin: 0;
-            line-height: 1.2;
-        }
-
-        .course-code {
-            background: #f8f9fa;
-            color: #495057;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-
-        .professor-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #7f8c8d;
-            margin-bottom: 20px;
-        }
-
-        .professor-info .icon {
             font-size: 16px;
-        }
-
-        .course-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .stat-item {
-            text-align: center;
-            flex: 1;
-        }
-
-        .stat-number {
-            font-size: 20px;
-            font-weight: bold;
-            color: #7fcdcd;
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 12px;
             color: #7f8c8d;
-            margin-top: 2px;
-        }
-
-        .course-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            transition: transform 0.2s;
-            flex: 1;
             text-align: center;
+            margin-bottom: 30px;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
-
-        .empty-state-icon {
-            font-size: 64px;
+        .enroll-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
             margin-bottom: 20px;
+            border: 2px dashed #7fcdcd;
         }
 
-        .empty-state h3 {
+        .enroll-title {
+            font-size: 18px;
+            font-weight: bold;
             color: #2c3e50;
             margin-bottom: 15px;
-        }
-
-        .empty-state p {
-            color: #7f8c8d;
-            font-size: 16px;
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 10% auto;
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-
-        .modal-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 20px;
             text-align: center;
+        }
+
+        .enroll-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            flex: 1;
+            min-width: 250px;
         }
 
         .form-group label {
@@ -329,8 +169,8 @@
             box-shadow: 0 0 0 3px rgba(127, 205, 205, 0.1);
         }
 
-        .btn-secondary {
-            background: #6c757d;
+        .btn-primary {
+            background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
             color: white;
             border: none;
             padding: 12px 24px;
@@ -338,31 +178,139 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.3s;
-            margin-right: 10px;
+            transition: transform 0.2s;
+            white-space: nowrap;
         }
 
-        .btn-secondary:hover {
-            background: #5a6268;
+        .btn-primary:hover {
+            transform: translateY(-2px);
         }
 
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
+        .courses-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .course-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 5px solid #7fcdcd;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .course-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .course-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+
+        .course-info {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .course-description {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #e9ecef;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .course-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .enrollment-date {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .unenroll-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: -10px;
+            transition: background 0.3s;
         }
 
-        .close:hover {
-            color: #000;
+        .unenroll-btn:hover {
+            background: #c82333;
+        }
+
+        .assignment-count {
+            background: #17a2b8;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state-subtext {
+            font-size: 14px;
         }
 
         .alert {
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
+            transition: opacity 0.3s ease;
         }
 
         .alert-success {
@@ -377,23 +325,70 @@
             border: 1px solid #f1aeb5;
         }
 
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #7fcdcd;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
         @media (max-width: 768px) {
             .courses-grid {
                 grid-template-columns: 1fr;
             }
 
-            .course-stats {
-                flex-wrap: wrap;
-                gap: 10px;
+            .enroll-form {
+                flex-direction: column;
+                align-items: stretch;
             }
 
-            .course-actions {
-                flex-direction: column;
+            .form-group {
+                min-width: auto;
             }
 
-            .header-actions {
-                flex-direction: column;
-                align-items: center;
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -407,280 +402,144 @@
     <div class="user-info">
         <span th:text="${student.name + ' 학생'}">학생</span>
         <span th:text="'(' + ${student.studentId} + ')'">학번</span>
-        <a href="/student/main" class="back-btn">← 메인으로</a>
-        <button class="add-btn" onclick="openEnrollModal()">+ 수업 등록</button>
+        <a th:href="@{/student/main}" class="back-btn">← 메인으로</a>
+        <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
     </div>
 </div>
 
 <div class="container">
-    <!-- Success/Error Messages -->
-    <div id="successAlert" class="alert alert-success" style="display: none;">
-        <strong>성공!</strong> <span id="successMessage"></span>
-    </div>
-
-    <div id="errorAlert" class="alert alert-danger" style="display: none;">
-        <strong>오류!</strong> <span id="errorMessage"></span>
-    </div>
-
     <!-- Page Header -->
     <div class="page-header">
-        <div class="page-title">
-            📚 수강 과목
+        <div class="page-title">📚 수업 목록</div>
+        <div class="page-subtitle">수강 중인 과목을 확인하고 새로운 수업을 등록하세요</div>
+
+        <!-- Enrollment Section -->
+        <div class="enroll-section">
+            <div class="enroll-title">🎯 새 수업 등록</div>
+            <form class="enroll-form" th:action="@{/student/enroll}" method="post">
+                <div class="form-group">
+                    <label for="courseCode">수업 코드</label>
+                    <input type="text" id="courseCode" name="courseCode" class="form-control"
+                           placeholder="교수님이 제공한 수업 코드를 입력하세요" required>
+                </div>
+                <button type="submit" class="btn-primary">등록하기</button>
+            </form>
         </div>
-        <div class="page-subtitle">현재 수강 중인 과목들을 관리하고, 새로운 수업을 등록하세요</div>
-        <div class="header-actions">
-            <button class="btn-primary" onclick="openEnrollModal()">
-                ➕ 새 수업 등록
-            </button>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${param.enrolled != null and param.enrolled[0] == 'success'}" class="alert alert-success">
+            ✅ 수업이 성공적으로 등록되었습니다!
         </div>
-    </div>
-
-    <!-- Error Message -->
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-
-    <!-- Courses Content -->
-    <div th:if="${#lists.isEmpty(courses)}" class="empty-state">
-        <div class="empty-state-icon">📚</div>
-        <h3>아직 수강 중인 과목이 없습니다</h3>
-        <p>수업 코드를 입력하여 새로운 과목을 등록해보세요.<br>
-            교수님이 제공해 드린 수업 코드가 필요합니다.</p>
-        <button class="btn-primary" onclick="openEnrollModal()">
-            첫 번째 수업 등록하기
-        </button>
-    </div>
-
-    <div th:unless="${#lists.isEmpty(courses)}" class="courses-grid">
-        <div th:each="course : ${courses}" class="course-card" th:onclick="|viewCourseDetails('${course.courseCode}')|">
-            <div class="course-header">
-                <h3 class="course-title" th:text="${course.courseName}">강의명</h3>
-                <span class="course-code" th:text="${course.courseCode}">강의코드</span>
-            </div>
-
-            <div class="professor-info">
-                <span class="icon">👨‍🏫</span>
-                <span th:text="${course.professor != null ? course.professor.name + ' 교수님' : '담당교수'}">담당교수</span>
-            </div>
-
-            <div class="course-stats">
-                <div class="stat-item">
-                    <span class="stat-number" th:text="${#lists.size(course.assignments) ?: '0'}">0</span>
-                    <span class="stat-label">과제</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">0</span>
-                    <span class="stat-label">제출완료</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">0</span>
-                    <span class="stat-label">미제출</span>
-                </div>
-            </div>
-
-            <div class="course-actions" onclick="event.stopPropagation();">
-                <a th:href="@{'/student/assignments?course=' + ${course.courseCode}}" class="btn-primary">
-                    📝 과제 보기
-                </a>
-                <button class="btn-danger" th:onclick="|unenrollConfirm('${course.courseCode}', '${course.courseName}')|">
-                    🗑️ 수강취소
-                </button>
-            </div>
+        <div th:if="${param.enrolled != null and param.enrolled[0] == 'error'}" class="alert alert-danger">
+            ❌ 수업 등록에 실패했습니다. 수업 코드를 확인해주세요.
+        </div>
+        <div th:if="${param.unenrolled != null}" class="alert alert-success">
+            ✅ 수업 등록이 해제되었습니다.
         </div>
     </div>
-</div>
 
-<!-- 수업 등록 Modal -->
-<div id="enrollModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeEnrollModal()">&times;</span>
-        <div class="modal-title">🎓 새 수업 등록</div>
-        <form onsubmit="enrollInCourse(event)">
-            <div class="form-group">
-                <label for="courseKey">수업 코드</label>
-                <input type="text" id="courseKey" class="form-control"
-                       placeholder="교수님이 제공한 수업 코드를 입력하세요 (예: CS101)" required>
-                <small style="color: #7f8c8d; font-size: 12px; margin-top: 5px; display: block;">
-                    * 수업 코드는 각 강의별로 고유하며, 담당 교수님으로부터 받을 수 있습니다.
-                </small>
-            </div>
-            <div style="text-align: center; margin-top: 25px;">
-                <button type="submit" class="btn-primary" style="margin-right: 10px;">등록하기</button>
-                <button type="button" class="btn-secondary" onclick="closeEnrollModal()">취소</button>
-            </div>
-        </form>
+    <!-- Statistics -->
+    <div class="stats-section">
+        <div class="stat-card">
+            <div class="stat-number" th:text="${#lists.size(courses)}">0</div>
+            <div class="stat-label">수강 과목</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="totalAssignments">0</div>
+            <div class="stat-label">전체 과제</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="totalProfessors">0</div>
+            <div class="stat-label">담당 교수</div>
+        </div>
     </div>
-</div>
 
-<!-- 수강취소 확인 Modal -->
-<div id="unenrollModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-title">⚠️ 수강취소 확인</div>
-        <p style="text-align: center; margin: 20px 0; line-height: 1.5;">
-            정말로 <strong id="unenrollCourseName"></strong> 수업을<br>
-            수강취소 하시겠습니까?
-        </p>
-        <p style="text-align: center; color: #dc3545; font-size: 14px; margin-bottom: 25px;">
-            수강취소 후에는 해당 강의의 과제에 접근할 수 없습니다.
-        </p>
-        <div style="text-align: center;">
-            <button class="btn-danger" onclick="confirmUnenroll()" style="margin-right: 10px;">수강취소</button>
-            <button class="btn-secondary" onclick="closeUnenrollModal()">취소</button>
+    <!-- Courses Section -->
+    <div class="courses-section">
+        <div class="section-title">
+            📖 수강 중인 과목
+        </div>
+
+        <div th:if="${#lists.isEmpty(courses)}" class="empty-state">
+            <div class="empty-state-icon">📚</div>
+            <div class="empty-state-text">아직 등록된 수업이 없습니다</div>
+            <div class="empty-state-subtext">위의 입력 창에 수업 코드를 입력하여 새 수업을 등록해보세요!</div>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(courses)}" class="courses-grid">
+            <div th:each="course : ${courses}" class="course-card">
+                <div class="course-title" th:text="${course.courseName}">강의명</div>
+                <div class="course-info">
+                    🏷️ 수업 코드: <strong th:text="${course.courseCode}">CS101</strong>
+                </div>
+                <div class="course-info">
+                    👨‍🏫 담당 교수: <strong th:text="${course.professor?.name ?: '교수님'}">교수님</strong>
+                </div>
+                <div class="course-info">
+                    📋 과제 수: <span class="assignment-count" th:text="${course.assignments?.size() ?: 0} + '개'">0개</span>
+                </div>
+
+                <div class="course-description">
+                    <p>📖 <strong th:text="${course.courseName}">강의명</strong> 수업에 참여하고 있습니다.</p>
+                    <p>과제 제출, 질문 등록 등 다양한 학습 활동을 진행해보세요!</p>
+                </div>
+
+                <div class="course-footer">
+                    <div class="enrollment-date">
+                        📅 등록일: <span th:text="${course.enrollments?.get(0)?.enrollmentDate ?: '정보 없음'}">정보 없음</span>
+                    </div>
+                    <form th:action="@{/student/unenroll}" method="post" style="display: inline;">
+                        <input type="hidden" name="courseCode" th:value="${course.courseCode}">
+                        <button type="submit" class="unenroll-btn"
+                                onclick="return confirm('정말로 이 수업을 등록 해제하시겠습니까?')">
+                            수강 취소
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    let currentUnenrollCourse = null;
-
-    // 수업 등록 모달 열기
-    function openEnrollModal() {
-        document.getElementById('enrollModal').style.display = 'block';
-    }
-
-    // 수업 등록 모달 닫기
-    function closeEnrollModal() {
-        document.getElementById('enrollModal').style.display = 'none';
-        document.getElementById('courseKey').value = '';
-    }
-
-    // 수강취소 모달 열기
-    function unenrollConfirm(courseCode, courseName) {
-        currentUnenrollCourse = courseCode;
-        document.getElementById('unenrollCourseName').textContent = courseName;
-        document.getElementById('unenrollModal').style.display = 'block';
-    }
-
-    // 수강취소 모달 닫기
-    function closeUnenrollModal() {
-        document.getElementById('unenrollModal').style.display = 'none';
-        currentUnenrollCourse = null;
-    }
-
-    // 수업 등록
-    function enrollInCourse(event) {
-        event.preventDefault();
-        const courseKey = document.getElementById('courseKey').value.trim();
-
-        if (!courseKey) {
-            showError('수업 코드를 입력해주세요.');
-            return;
-        }
-
-        // 로딩 상태 표시
-        const submitBtn = event.target.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = '등록 중...';
-        submitBtn.disabled = true;
-
-        fetch('/api/student/enroll', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                courseKey: courseKey
-            })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showSuccess(data.message);
-                    closeEnrollModal();
-                    // 페이지 새로고침으로 업데이트된 과목 목록 표시
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showError(data.message || '등록에 실패했습니다.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError('네트워크 오류가 발생했습니다.');
-            })
-            .finally(() => {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            });
-    }
-
-    // 수강취소 확인
-    function confirmUnenroll() {
-        if (!currentUnenrollCourse) return;
-
-        fetch(`/api/student/enroll/${currentUnenrollCourse}`, {
-            method: 'DELETE'
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showSuccess(data.message);
-                    closeUnenrollModal();
-                    // 페이지 새로고침으로 업데이트된 과목 목록 표시
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showError(data.message || '수강취소에 실패했습니다.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError('네트워크 오류가 발생했습니다.');
-            });
-    }
-
-    // 강의 상세 보기
-    function viewCourseDetails(courseCode) {
-        // 강의별 과제 목록 페이지로 이동
-        window.location.href = `/student/assignments?course=${courseCode}`;
-    }
-
-    // 성공 메시지 표시
-    function showSuccess(message) {
-        const alert = document.getElementById('successAlert');
-        document.getElementById('successMessage').textContent = message;
-        alert.style.display = 'block';
-
-        setTimeout(() => {
-            alert.style.display = 'none';
-        }, 3000);
-
-        // 페이지 상단으로 스크롤
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // 오류 메시지 표시
-    function showError(message) {
-        const alert = document.getElementById('errorAlert');
-        document.getElementById('errorMessage').textContent = message;
-        alert.style.display = 'block';
-
-        setTimeout(() => {
-            alert.style.display = 'none';
-        }, 5000);
-
-        // 페이지 상단으로 스크롤
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // Modal 외부 클릭 시 닫기
-    window.onclick = function(event) {
-        const enrollModal = document.getElementById('enrollModal');
-        const unenrollModal = document.getElementById('unenrollModal');
-
-        if (event.target === enrollModal) {
-            closeEnrollModal();
-        }
-        if (event.target === unenrollModal) {
-            closeUnenrollModal();
-        }
-    }
-
-    // 페이지 로드 시 자동으로 통계 업데이트 (실제 구현에서는 서버에서 계산)
+    // 페이지 로드 시 통계 업데이트
     document.addEventListener('DOMContentLoaded', function() {
-        // 여기서 각 과목별 과제 통계를 업데이트할 수 있습니다
-        // 현재는 더미 데이터를 사용
+        updateStatistics();
+
+        // 알림 메시지 자동 숨김
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
     });
+
+    // 통계 업데이트
+    function updateStatistics() {
+        const courses = document.querySelectorAll('.course-card');
+        let totalAssignments = 0;
+        const professors = new Set();
+
+        courses.forEach(course => {
+            // 과제 수 계산
+            const assignmentCount = course.querySelector('.assignment-count');
+            if (assignmentCount) {
+                const count = parseInt(assignmentCount.textContent.replace('개', '')) || 0;
+                totalAssignments += count;
+            }
+
+            // 교수 수 계산
+            const professorName = course.querySelector('.course-info:nth-child(3) strong');
+            if (professorName && professorName.textContent !== '교수님') {
+                professors.add(professorName.textContent);
+            }
+        });
+
+        document.getElementById('totalAssignments').textContent = totalAssignments;
+        document.getElementById('totalProfessors').textContent = professors.size;
+    }
 </script>
 </body>
 </html>

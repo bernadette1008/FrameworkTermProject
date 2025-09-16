@@ -1,5 +1,6 @@
 package com.example.demo.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -9,30 +10,27 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "submission")
 @Data
-@Setter
 @Getter
+@Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Submission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int submissionCode;   // 제출물코드(PK)
+    private int submissionCode;
 
     @Column(name = "assignment_code")
-    private int assignmentCode;   // 과제코드(FK)
+    private int assignmentCode;
 
     @Column(name = "student_id")
-    private String studentId;        // 학번(FK)
+    private String studentId;
 
-    private LocalDateTime submissionTime;    // 제출시간
-
+    private LocalDateTime submissionTime;
     @Column(columnDefinition = "TEXT")
-    private String content;          // 제출내용
-
-    private Integer score;           // 점수
-
+    private String content;
+    private Integer score;
     @Column(columnDefinition = "TEXT")
-    private String feedback;         // 피드백
-
-    private LocalDateTime lastModifiedDate;  // 최종 수정일
+    private String feedback;
+    private LocalDateTime lastModifiedDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignment_code", insertable = false, updatable = false)
@@ -41,15 +39,4 @@ public class Submission {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", insertable = false, updatable = false)
     private Student student;
-
-    @PrePersist
-    protected void onCreate() {
-        submissionTime = LocalDateTime.now();
-        lastModifiedDate = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        lastModifiedDate = LocalDateTime.now();
-    }
 }

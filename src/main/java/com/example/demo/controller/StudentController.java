@@ -34,23 +34,26 @@ public class StudentController {
         // 학생의 수강 과목과 과제 정보 조회
         try {
             List<Course> courses = studentService.getStudentCourses(student.getStudentId());
-            List<Assignment> assignments = studentService.getStudentAssignments(student.getStudentId());
+//            List<Assignment> assignments = studentService.getStudentAssignments(student.getStudentId());
+            List<Assignment> assignments = studentService.getUnsubmittedAssignments(student.getStudentId());
+            List<Submission> submissions = studentService.getStudentSubmissions(student.getStudentId());
 
             // 과제별 제출 상태 설정
-            for (Assignment assignment : assignments) {
-                boolean isSubmitted = studentService.getSubmission(
-                        assignment.getAssignmentCode(),
-                        student.getStudentId()
-                ).isPresent();
-
-                assignment.setSubmitted(isSubmitted);
-                assignment.setOverdue(assignment.getDueDate() != null &&
-                        assignment.getDueDate().isBefore(LocalDateTime.now()));
-            }
+//            for (Assignment assignment : assignments) {
+//                boolean isSubmitted = studentService.getSubmission(
+//                        assignment.getAssignmentCode(),
+//                        student.getStudentId()
+//                ).isPresent();
+//
+//                assignment.setSubmitted(isSubmitted);
+//                assignment.setOverdue(assignment.getDueDate() != null &&
+//                        assignment.getDueDate().isBefore(LocalDateTime.now()));
+//            }
 
             model.addAttribute("student", student);
             model.addAttribute("courses", courses);
             model.addAttribute("assignments", assignments);
+            model.addAttribute("submissions", submissions);
         } catch (Exception e) {
             model.addAttribute("error", "데이터를 불러오는데 실패했습니다.");
         }

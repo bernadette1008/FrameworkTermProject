@@ -7,14 +7,17 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "professor")
 @Data
-@Setter
 @Getter
+@Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Professor {
     @Id
-    private String professorId;  // 교수아이디(PK)
-    private String name;         // 이름
-    private String password;     // 비밀번호
+    private String professorId;
+    private String name;
+    private String password;
 }

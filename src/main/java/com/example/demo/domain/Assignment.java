@@ -1,5 +1,6 @@
 package com.example.demo.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -10,23 +11,24 @@ import java.util.List;
 @Entity
 @Table(name = "assignment")
 @Data
-@Setter
 @Getter
+@Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Assignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int assignmentCode;  // 과제코드(PK) - 일관성을 위해 코드명 유지
+    private int assignmentCode;
 
     @Column(name = "course_code")
-    private String courseCode;      // 수업코드(FK)
+    private String courseCode;
 
-    private String title;           // 이름
+    private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String content;         // 내용
+    private String content;
 
-    private LocalDateTime createdDate;  // 생성시간
-    private LocalDateTime dueDate;      // 마감시간
+    private LocalDateTime createdDate;
+    private LocalDateTime dueDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_code", insertable = false, updatable = false)
@@ -38,39 +40,9 @@ public class Assignment {
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL)
     private List<Question> questions;
 
-    // 제출 상태와 기한 초과 여부를 위한 임시 필드들 (DB에 저장되지 않음)
     @Transient
     private boolean isSubmitted;
 
     @Transient
     private boolean isOverdue;
-
-    @PrePersist
-    protected void onCreate() {
-        if (createdDate == null) {
-            createdDate = LocalDateTime.now();
-        }
-    }
-
-    // JavaScript와의 호환성을 위한 getter 추가
-    public int getAssignmentId() {
-        return this.assignmentCode;
-    }
-
-    // Helper methods
-    public boolean isSubmitted() {
-        return isSubmitted;
-    }
-
-    public void setSubmitted(boolean submitted) {
-        isSubmitted = submitted;
-    }
-
-    public boolean isOverdue() {
-        return isOverdue;
-    }
-
-    public void setOverdue(boolean overdue) {
-        isOverdue = overdue;
-    }
 }

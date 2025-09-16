@@ -260,7 +260,6 @@ public class StudentApiController {
             if (studentId == null) {
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
-
             List<Submission> submissions = studentService.getStudentSubmissions(studentId);
             return ResponseEntity.ok(submissions);
         } catch (Exception e) {

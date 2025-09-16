@@ -87,11 +87,18 @@
             background: #2980b9;
         }
 
+        /*.container {*/
+        /*    flex: 1;*/
+        /*    max-width: 1200px;*/
+        /*    margin: 0 auto;*/
+        /*    padding: 20px;*/
+        /*}*/
+
         .container {
             flex: 1;
             max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            /*margin: 0 auto;*/
+            padding: 20px 400px;
         }
 
         .page-header {
@@ -486,7 +493,7 @@
 
                 <div class="course-footer">
                     <div class="enrollment-date">
-                        📅 등록일: <span th:text="${course.enrollments?.get(0)?.enrollmentDate ?: '정보 없음'}">정보 없음</span>
+                        📅 등록일: <span th:text="${#lists.isEmpty(course.enrollments) ? '정보 없음' : course.enrollments.get(0).enrollmentDate}">정보 없음</span>
                     </div>
                     <form th:action="@{/student/unenroll}" method="post" style="display: inline;">
                         <input type="hidden" name="courseCode" th:value="${course.courseCode}">

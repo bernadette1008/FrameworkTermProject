@@ -142,6 +142,22 @@
             font-style: italic;
         }
 
+        .logout-btn {
+            text-decoration: none;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
         textarea.form-control {
             resize: vertical;
             min-height: 120px;
@@ -257,7 +273,8 @@
     </div>
     <div class="user-info">
         <span th:text="${professor.name + ' 교수님'}">교수님</span>
-        <a th:href="@{/professor-main}" class="back-btn">← 돌아가기</a>
+        <a th:href="@{/professor-main}" class="back-btn">← 메인으로</a>
+        <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
     </div>
 </div>
 

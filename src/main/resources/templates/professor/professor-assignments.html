@@ -76,11 +76,64 @@
             background: #5a6268;
         }
 
+        .sidebar {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .sidebar-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .sidebar-item.active {
+            background: #7fcdcd;
+            color: white;
+        }
+
         .container {
             flex: 1;
-            max-width: 1400px;
+            display: flex;
+            /*max-width: 1400px;*/
+            width: 1100px;
             margin: 0 auto;
             padding: 20px;
+            gap: 20px
+        }
+
+        .main-content {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .logout-btn {
+            text-decoration: none;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
         }
 
         .page-header {
@@ -298,79 +351,98 @@
     </div>
     <div class="user-info">
         <span th:text="${professor.name + ' 교수님'}">교수님</span>
-        <a href="/professor-main" class="back-btn">← 메인으로</a>
+        <a th:href="@{/professor-main}" class="back-btn">← 메인으로</a>
+        <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
     </div>
 </div>
 
 <div class="container">
+    <div class="sidebar">
+        <a href="/professor-main" style="text-decoration: none; color: inherit;">
+            <div class="sidebar-item">대시보드</div>
+        </a>
+        <div class="sidebar-item active">과제 관리</div>
+        <a href="/professor/questions" style="text-decoration: none; color: inherit;">
+            <div class="sidebar-item">질문 관리</div>
+        </a>
+        <a href="/professor/students" style="text-decoration: none; color: inherit;">
+            <div class="sidebar-item">수강생 관리</div>
+        </a>
+        <div class="sidebar-item">성적 관리</div>
+        <div class="sidebar-item">설정</div>
+    </div>
     <!-- Page Header -->
-    <div class="page-header">
-        <div class="page-title">📋 과제 관리</div>
-        <div class="page-subtitle">과제별 제출 현황을 확인하고 채점하세요</div>
-    </div>
 
-    <!-- Error Message -->
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <!-- Assignments Grid -->
-    <div th:if="${#lists.isEmpty(assignments)}" class="empty-state">
-        <div class="empty-state-icon">📝</div>
-        <h3>등록된 과제가 없습니다</h3>
-        <p>새로운 과제를 등록해보세요!</p>
-        <a href="/create-assignment" class="btn-primary">과제 등록하기</a>
-    </div>
+    <div class="main-content">
+        <div class="page-header">
+            <div class="page-title">📋 과제 관리</div>
+            <div class="page-subtitle">과제별 제출 현황을 확인하고 채점하세요</div>
+        </div>
+        <!-- Error Message -->
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <div th:unless="${#lists.isEmpty(assignments)}" class="assignments-grid">
-        <div th:each="assignment : ${assignments}" class="assignment-card"
-             th:onclick="|viewAssignmentSubmissions('${assignment.assignmentCode}')|">
+        <!-- Assignments Grid -->
+        <div th:if="${#lists.isEmpty(assignments)}" class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <h3>등록된 과제가 없습니다</h3>
+            <p>새로운 과제를 등록해보세요!</p>
+            <a href="/create-assignment" class="btn-primary">과제 등록하기</a>
+        </div>
 
-            <div class="assignment-header">
-                <h3 class="assignment-title" th:text="${assignment.title}">과제 제목</h3>
-                <span class="assignment-code" th:text="${'#' + assignment.assignmentCode}">#001</span>
-            </div>
+        <div th:unless="${#lists.isEmpty(assignments)}" class="assignments-grid">
+            <div th:each="assignment : ${assignments}" class="assignment-card"
+                 th:onclick="|viewAssignmentSubmissions('${assignment.assignmentCode}')|">
 
-            <div class="course-info">
-                <span>📚</span>
-                <span th:text="${assignment.course.courseName + ' (' + assignment.course.courseCode + ')'}">강의명 (코드)</span>
-            </div>
-
-            <div class="assignment-dates">
-                <div class="date-item">
-                    <span>📅</span>
-                    <span th:text="'등록: ' + ${#temporals.format(assignment.createdDate, 'MM-dd HH:mm')}">등록일</span>
+                <div class="assignment-header">
+                    <h3 class="assignment-title" th:text="${assignment.title}">과제 제목</h3>
+                    <span class="assignment-code" th:text="${'#' + assignment.assignmentCode}">#001</span>
                 </div>
-                <div class="date-item">
-                    <span>⏰</span>
-                    <span th:text="'마감: ' + ${#temporals.format(assignment.dueDate, 'MM-dd HH:mm')}">마감일</span>
-                </div>
-            </div>
 
-            <div class="stats-section">
-                <div class="stat-item">
-                    <div class="stat-number" th:text="${#lists.size(assignment.submissions) ?: '0'}">0</div>
-                    <div class="stat-label">제출물</div>
+                <div class="course-info">
+                    <span>📚</span>
+                    <span th:text="${assignment.course.courseName + ' (' + assignment.course.courseCode + ')'}">강의명 (코드)</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number" th:text="${assignment.submissions != null ? #lists.size(assignment.submissions.?[score != null]) : '0'}">0</div>
-                    <div class="stat-label">채점완료</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" th:text="${#lists.size(assignment.questions) ?: '0'}">0</div>
-                    <div class="stat-label">질문</div>
-                </div>
-            </div>
 
-            <div class="action-buttons" onclick="event.stopPropagation();">
-                <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/submissions'}" class="btn-primary">
-                    📋 제출물 보기
-                </a>
-                <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/questions'}" class="btn-secondary">
-                    ❓ 질문 보기
-                </a>
+                <div class="assignment-dates">
+                    <div class="date-item">
+                        <span>📅</span>
+                        <span th:text="'등록: ' + ${#temporals.format(assignment.createdDate, 'MM-dd HH:mm')}">등록일</span>
+                    </div>
+                    <div class="date-item">
+                        <span>⏰</span>
+                        <span th:text="'마감: ' + ${#temporals.format(assignment.dueDate, 'MM-dd HH:mm')}">마감일</span>
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stat-item">
+                        <div class="stat-number" th:text="${#lists.size(assignment.submissions) ?: '0'}">0</div>
+                        <div class="stat-label">제출물</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" th:text="${assignment.submissions != null ? #lists.size(assignment.submissions.?[score != null]) : '0'}">0</div>
+                        <div class="stat-label">채점완료</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" th:text="${#lists.size(assignment.questions) ?: '0'}">0</div>
+                        <div class="stat-label">질문</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons" onclick="event.stopPropagation();">
+                    <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/submissions'}" class="btn-primary">
+                        📋 제출물 보기
+                    </a>
+                    <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/question'}" class="btn-secondary">
+                        ❓ 질문 보기
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 
 <script>
     function viewAssignmentSubmissions(assignmentCode) {

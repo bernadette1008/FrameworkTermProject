@@ -87,11 +87,18 @@
             background: #2980b9;
         }
 
+        /*.container {*/
+        /*    flex: 1;*/
+        /*    max-width: 1200px;*/
+        /*    margin: 0 auto;*/
+        /*    padding: 20px;*/
+        /*}*/
+
         .container {
             flex: 1;
             max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            /*margin: 0 auto;*/
+            padding: 20px 400px;
         }
 
         .page-header {
@@ -425,9 +432,9 @@
         <div class="title">Ploytech 과제 제출 시스템</div>
     </div>
     <div class="user-info">
-        <a th:href="@{/student/main}" class="back-btn">🏠 메인으로</a>
         <span th:text="${student.name + ' 학생'}">학생</span>
         <span th:text="'(' + ${student.studentId} + ')'">학번</span>
+        <a th:href="@{/student/main}" class="back-btn">메인으로</a>
         <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
     </div>
 </div>

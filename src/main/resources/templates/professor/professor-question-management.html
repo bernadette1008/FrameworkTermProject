@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>질문 관리 - Ploytech</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #a8e6cf, #7fcdcd);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #7fcdcd;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo::before {
+            content: "💡";
+            font-size: 24px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            text-decoration: none;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .sidebar-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .sidebar-item.active {
+            background: #7fcdcd;
+            color: white;
+        }
+
+        .logout-btn {
+            text-decoration: none;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .main-content {
+            flex: 1;
+            width: 1000px;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .questions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border-left: 5px solid #7fcdcd;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .question-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .question-info {
+            flex: 1;
+        }
+
+        .assignment-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .course-name {
+            font-size: 16px;
+            color: #7fcdcd;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .student-info {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .question-date {
+            font-size: 14px;
+            color: #95a5a6;
+            text-align: right;
+        }
+
+        .question-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 3px solid #e9ecef;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+
+        .answer-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .status-badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-answered {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .answer-btn {
+            background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .answer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(127, 205, 205, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .empty-state-message {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            /*margin-bottom: 20px;*/
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        .answer-preview {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: #e8f5e8;
+            border-radius: 8px;
+            border-left: 3px solid #28a745;
+        }
+
+        .answer-author {
+            font-size: 12px;
+            color: #28a745;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .answer-text {
+            font-size: 14px;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div class="logo"></div>
+        <div class="title">Ploytech 과제 제출 시스템</div>
+    </div>
+    <div class="user-info">
+        <span th:text="${professor.name + ' 교수님'}">교수님</span>
+        <a th:href="@{/professor-main}" class="back-btn">← 메인으로</a>
+        <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <a href="/professor-main" class="sidebar-item">대시보드</a>
+        <a href="/professor/assignments" class="sidebar-item">과제 관리</a>
+        <div class="sidebar-item active">질문 관리</div>
+        <a href="/professor/students" class="sidebar-item">수강생 관리</a>
+        <div class="sidebar-item">성적 관리</div>
+        <div class="sidebar-item">설정</div>
+    </div>
+
+    <div class="main-content">
+        <a th:href="@{/professor-main}" class="back-btn">← 대시보드로 돌아가기</a>
+
+        <div class="page-title">질문 관리</div>
+
+        <!-- 에러 메시지 -->
+        <div th:if="${error}" class="error-message" th:text="${error}">
+            에러 메시지
+        </div>
+
+        <!-- 질문 목록 -->
+        <div th:if="${#lists.isEmpty(questions)}" class="empty-state">
+            <div class="empty-state-icon">❓</div>
+            <div class="empty-state-title">등록된 질문이 없습니다</div>
+            <div class="empty-state-message">
+                학생들이 과제에 대해 질문을 남기면<br>
+                이곳에서 확인하고 답변할 수 있습니다.
+            </div>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(questions)}" class="questions-list">
+            <a th:each="question : ${questions}"
+               th:href="@{'/professor/question/' + ${question.questionCode}}"
+               class="question-card">
+
+                <div class="question-header">
+                    <div class="question-info">
+                        <div class="assignment-title" th:text="${question.assignment.title}">과제명</div>
+                        <div class="course-name" th:text="${question.assignment.course.courseName}">강의명</div>
+                        <div class="student-info">
+                            질문자: <span th:text="${question.student.name}">학생명</span>
+                            (<span th:text="${question.studentId}">학번</span>)
+                        </div>
+                    </div>
+                    <div class="question-date">
+                        <div th:text="${#temporals.format(question.questionTime, 'yyyy-MM-dd')}">2024-01-01</div>
+                        <div th:text="${#temporals.format(question.questionTime, 'HH:mm')}">12:00</div>
+                    </div>
+                </div>
+
+                <div class="question-content" th:text="${question.content}">
+                    질문 내용이 여기에 표시됩니다...
+                </div>
+
+                <!-- 답변 미리보기 (답변이 있는 경우) -->
+                <div th:if="${not #lists.isEmpty(question.answers)}" class="answer-preview">
+                    <div class="answer-author">답변 완료</div>
+                    <div class="answer-text" th:text="${#strings.abbreviate(question.answers[0].content, 100)}">
+                        답변 미리보기...
+                    </div>
+                </div>
+
+                <div class="answer-status">
+                    <span th:if="${#lists.isEmpty(question.answers)}" class="status-badge status-pending">
+                        답변 대기
+                    </span>
+                    <span th:unless="${#lists.isEmpty(question.answers)}" class="status-badge status-answered">
+                        답변 완료
+                    </span>
+
+                    <span class="answer-btn">
+                        <span th:if="${#lists.isEmpty(question.answers)}">답변하기</span>
+                        <span th:unless="${#lists.isEmpty(question.answers)}">답변 보기</span>
+                    </span>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

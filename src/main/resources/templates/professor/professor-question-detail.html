@@ -1,0 +1,521 @@
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>질문 상세 - Ploytech</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #a8e6cf, #7fcdcd);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #7fcdcd;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo::before {
+            content: "💡";
+            font-size: 24px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            text-decoration: none;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .container {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .main-content {
+            background: white;
+            width: 1000px;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        .main-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .main-btn:hover {
+            background: #5a6268;
+        }
+
+        .question-header {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #7fcdcd;
+            margin-bottom: 30px;
+        }
+
+        .assignment-info {
+            margin-bottom: 20px;
+        }
+
+        .assignment-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .course-name {
+            font-size: 18px;
+            color: #7fcdcd;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .question-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .student-info {
+            font-size: 16px;
+            color: #2c3e50;
+        }
+
+        .student-name {
+            font-weight: bold;
+            color: #7fcdcd;
+        }
+
+        .question-date {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .question-content {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+            line-height: 1.8;
+            font-size: 16px;
+            color: #2c3e50;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .question-content h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #7fcdcd;
+            padding-bottom: 8px;
+        }
+
+        .answers-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: "💬";
+            font-size: 20px;
+        }
+
+        .answer-item {
+            background: #e8f5e8;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1);
+        }
+
+        .answer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .answer-author {
+            font-weight: bold;
+            color: #28a745;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .answer-author::before {
+            content: "👨‍🏫";
+            font-size: 16px;
+        }
+
+        .answer-date {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .answer-content {
+            line-height: 1.7;
+            color: #2c3e50;
+            font-size: 15px;
+        }
+
+        .answer-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid #7fcdcd;
+        }
+
+        .form-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-title::before {
+            content: "✏️";
+            font-size: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .form-textarea {
+            width: 99%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 15px;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 150px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #7fcdcd;
+            box-shadow: 0 0 0 3px rgba(127, 205, 205, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(127, 205, 205, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .success-message::before {
+            content: "✅";
+            font-size: 18px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .error-message::before {
+            content: "❌";
+            font-size: 18px;
+        }
+
+        .no-answers {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .answer-count {
+            background: #7fcdcd;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div class="logo"></div>
+        <div class="title">Ploytech 과제 제출 시스템</div>
+    </div>
+    <div class="user-info">
+        <span th:text="${professor.name + ' 교수님'}">교수님</span>
+        <a th:href="@{/professor-main}" class="main-btn">← 메인으로</a>
+        <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="main-content">
+        <a th:href="@{/professor/questions}" class="back-btn">← 질문 목록으로 돌아가기</a>
+
+        <!-- 성공/에러 메시지 -->
+        <div th:if="${successMessage}" class="success-message" th:text="${successMessage}">
+            답변이 성공적으로 등록되었습니다.
+        </div>
+        <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}">
+            에러가 발생했습니다.
+        </div>
+        <div th:if="${error}" class="error-message" th:text="${error}">
+            에러 메시지
+        </div>
+
+        <!-- 질문 정보 -->
+        <div class="question-header">
+            <div class="assignment-info">
+                <div class="assignment-title" th:text="${question.assignment.title}">과제명</div>
+                <div class="course-name" th:text="${question.assignment.course.courseName}">강의명</div>
+            </div>
+
+            <div class="question-meta">
+                <div class="student-info">
+                    질문자: <span class="student-name" th:text="${question.student.name}">학생명</span>
+                    (<span th:text="${question.studentId}">학번</span>)
+                </div>
+                <div class="question-date">
+                    <div th:text="${#temporals.format(question.questionTime, 'yyyy년 MM월 dd일')}">2024년 1월 1일</div>
+                    <div th:text="${#temporals.format(question.questionTime, 'HH:mm')}">12:00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 질문 내용 -->
+        <div class="question-content">
+            <h3>📝 학생 질문</h3>
+            <div th:text="${question.content}">질문 내용이 여기에 표시됩니다...</div>
+        </div>
+
+        <!-- 답변 목록 -->
+        <div class="answers-section">
+            <div class="section-title">
+                기존 답변
+                <span th:if="${not #lists.isEmpty(question.answers)}" class="answer-count"
+                      th:text="${#lists.size(question.answers)}">0</span>
+            </div>
+
+            <div th:if="${#lists.isEmpty(question.answers)}" class="no-answers">
+                아직 등록된 답변이 없습니다.
+            </div>
+
+            <div th:each="answer : ${question.answers}" class="answer-item">
+                <div class="answer-header">
+                    <div class="answer-author" th:text="${answer.professor.name + ' 교수님'}">교수님</div>
+                    <div class="answer-date" th:text="${#temporals.format(answer.answerTime, 'yyyy-MM-dd HH:mm')}">
+                        2024-01-01 12:00
+                    </div>
+                </div>
+                <div class="answer-content" th:text="${answer.content}">답변 내용</div>
+            </div>
+        </div>
+
+        <!-- 답변 작성 폼 -->
+        <div class="answer-form">
+            <div class="form-title">새 답변 작성</div>
+
+            <form th:action="@{'/professor/question/' + ${question.questionCode} + '/answer'}" method="post">
+                <div class="form-group">
+                    <label for="content" class="form-label">답변 내용</label>
+                    <textarea id="content" name="content" class="form-textarea"
+                              placeholder="학생의 질문에 대한 답변을 작성해주세요..." required></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <a th:href="@{/professor/questions}" class="btn btn-secondary">취소</a>
+                    <button type="submit" class="btn btn-primary">답변 등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 텍스트 영역 자동 높이 조절
+        const textarea = document.getElementById('content');
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.max(150, this.scrollHeight) + 'px';
+            });
+        }
+
+        // 성공 메시지 자동 숨기기
+        const successMessage = document.querySelector('.success-message');
+        if (successMessage) {
+            setTimeout(() => {
+                successMessage.style.opacity = '0';
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 300);
+
+
+</script>
+</body>
+</html>

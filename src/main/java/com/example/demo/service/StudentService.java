@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.*;
+import com.example.demo.dto.QuestionDTO;
+import com.example.demo.dto.SubmissionDTO;
 import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,6 +40,9 @@ public class StudentService {
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private ProfessorRepository professorRepository;
 
     // 학생의 수강 과목 목록 조회 (수정됨)
     public List<Course> getStudentCourses(String studentId) {
@@ -97,11 +103,10 @@ public class StudentService {
         // 1. 학생이 수강 중인 모든 과목의 모든 과제 가져오기
         List<Assignment> assignments = getStudentAssignments(studentId);
 
-
         // 2. 학생이 이미 제출한 과제 목록 가져오기
         List<Submission> submissions = submissionRepository.findByStudentId(studentId);
         Set<Integer> submittedAssignmentIds = submissions.stream()
-                .map(submission -> submission.getAssignment().getAssignmentCode())
+                .map(Submission::getAssignmentCode) // 수정: getAssignment()를 getAssignmentCode()로 변경
                 .collect(Collectors.toSet());
 
         // 3. 제출하지 않은 과제만 필터링
@@ -212,7 +217,7 @@ public class StudentService {
         return questionRepository.save(question);
     }
 
-    // 특정 과제의 질문 목록 조회 (답변 포함)
+    // 특정 과제의 질문 목록 조회 (답변 포함) - 수정
     public List<Question> getAssignmentQuestions(int assignmentCode, String studentId) {
         Assignment assignment = getAssignmentDetails(assignmentCode);
         Student student = studentRepository.findByStudentId(studentId);
@@ -227,6 +232,7 @@ public class StudentService {
             throw new RuntimeException("해당 수업에 등록되어 있지 않습니다.");
         }
 
+        // 해당 학생이 해당 과제에 대해 한 질문들만 조회 (수정됨)
         List<Question> questions = questionRepository.findByAssignmentCodeAndStudentId(assignmentCode, studentId);
 
         // 각 질문에 대한 답변 로드
@@ -286,14 +292,214 @@ public class StudentService {
         }
     }
 
-    // 학생의 제출물 목록 조회
+    // 학생의 제출물 목록 조회 (수정됨)
     public List<Submission> getStudentSubmissions(String studentId) {
         try {
-            return submissionRepository.findByStudentId(studentId);
+            List<Submission> submissions = submissionRepository.findByStudentId(studentId);
+
+            // 각 제출물에 대해 과제 정보와 강의 정보를 로드
+            for (Submission submission : submissions) {
+                try {
+                    // 과제 정보 로드
+                    Assignment assignment = assignmentRepository.findById(submission.getAssignmentCode()).orElse(null);
+                    if (assignment != null) {
+                        submission.setAssignment(assignment);
+
+                        // 강의 정보 로드
+                        Course course = courseRepository.findByCourseCode(assignment.getCourseCode());
+                        if (course != null) {
+                            assignment.setCourse(course);
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error loading assignment for submission " + submission.getSubmissionCode() + ": " + e.getMessage());
+                }
+            }
+
+            return submissions;
         } catch (Exception e) {
             System.err.println("Error loading student submissions: " + e.getMessage());
             e.printStackTrace();
             return List.of();
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubmissionDTO> getStudentSubmissionsDTO(String studentId) {
+        try {
+            System.out.println("DEBUG: Loading submissions for student: " + studentId);
+
+            List<Submission> submissions = submissionRepository.findByStudentId(studentId);
+            System.out.println("DEBUG: Found " + submissions.size() + " raw submissions");
+
+            // 각 제출물에 대해 과제 정보를 직접 로드하고 DTO로 변환
+            List<SubmissionDTO> submissionDTOs = new ArrayList<>();
+
+            for (Submission submission : submissions) {
+                try {
+                    // 과제 정보 로드
+                    Optional<Assignment> assignmentOpt = assignmentRepository.findById(submission.getAssignmentCode());
+                    if (assignmentOpt.isPresent()) {
+                        Assignment assignment = assignmentOpt.get();
+
+                        // 강의 정보 로드
+                        Course course = courseRepository.findByCourseCode(assignment.getCourseCode());
+                        if (course != null) {
+                            assignment.setCourse(course);
+                        }
+
+                        submission.setAssignment(assignment);
+                    }
+
+                    // DTO로 변환
+                    SubmissionDTO dto = new SubmissionDTO(submission);
+                    submissionDTOs.add(dto);
+
+                } catch (Exception e) {
+                    System.err.println("Error processing submission " + submission.getSubmissionCode() + ": " + e.getMessage());
+                    // 오류가 있어도 다른 제출물은 계속 처리
+                    SubmissionDTO dto = new SubmissionDTO(submission);
+                    submissionDTOs.add(dto);
+                }
+            }
+
+            System.out.println("DEBUG: Converted to " + submissionDTOs.size() + " DTOs");
+            return submissionDTOs;
+
+        } catch (Exception e) {
+            System.err.println("Error loading student submissions: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    // 기존 getStudentQuestions 메서드를 이걸로 교체
+    @Transactional(readOnly = true)
+    public List<QuestionDTO> getStudentQuestionsDTO(String studentId) {
+        try {
+            System.out.println("DEBUG: Loading questions for student: " + studentId);
+
+            List<Question> questions = questionRepository.findByStudentId(studentId);
+            System.out.println("DEBUG: Found " + questions.size() + " raw questions");
+
+            // 각 질문에 대해 관련 데이터를 로드하고 DTO로 변환
+            List<QuestionDTO> questionDTOs = new ArrayList<>();
+
+            for (Question question : questions) {
+                try {
+                    // 답변 로드
+                    List<Answer> answers = answerRepository.findByQuestionCodeOrderByAnswerTimeAsc(question.getQuestionCode());
+
+                    // 각 답변에 대해 교수 정보 로드
+                    for (Answer answer : answers) {
+                        try {
+                            if (answer.getProfessorId() != null) {
+                                Professor professor = professorRepository.findByProfessorId(answer.getProfessorId());
+                                answer.setProfessor(professor);
+                            }
+                        } catch (Exception e) {
+                            System.err.println("Error loading professor for answer " + answer.getAnswerCode());
+                        }
+                    }
+
+                    question.setAnswers(answers);
+
+                    // 과제 정보 로드
+                    Optional<Assignment> assignmentOpt = assignmentRepository.findById(question.getAssignmentCode());
+                    if (assignmentOpt.isPresent()) {
+                        Assignment assignment = assignmentOpt.get();
+
+                        // 강의 정보 로드
+                        Course course = courseRepository.findByCourseCode(assignment.getCourseCode());
+                        if (course != null) {
+                            assignment.setCourse(course);
+                        }
+
+                        question.setAssignment(assignment);
+                    }
+
+                    // DTO로 변환
+                    QuestionDTO dto = new QuestionDTO(question);
+                    questionDTOs.add(dto);
+
+                } catch (Exception e) {
+                    System.err.println("Error processing question " + question.getQuestionCode() + ": " + e.getMessage());
+                    // 오류가 있어도 다른 질문은 계속 처리
+                    QuestionDTO dto = new QuestionDTO(question);
+                    questionDTOs.add(dto);
+                }
+            }
+
+            System.out.println("DEBUG: Converted to " + questionDTOs.size() + " DTOs");
+            return questionDTOs;
+
+        } catch (Exception e) {
+            System.err.println("Error loading student questions: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    // 기존 getAssignmentQuestions 메서드를 이걸로 교체
+    public List<QuestionDTO> getAssignmentQuestionsDTO(int assignmentCode, String studentId) {
+        try {
+            System.out.println("DEBUG: Loading questions for assignment " + assignmentCode + ", student " + studentId);
+
+            Assignment assignment = getAssignmentDetails(assignmentCode);
+            Student student = studentRepository.findByStudentId(studentId);
+
+            if (student == null) {
+                throw new RuntimeException("학생을 찾을 수 없습니다.");
+            }
+
+            boolean isEnrolled = enrollmentRepository.existsByStudentIdAndCourseCode(studentId, assignment.getCourseCode());
+            if (!isEnrolled) {
+                throw new RuntimeException("해당 수업에 등록되어 있지 않습니다.");
+            }
+
+            List<Question> questions = questionRepository.findByAssignmentCodeAndStudentId(assignmentCode, studentId);
+            System.out.println("DEBUG: Found " + questions.size() + " questions");
+
+            // 각 질문에 대해 답변과 관련 정보를 로드하고 DTO로 변환
+            List<QuestionDTO> questionDTOs = new ArrayList<>();
+
+            for (Question question : questions) {
+                try {
+                    // 답변 로드
+                    List<Answer> answers = answerRepository.findByQuestionCodeOrderByAnswerTimeAsc(question.getQuestionCode());
+                    System.out.println("DEBUG: Question " + question.getQuestionCode() + " has " + answers.size() + " answers");
+
+                    // 각 답변에 교수 정보 로드
+                    for (Answer answer : answers) {
+                        try {
+                            if (answer.getProfessorId() != null) {
+                                Professor professor = professorRepository.findByProfessorId(answer.getProfessorId());
+                                answer.setProfessor(professor);
+                            }
+                        } catch (Exception e) {
+                            System.err.println("Error loading professor for answer " + answer.getAnswerCode());
+                        }
+                    }
+
+                    question.setAnswers(answers);
+                    question.setAssignment(assignment);
+
+                    // DTO로 변환
+                    QuestionDTO dto = new QuestionDTO(question);
+                    questionDTOs.add(dto);
+
+                } catch (Exception e) {
+                    System.err.println("Error processing question " + question.getQuestionCode() + ": " + e.getMessage());
+                    QuestionDTO dto = new QuestionDTO(question);
+                    questionDTOs.add(dto);
+                }
+            }
+
+            return questionDTOs;
+        } catch (Exception e) {
+            System.err.println("Error loading assignment questions: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -302,10 +508,27 @@ public class StudentService {
         try {
             List<Question> questions = questionRepository.findByStudentId(studentId);
 
-            // 각 질문에 대한 답변 로드
+            // 각 질문에 대한 답변과 과제 정보 로드
             for (Question question : questions) {
-                List<Answer> answers = answerRepository.findByQuestionCodeOrderByAnswerTimeAsc(question.getQuestionCode());
-                question.setAnswers(answers);
+                try {
+                    // 답변 로드
+                    List<Answer> answers = answerRepository.findByQuestionCodeOrderByAnswerTimeAsc(question.getQuestionCode());
+                    question.setAnswers(answers);
+
+                    // 과제 정보 로드
+                    Assignment assignment = assignmentRepository.findById(question.getAssignmentCode()).orElse(null);
+                    if (assignment != null) {
+                        question.setAssignment(assignment);
+
+                        // 강의 정보 로드
+                        Course course = courseRepository.findByCourseCode(assignment.getCourseCode());
+                        if (course != null) {
+                            assignment.setCourse(course);
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error loading data for question " + question.getQuestionCode() + ": " + e.getMessage());
+                }
             }
 
             return questions;

@@ -400,12 +400,10 @@
     <div id="submissionsContainer" class="submissions-grid" style="display: none;">
       <!-- 제출물들이 여기에 동적으로 추가됩니다 -->
     </div>
-    <div>
-      <div th:if="${#lists.isEmpty(submission)}" id="emptyState" class="empty-state" style="display: none;">
-        <div class="empty-state-icon">📋</div>
-        <div class="empty-state-text">아직 제출한 과제가 없습니다</div>
-        <div class="empty-state-subtext">과제를 제출하면 여기에서 확인할 수 있습니다</div>
-      </div>
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <div class="empty-state-icon">📋</div>
+      <div class="empty-state-text">아직 제출한 과제가 없습니다</div>
+      <div class="empty-state-subtext">과제를 제출하면 여기에서 확인할 수 있습니다</div>
     </div>
   </div>
 </div>
@@ -437,6 +435,9 @@
                 allSubmissions = data;
                 updateStatistics();
                 displaySubmissions(data);
+              } else if (data.success === false) {
+                console.error('Error:', data.message);
+                showEmptyState();
               } else {
                 console.error('Invalid data format:', data);
                 showEmptyState();
@@ -487,7 +488,7 @@
     });
   }
 
-  // 제출물 카드 생성
+  // 제출물 카드 생성 (DTO용으로 수정됨)
   function createSubmissionCard(submission) {
     const card = document.createElement('div');
     card.className = 'submission-card';
@@ -500,24 +501,24 @@
             ? `<div class="score-badge score-graded">${submission.score}점</div>`
             : `<div class="score-badge score-pending">채점 대기</div>`;
 
-    card.innerHTML = `
-            <div class="submission-title" th:text="${submission.assignment ? submission.assignment.title : '과제 제목'}"></div>
-            <div class="submission-info">
-                📚 <strong th:text="${submission.assignment ? submission.assignment.course?.courseName || '강의명' : '강의명'}"></strong>
-            </div>
-            <div class="submission-info" th:text="📅 제출일: ${submissionDate.toLocaleDateString('ko-KR')} ${submissionDate.toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'})}">
+    // DTO에서 직접 데이터 가져오기
+    const assignmentTitle = submission.assignmentTitle || '과제 제목 없음';
+    const courseName = submission.courseName || '강의명 없음';
 
+    card.innerHTML = `
+            <div class="submission-title">${assignmentTitle}</div>
+            <div class="submission-info">
+                📚 <strong>${courseName}</strong>
+            </div>
+            <div class="submission-info">
+                📅 제출일: ${submissionDate.toLocaleDateString('ko-KR')} ${submissionDate.toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'})}
             </div>
             ${lastModified ? `<div class="submission-info">📝 최종 수정: ${lastModified.toLocaleDateString('ko-KR')} ${lastModified.toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'})}</div>` : ''}
-            <div class="submission-content" th:if="${submission.content != null}" th:text="${submission.content}">
-
-            </div>
-            <div class="submission-content" th:if="${submission.content == null}">
-                제출 내용이 없습니다.
+            <div class="submission-content">
+                ${submission.content || '제출 내용이 없습니다.'}
             </div>
             <div class="submission-footer">
                 ${scoreBadge}
-                <div class="submission-date" th:text="제출 ID: #${submission.submissionCode}"></div>
             </div>
             ${submission.feedback ? `<div class="submission-info" style="margin-top: 10px;">💬 피드백: ${submission.feedback}</div>` : ''}
         `;

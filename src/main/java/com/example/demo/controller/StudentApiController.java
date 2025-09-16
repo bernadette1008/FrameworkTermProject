@@ -1,6 +1,8 @@
 package com.example.demo.controller;
 
 import com.example.demo.domain.*;
+import com.example.demo.dto.QuestionDTO;
+import com.example.demo.dto.SubmissionDTO;
 import com.example.demo.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -55,19 +57,24 @@ public class StudentApiController {
         }
     }
 
-    // 과제의 질문 목록 조회
+    // 과제의 질문 목록 조회 - DTO 사용
     @GetMapping("/assignment/{assignmentCode}/questions")
     public ResponseEntity<?> getAssignmentQuestions(@PathVariable int assignmentCode, HttpSession session) {
         try {
             String studentId = (String) session.getAttribute("userId");
+            System.out.println("DEBUG: Loading questions for studentId: " + studentId + ", assignmentCode: " + assignmentCode);
+
             if (studentId == null) {
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
 
-            List<Question> questions = studentService.getAssignmentQuestions(assignmentCode, studentId);
+            List<QuestionDTO> questions = studentService.getAssignmentQuestionsDTO(assignmentCode, studentId);
+            System.out.println("DEBUG: Found " + questions.size() + " questions");
 
             return ResponseEntity.ok(questions);
         } catch (Exception e) {
+            System.err.println("DEBUG: Error in getAssignmentQuestions: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
     }
@@ -252,33 +259,49 @@ public class StudentApiController {
         }
     }
 
-    // 학생의 모든 제출물 조회
+    // 학생의 모든 제출물 조회 - DTO 사용
     @GetMapping("/submissions")
     public ResponseEntity<?> getStudentSubmissions(HttpSession session) {
         try {
             String studentId = (String) session.getAttribute("userId");
+            System.out.println("DEBUG: Getting submissions for studentId: " + studentId);
+
             if (studentId == null) {
+                System.out.println("DEBUG: No studentId in session");
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
-            List<Submission> submissions = studentService.getStudentSubmissions(studentId);
+
+            List<SubmissionDTO> submissions = studentService.getStudentSubmissionsDTO(studentId);
+            System.out.println("DEBUG: Retrieved " + submissions.size() + " submissions");
+
             return ResponseEntity.ok(submissions);
         } catch (Exception e) {
+            System.err.println("DEBUG: Error in getStudentSubmissions: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
     }
+
+
 
     // 학생의 모든 질문 조회
     @GetMapping("/questions")
     public ResponseEntity<?> getStudentQuestions(HttpSession session) {
         try {
             String studentId = (String) session.getAttribute("userId");
+            System.out.println("DEBUG: Getting questions for studentId: " + studentId);
+
             if (studentId == null) {
                 return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
             }
 
-            List<Question> questions = studentService.getStudentQuestions(studentId);
+            List<QuestionDTO> questions = studentService.getStudentQuestionsDTO(studentId);
+            System.out.println("DEBUG: Retrieved " + questions.size() + " questions");
+
             return ResponseEntity.ok(questions);
         } catch (Exception e) {
+            System.err.println("DEBUG: Error in getStudentQuestions: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
     }

@@ -396,8 +396,9 @@
         <div class="title">Ploytech 과제 제출 시스템</div>
     </div>
     <div class="user-info">
-        <span id="studentName">학생</span>
-        <a href="/student-main" class="back-btn">← 목록으로</a>
+        <span th:text="${student.name + ' 학생'}">학생</span>
+        <span th:text="'(' + ${student.studentId} + ')'">학번</span>
+        <a href="/student/main" class="back-btn">← 메인으로</a>
     </div>
 </div>
 

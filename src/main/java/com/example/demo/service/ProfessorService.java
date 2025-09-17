@@ -162,4 +162,87 @@ public class ProfessorService {
 
         return submissions;
     }
+
+    // ProfessorService.java에 추가할 메서드들
+
+    // 특정 강의의 과제 목록 조회
+    public List<Assignment> getCourseAssignments(String courseCode) {
+        return assignmentRepository.findByCourseCode(courseCode);
+    }
+
+    // 강의 삭제 (과제, 제출물, 질문, 답변, 수강신청 모두 삭제)
+    @Transactional
+    public void deleteCourse(String courseCode) {
+        // 1. 강의의 모든 과제 조회
+        List<Assignment> assignments = assignmentRepository.findByCourseCode(courseCode);
+
+        for (Assignment assignment : assignments) {
+            // 2. 각 과제의 모든 제출물 삭제
+            List<Submission> submissions = submissionRepository.findByAssignmentCode(assignment.getAssignmentCode());
+            if (!submissions.isEmpty()) {
+                submissionRepository.deleteAll(submissions);
+            }
+
+            // 3. 각 과제의 모든 질문과 답변 삭제
+            List<Question> questions = questionRepository.findByAssignmentCode(assignment.getAssignmentCode());
+            for (Question question : questions) {
+                List<Answer> answers = answerRepository.findByQuestionCode(question.getQuestionCode());
+                if (!answers.isEmpty()) {
+                    answerRepository.deleteAll(answers);
+                }
+            }
+            if (!questions.isEmpty()) {
+                questionRepository.deleteAll(questions);
+            }
+        }
+
+        // 4. 모든 과제 삭제
+        if (!assignments.isEmpty()) {
+            assignmentRepository.deleteAll(assignments);
+        }
+
+        // 5. 수강신청 정보 삭제
+        List<Enrollment> enrollments = enrollmentRepository.findByCourseCode(courseCode);
+        if (!enrollments.isEmpty()) {
+            enrollmentRepository.deleteAll(enrollments);
+        }
+
+        // 6. 강의 삭제
+        courseRepository.deleteById(courseCode);
+    }
+
+    // 수강생을 강의에서 제외
+    @Transactional
+    public void removeStudentFromCourse(String studentId, String courseCode) {
+        // 1. 수강신청 정보 확인
+        if (!enrollmentRepository.existsByStudentIdAndCourseCode(studentId, courseCode)) {
+            throw new RuntimeException("해당 학생은 이 강의를 수강하지 않습니다.");
+        }
+
+        // 2. 해당 학생의 이 강의 관련 제출물들 먼저 삭제
+        List<Assignment> assignments = assignmentRepository.findByCourseCode(courseCode);
+        for (Assignment assignment : assignments) {
+            submissionRepository.findByAssignmentCodeAndStudentId(assignment.getAssignmentCode(), studentId)
+                    .ifPresent(submission -> {
+                        submissionRepository.delete(submission);
+                    });
+
+            // 3. 해당 학생의 질문과 답변도 삭제
+            List<Question> questions = questionRepository.findByAssignmentCodeAndStudentId(assignment.getAssignmentCode(), studentId);
+            for (Question question : questions) {
+                List<Answer> answers = answerRepository.findByQuestionCode(question.getQuestionCode());
+                if (!answers.isEmpty()) {
+                    answerRepository.deleteAll(answers);
+                }
+            }
+            if (!questions.isEmpty()) {
+                questionRepository.deleteAll(questions);
+            }
+        }
+
+        // 4. 수강신청 정보 삭제
+        enrollmentRepository.deleteByStudentIdAndCourseCode(studentId, courseCode);
+    }
+
+
 }

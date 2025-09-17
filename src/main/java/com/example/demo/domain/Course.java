@@ -28,4 +28,11 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private List<Enrollment> enrollments;
+
+    // 추가된 transient 필드들
+    @Transient
+    private int studentCount;    // 수강생 수
+
+    @Transient
+    private int assignmentCount; // 과제 수
 }

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강의 상세 관리 - Ploytech</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #a8e6cf, #7fcdcd);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #7fcdcd;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo::before {
+            content: "💡";
+            font-size: 24px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .logout-btn, .main-btn, .back-btn {
+            text-decoration: none;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .main-btn, .back-btn {
+            background: #6c757d;
+        }
+
+        .main-btn:hover, .back-btn:hover {
+            background: #5a6268;
+        }
+
+        .container {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .main-content {
+            width: 1200px;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .course-header {
+            background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .course-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .course-code {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .course-stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .course-stat {
+            text-align: center;
+        }
+
+        .course-stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .course-stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .success-message::before {
+            content: "✅";
+            font-size: 18px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .error-message::before {
+            content: "❌";
+            font-size: 18px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        .tab.active {
+            color: #7fcdcd;
+            border-bottom-color: #7fcdcd;
+        }
+
+        .tab:hover {
+            color: #7fcdcd;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #7fcdcd;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #6bb6b6;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .students-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .student-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #7fcdcd;
+            transition: transform 0.2s;
+        }
+
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .student-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .student-id {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        .student-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .assignments-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .assignment-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #7fcdcd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .assignment-info {
+            flex: 1;
+        }
+
+        .assignment-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .assignment-meta {
+            color: #7f8c8d;
+            font-size: 14px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .assignment-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+
+        .modal-text {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div class="logo"></div>
+        <div class="title">Ploytech 과제 제출 시스템</div>
+    </div>
+    <div class="user-info">
+        <span th:text="${professor.name + ' 교수님'}">교수님</span>
+        <a th:href="@{/professor/courses}" class="back-btn">← 강의 관리</a>
+        <a th:href="@{/professor-main}" class="main-btn">메인으로</a>
+        <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="main-content">
+        <!-- 성공/에러 메시지 -->
+        <div th:if="${successMessage}" class="success-message" th:text="${successMessage}">
+            작업이 성공적으로 처리되었습니다.
+        </div>
+        <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}">
+            에러가 발생했습니다.
+        </div>
+        <div th:if="${error}" class="error-message" th:text="${error}">
+            에러 메시지
+        </div>
+
+        <!-- 강의 헤더 -->
+        <div class="course-header">
+            <div class="course-title" th:text="${course.courseName}">강의명</div>
+            <div class="course-code" th:text="'강의코드: ' + ${course.courseCode}">CS101</div>
+            <div class="course-stats">
+                <div class="course-stat">
+                    <span class="course-stat-number" th:text="${#lists.size(students)}">0</span>
+                    <span class="course-stat-label">수강생</span>
+                </div>
+                <div class="course-stat">
+                    <span class="course-stat-number" th:text="${#lists.size(assignments)}">0</span>
+                    <span class="course-stat-label">과제</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('students')">
+                👥 수강생 관리 (<span th:text="${#lists.size(students)}">0</span>)
+            </div>
+            <div class="tab" onclick="switchTab('assignments')">
+                📝 과제 관리 (<span th:text="${#lists.size(assignments)}">0</span>)
+            </div>
+        </div>
+
+        <!-- 수강생 관리 탭 -->
+        <div id="students-tab" class="tab-content active">
+            <div class="section-header">
+                <div class="section-title">
+                    👥 수강생 목록
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(students)}" class="empty-state">
+                <div class="empty-state-icon">👥</div>
+                <div>아직 수강신청한 학생이 없습니다.</div>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(students)}" class="students-grid">
+                <div th:each="student : ${students}" class="student-card">
+                    <div class="student-name" th:text="${student.name}">학생 이름</div>
+                    <div class="student-id" th:text="'학번: ' + ${student.studentId}">학번: 20230001</div>
+                    <button class="btn btn-secondary btn-sm"
+                            th:data-id="${student.studentId}"
+                            th:data-name="${student.name}"
+                            onclick="viewStudentGrades(this.dataset.id, this.dataset.name)">
+                        📊 성적 보기
+                    </button>
+
+                    <button class="btn btn-danger btn-sm"
+                            th:data-id="${student.studentId}"
+                            th:data-name="${student.name}"
+                            onclick="showRemoveStudentModal(this.dataset.id, this.dataset.name)">
+                        🗑️ 제외
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 과제 관리 탭 -->
+        <div id="assignments-tab" class="tab-content">
+            <div class="section-header">
+                <div class="section-title">
+                    📝 과제 목록
+                </div>
+                <a th:href="@{'/create-assignment?courseCode=' + ${course.courseCode}}" class="btn btn-primary">
+                    + 새 과제 등록
+                </a>
+            </div>
+
+            <div th:if="${#lists.isEmpty(assignments)}" class="empty-state">
+                <div class="empty-state-icon">📝</div>
+                <div>아직 등록된 과제가 없습니다.</div>
+                <div style="margin-top: 10px;">
+                    <a th:href="@{'/create-assignment?courseCode=' + ${course.courseCode}}" class="btn btn-primary">
+                        첫 과제 등록하기
+                    </a>
+                </div>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(assignments)}" class="assignments-list">
+                <div th:each="assignment : ${assignments}" class="assignment-item">
+                    <div class="assignment-info">
+                        <div class="assignment-title" th:text="${assignment.title}">과제 제목</div>
+                        <div class="assignment-meta">
+                            <span th:text="'등록일: ' + ${#temporals.format(assignment.createdDate, 'yyyy-MM-dd')}">
+                                등록일: 2024-01-01
+                            </span>
+                            <span th:text="'마감일: ' + ${#temporals.format(assignment.dueDate, 'yyyy-MM-dd HH:mm')}">
+                                마감일: 2024-01-15 23:59
+                            </span>
+                        </div>
+                    </div>
+                    <div class="assignment-actions">
+                        <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/submissions'}"
+                           class="btn btn-primary btn-sm">
+                            📊 제출현황
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 학생 제외 확인 모달 -->
+<div id="removeStudentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-title">⚠️ 수강생 제외 확인</div>
+        <div class="modal-text">
+            <strong id="studentNameToRemove"></strong> 학생을 이 강의에서 제외하시겠습니까?<br><br>
+            <span style="color: #e74c3c; font-size: 14px;">
+                ⚠️ 해당 학생의 모든 제출물과 질문이 함께 삭제됩니다.
+            </span>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeRemoveStudentModal()">취소</button>
+            <form id="removeStudentForm" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-danger">제외하기</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 성적 보기 모달 -->
+<div id="gradesModal" class="modal">
+    <div class="modal-content" style="width: 600px; max-height: 70vh; overflow-y: auto;">
+        <div class="modal-title" style="color: #7fcdcd;">📊 학생 성적 현황</div>
+        <div id="gradesContent">
+            <!-- 성적 내용이 여기에 동적으로 로드됩니다 -->
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeGradesModal()">닫기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // 모든 탭 비활성화
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        // 선택된 탭 활성화
+        event.target.classList.add('active');
+        document.getElementById(tabName + '-tab').classList.add('active');
+    }
+
+    function showRemoveStudentModal(studentId, studentName) {
+        document.getElementById('studentNameToRemove').textContent = studentName;
+        document.getElementById('removeStudentForm').action =
+            '/professor/course/' + '[[${course.courseCode}]]' + '/remove-student/' + studentId;
+        document.getElementById('removeStudentModal').style.display = 'block';
+    }
+
+    function closeRemoveStudentModal() {
+        document.getElementById('removeStudentModal').style.display = 'none';
+    }
+
+    function viewStudentGrades(studentId, studentName) {
+        // AJAX로 학생 성적 정보 가져오기
+        fetch('/professor/course/' + '[[${course.courseCode}]]' + '/student/' + studentId + '/grades')
+            .then(response => response.json())
+            .then(data => {
+                let gradesHtml = '<h3 style="color: #2c3e50; margin-bottom: 20px;">' + studentName + ' 성적</h3>';
+
+                if (data.length === 0) {
+                    gradesHtml += '<div style="text-align: center; padding: 20px; color: #7f8c8d;">';
+                    gradesHtml += '아직 제출한 과제가 없습니다.</div>';
+                } else {
+                    gradesHtml += '<div style="display: grid; gap: 15px;">';
+                    data.forEach(submission => {
+                        gradesHtml += '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid ' +
+                            (submission.score !== null ? '#28a745' : '#ffc107') + ';">';
+                        gradesHtml += '<div style="font-weight: bold; margin-bottom: 5px;">' + submission.assignmentTitle + '</div>';
+                        gradesHtml += '<div style="color: #7f8c8d; font-size: 14px; margin-bottom: 10px;">제출일: ' +
+                            new Date(submission.submissionTime).toLocaleDateString() + '</div>';
+
+                        if (submission.score !== null) {
+                            gradesHtml += '<div style="color: #28a745; font-weight: bold;">점수: ' + submission.score + '점</div>';
+                            if (submission.feedback) {
+                                gradesHtml += '<div style="margin-top: 8px; padding: 8px; background: #e8f5e8; border-radius: 4px; font-size: 14px;">';
+                                gradesHtml += '피드백: ' + submission.feedback + '</div>';
+                            }
+                        } else {
+                            gradesHtml += '<div style="color: #ffc107; font-weight: bold;">미채점</div>';
+                        }
+
+                        gradesHtml += '</div>';
+                    });
+                    gradesHtml += '</div>';
+                }
+
+                document.getElementById('gradesContent').innerHTML = gradesHtml;
+                document.getElementById('gradesModal').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('성적 정보를 불러오는데 실패했습니다.');
+            });
+    }
+
+    function closeGradesModal() {
+        document.getElementById('gradesModal').style.display = 'none';
+    }
+
+    // 모달 외부 클릭시 닫기
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+
+    // 성공 메시지 자동 숨기기
+    document.addEventListener('DOMContentLoaded', function() {
+        const successMessage = document.querySelector('.success-message');
+        if (successMessage) {
+            setTimeout(() => {
+                successMessage.style.opacity = '0';
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 300);
+            }, 3000);
+        }
+    });
+</script>
+</body>
+</html>

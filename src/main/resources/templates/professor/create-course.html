@@ -137,6 +137,11 @@
             box-shadow: 0 0 0 3px rgba(127, 205, 205, 0.1);
         }
 
+        .form-control.error {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+
         .form-control::placeholder {
             color: #a0a0a0;
             font-style: italic;
@@ -199,6 +204,13 @@
             border: 1px solid #fecaca;
         }
 
+        .validation-error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
         .form-help {
             font-size: 14px;
             color: #7f8c8d;
@@ -235,6 +247,12 @@
         .code-preview.empty {
             color: #adb5bd;
             font-style: italic;
+        }
+
+        .code-preview.error {
+            background: #fdf2f2;
+            border-color: #fecaca;
+            color: #e74c3c;
         }
 
         .preview-label {
@@ -286,10 +304,10 @@
 
         <div class="info-box">
             <h4>💡 강의 개설 안내</h4>
-            <p>강의를 개설하면 학생들이 강의 코드로 수강 신청할 수 있습니다. 강의 코드는 자동으로 생성되거나 직접 입력할 수 있습니다.</p>
+            <p>강의를 개설하면 학생들이 강의 코드로 수강 신청할 수 있습니다. 강의 코드는 영문 대문자와 숫자만 사용 가능합니다.</p>
         </div>
 
-        <form th:action="@{/create-course}" method="post">
+        <form th:action="@{/create-course}" method="post" id="courseForm">
             <div class="form-group">
                 <label for="courseName">강의명 <span class="required">*</span></label>
                 <input type="text" class="form-control" id="courseName" name="courseName"
@@ -302,7 +320,8 @@
                     <label for="courseCode">강의 코드 <span class="required">*</span></label>
                     <input type="text" class="form-control" id="courseCode" name="courseCode"
                            placeholder="예: CS101" required maxlength="10">
-                    <div class="form-help">영문과 숫자로 구성된 고유 코드</div>
+                    <div class="form-help">영문 대문자와 숫자만 사용 가능 (최대 10자)</div>
+                    <div class="validation-error" id="codeError">강의 코드는 영문 대문자와 숫자만 사용할 수 있습니다.</div>
                 </div>
                 <div class="form-group half">
                     <div class="preview-label">생성될 강의 코드 미리보기</div>
@@ -310,7 +329,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn-primary">강의 개설하기</button>
+            <button type="submit" class="btn-primary" id="submitBtn">강의 개설하기</button>
         </form>
     </div>
 </div>
@@ -319,30 +338,88 @@
     document.addEventListener('DOMContentLoaded', function() {
         const courseCodeInput = document.getElementById('courseCode');
         const codePreview = document.getElementById('codePreview');
+        const codeError = document.getElementById('codeError');
+        const submitBtn = document.getElementById('submitBtn');
+        const courseForm = document.getElementById('courseForm');
 
-        // 강의 코드 입력 시 실시간 미리보기
+        let isCodeValid = false;
+
+        // 강의 코드 유효성 검사 함수
+        function validateCourseCode(code) {
+            // 영문 대문자와 숫자만 허용하는 정규식
+            const regex = /^[A-Z0-9]+$/;
+            return regex.test(code) && code.length > 0;
+        }
+
+        // 강의 코드 입력 시 실시간 검증 및 미리보기
         courseCodeInput.addEventListener('input', function() {
-            const code = this.value.trim().toUpperCase();
+            let code = this.value.trim().toUpperCase();
+
+            // 한글 및 특수문자 입력 방지 (실시간으로 제거)
+            code = code.replace(/[^A-Z0-9]/g, '');
+            this.value = code;
+
             if (code) {
-                codePreview.textContent = code;
-                codePreview.classList.remove('empty');
+                if (validateCourseCode(code)) {
+                    // 유효한 코드
+                    codePreview.textContent = code;
+                    codePreview.classList.remove('empty', 'error');
+                    codeError.style.display = 'none';
+                    courseCodeInput.classList.remove('error');
+                    isCodeValid = true;
+                } else {
+                    // 유효하지 않은 코드
+                    codePreview.textContent = '유효하지 않은 강의 코드';
+                    codePreview.classList.remove('empty');
+                    codePreview.classList.add('error');
+                    codeError.style.display = 'block';
+                    courseCodeInput.classList.add('error');
+                    isCodeValid = false;
+                }
             } else {
+                // 빈 입력
                 codePreview.textContent = '강의 코드를 입력하세요';
                 codePreview.classList.add('empty');
+                codePreview.classList.remove('error');
+                codeError.style.display = 'none';
+                courseCodeInput.classList.remove('error');
+                isCodeValid = false;
             }
+
+            updateSubmitButton();
         });
 
-        // 강의 코드 자동 대문자 변환
-        courseCodeInput.addEventListener('input', function() {
-            this.value = this.value.toUpperCase();
-        });
+        // 제출 버튼 상태 업데이트
+        function updateSubmitButton() {
+            const courseName = document.getElementById('courseName').value.trim();
+            const courseCode = courseCodeInput.value.trim();
 
-        // 강의 코드 유효성 검사
-        courseCodeInput.addEventListener('blur', function() {
-            const code = this.value.trim();
-            if (code && !/^[A-Z0-9]+$/.test(code)) {
+            if (courseName && courseCode && isCodeValid) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        // 강의명 입력 시에도 제출 버튼 상태 업데이트
+        document.getElementById('courseName').addEventListener('input', updateSubmitButton);
+
+        // 폼 제출 시 최종 검증
+        courseForm.addEventListener('submit', function(e) {
+            const courseCode = courseCodeInput.value.trim();
+
+            if (!validateCourseCode(courseCode)) {
+                e.preventDefault();
                 alert('강의 코드는 영문 대문자와 숫자만 사용할 수 있습니다.');
-                // this.focus();
+                courseCodeInput.focus();
+                return false;
+            }
+
+            if (courseCode.length === 0) {
+                e.preventDefault();
+                alert('강의 코드를 입력해주세요.');
+                courseCodeInput.focus();
+                return false;
             }
         });
 
@@ -359,21 +436,32 @@
         });
 
         function generateCourseCode(courseName) {
-            // 간단한 강의 코드 자동 생성 로직
+            // 간단한 강의 코드 자동 생성 로직 (영문과 숫자만)
             const words = courseName.split(' ');
             let code = '';
 
             for (let word of words) {
                 if (code.length < 6) {
-                    code += word.charAt(0).toUpperCase();
+                    // 영문만 추출하여 대문자로 변환
+                    const englishOnly = word.replace(/[^a-zA-Z]/g, '');
+                    if (englishOnly.length > 0) {
+                        code += englishOnly.charAt(0).toUpperCase();
+                    }
                 }
             }
 
-            // 숫자 추가 (예: 101)
-            code += '101';
+            // 코드가 너무 짧으면 숫자 추가
+            if (code.length < 3) {
+                code += '101';
+            } else {
+                code += Math.floor(Math.random() * 900 + 100); // 3자리 랜덤 숫자
+            }
 
             return code.length <= 10 ? code : code.substring(0, 10);
         }
+
+        // 초기 상태 설정
+        updateSubmitButton();
     });
 </script>
 </body>

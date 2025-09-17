@@ -613,8 +613,8 @@
                             </div>
                         </div>
                         <div class="question-meta">
-                            <a href="/student/assignment/${question.assignmentCode}" class="view-assignment-btn">
-                                과제 보기
+                            <a th:href="@{/student/assignment/{code}(code=${question.assignmentCode})}" class="view-assignment-btn">
+                            과제 보기
                             </a>
                         </div>
                     </div>

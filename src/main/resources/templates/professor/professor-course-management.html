@@ -86,13 +86,48 @@
 
         .container {
             flex: 1;
+            display: flex;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-item-container {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .sidebar-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .sidebar-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .sidebar-item.active {
+            background: #7fcdcd;
+            color: white;
         }
 
         .main-content {
-            width: 1200px;
+            width: 1000px;
             background: white;
             border-radius: 15px;
             padding: 30px;
@@ -449,6 +484,21 @@
 </div>
 
 <div class="container">
+    <div class="sidebar">
+        <a th:href="@{/professor-main}" class="sidebar-item-container">
+            <div class="sidebar-item">대시보드</div>
+        </a>
+        <a th:href="@{/professor/courses}" class="sidebar-item-container">
+            <div class="sidebar-item active">강의 관리</div>
+        </a>
+        <a th:href="@{/professor/assignments}" class="sidebar-item-container">
+            <div class="sidebar-item">과제 관리</div>
+        </a>
+        <a th:href="@{/professor/questions}" class="sidebar-item-container">
+            <div class="sidebar-item">질문 관리</div>
+        </a>
+    </div>
+
     <div class="main-content">
         <div class="page-header">
             <div class="page-title">강의 관리</div>
@@ -505,9 +555,6 @@
                         <div th:id="'dropdown-' + ${iterStat.index}" class="dropdown-content">
                             <a th:href="@{'/professor/course/' + ${course.courseCode} + '/manage'}" class="dropdown-item">
                                 📊 상세 관리
-                            </a>
-                            <a th:href="@{'/professor/course/' + ${course.courseCode} + '/students'}" class="dropdown-item">
-                                👥 수강생 보기
                             </a>
                             <a href="#" class="dropdown-item danger"
                                th:attr="data-code=${course.courseCode}, data-name=${course.courseName}"

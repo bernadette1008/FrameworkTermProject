@@ -92,6 +92,11 @@
             gap: 10px;
         }
 
+        .sidebar-item-container {
+            text-decoration: none;
+            color: inherit;
+        }
+
         .sidebar-item {
             background: white;
             border-radius: 10px;
@@ -346,19 +351,18 @@
 
 <div class="container">
     <div class="sidebar">
-        <a href="/professor-main" class="sidebar-item">대시보드</a>
-        <a href="/professor/courses" style="text-decoration: none; color: inherit;">
+        <a th:href="@{/professor-main}" class="sidebar-item-container">
+            <div class="sidebar-item">대시보드</div>
+        </a>
+        <a th:href="@{/professor/courses}" class="sidebar-item-container">
             <div class="sidebar-item">강의 관리</div>
         </a>
-        <a href="/professor/assignments" style="text-decoration: none; color: inherit;">
+        <a th:href="@{/professor/assignments}" class="sidebar-item-container">
             <div class="sidebar-item">과제 관리</div>
         </a>
-        <div class="sidebar-item active">질문 관리</div>
-        <a href="/professor/students" style="text-decoration: none; color: inherit;">
-            <div class="sidebar-item">수강생 관리</div>
+        <a th:href="@{/professor/questions}" class="sidebar-item-container">
+            <div class="sidebar-item active">질문 관리</div>
         </a>
-        <div class="sidebar-item">성적 관리</div>
-        <div class="sidebar-item">설정</div>
     </div>
 
     <div class="main-content">

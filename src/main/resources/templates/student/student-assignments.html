@@ -181,6 +181,7 @@
         }
 
         .assignment-card {
+            text-decoration: none;
             background: white;
             border-radius: 15px;
             padding: 25px;
@@ -386,7 +387,7 @@
     <div class="user-info">
         <span th:text="${student.name + ' 학생'}">학생</span>
         <span th:text="'(' + ${student.studentId} + ')'">학번</span>
-        <a href="/student/main" class="back-btn">← 메인으로</a>
+        <a th:href="@{/student/main}" class="back-btn">← 메인으로</a>
     </div>
 </div>
 
@@ -453,18 +454,18 @@
             <div class="empty-state-icon">📝</div>
             <h3>아직 과제가 없습니다</h3>
             <p>수업을 등록하면 과제를 확인할 수 있어요!</p>
-            <a href="/student/main" class="btn-primary">메인으로 돌아가기</a>
+            <a th:href="@{/student/main}" class="btn-primary">메인으로 돌아가기</a>
         </div>
 
         <div th:unless="${#lists.isEmpty(assignments)}" class="assignments-grid" id="assignmentsGrid">
-            <div th:each="assignment : ${assignments}"
+            <a th:each="assignment : ${assignments}"
                  class="assignment-card"
-                 th:onclick="|viewAssignment('${assignment.assignmentCode}')|"
-                 th:data-status="${assignment.isSubmitted() ? 'submitted' : (assignment.isOverdue() ? 'overdue' : 'pending')}"
-                 th:data-course="${assignment.course.courseCode}"
-                 th:data-due-date="${assignment.dueDate}"
-                 th:data-created-date="${assignment.createdDate}"
-                 th:data-title="${assignment.title}">
+               th:href="@{/student/assignment/{code}(code=${assignment.assignmentCode})}"
+               th:data-status="${assignment.isSubmitted() ? 'submitted' : (assignment.isOverdue() ? 'overdue' : 'pending')}"
+               th:data-course="${assignment.course.courseCode}"
+               th:data-due-date="${assignment.dueDate}"
+               th:data-created-date="${assignment.createdDate}"
+               th:data-title="${assignment.title}">
 
                 <div class="assignment-header">
                     <h3 class="assignment-title" th:text="${assignment.title}">과제 제목</h3>
@@ -499,7 +500,7 @@
                      th:data-is-submitted="${assignment.isSubmitted()}">
                     시간 계산 중...
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 </div>

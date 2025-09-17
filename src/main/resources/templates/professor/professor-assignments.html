@@ -83,6 +83,11 @@
             gap: 10px;
         }
 
+        .sidebar-item-container {
+            text-decoration: none;
+            color: inherit;
+        }
+
         .sidebar-item {
             background: white;
             border-radius: 10px;
@@ -91,6 +96,8 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.1);
             cursor: pointer;
             transition: transform 0.2s;
+            text-decoration: none;
+            color: inherit;
         }
 
         .sidebar-item:hover {
@@ -358,25 +365,18 @@
 
 <div class="container">
     <div class="sidebar">
-        <a href="/professor-main" class="sidebar-item">대시보드</a>
-
-        <a href="/professor/courses" style="text-decoration: none; color: inherit;">
+        <a th:href="@{/professor-main}" class="sidebar-item-container">
+            <div class="sidebar-item">대시보드</div>
+        </a>
+        <a th:href="@{/professor/courses}" class="sidebar-item-container">
             <div class="sidebar-item">강의 관리</div>
         </a>
-
-        <div class="sidebar-item active">과제 관리</div>
-
-        <a href="/professor/questions" style="text-decoration: none; color: inherit;">
+        <a th:href="@{/professor/assignments}" class="sidebar-item-container">
+            <div class="sidebar-item active">과제 관리</div>
+        </a>
+        <a th:href="@{/professor/questions}" class="sidebar-item-container">
             <div class="sidebar-item">질문 관리</div>
         </a>
-
-        <a href="/professor/students" style="text-decoration: none; color: inherit;">
-            <div class="sidebar-item">수강생 관리</div>
-        </a>
-
-        <div class="sidebar-item">성적 관리</div>
-
-        <div class="sidebar-item">설정</div>
     </div>
 
     <!-- Page Header -->
@@ -393,7 +393,7 @@
             <div class="empty-state-icon">📝</div>
             <h3>등록된 과제가 없습니다</h3>
             <p>새로운 과제를 등록해보세요!</p>
-            <a href="/create-assignment" class="btn-primary">과제 등록하기</a>
+            <a th:href="@{/create-assignment}" class="btn-primary">과제 등록하기</a>
         </div>
 
         <div th:unless="${#lists.isEmpty(assignments)}" class="assignments-grid">
@@ -448,12 +448,5 @@
         </div>
     </div>
 </div>
-
-
-<script>
-    function viewAssignmentSubmissions(assignmentCode) {
-        window.location.href = `/professor/assignment/${assignmentCode}/submissions`;
-    }
-</script>
 </body>
 </html>

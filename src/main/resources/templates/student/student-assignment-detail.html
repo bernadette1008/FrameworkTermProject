@@ -544,6 +544,16 @@
                     <h4>💬 질문 현황</h4>
                     <p><span id="questionCount">0</span>개의 질문</p>
                 </div>
+
+                <div class="sidebar-item">
+                    <h4>💬 취득 점수</h4>
+                    <p><span id="studentScore">0</span>점</p>
+                </div>
+
+                <div class="sidebar-item">
+                    <h4>💬 피드백</h4>
+                    <p><span id="feedback">0</span></p>
+                </div>
             </div>
         </div>
     </div>
@@ -803,6 +813,7 @@
                     '<div class="alert alert-danger">질문을 불러오는데 실패했습니다.</div>';
             });
     }
+
 
     // 질문 목록 표시
     function displayQuestions(questions) {

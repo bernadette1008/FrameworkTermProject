@@ -385,21 +385,56 @@
                 flex-shrink: 0;
             }
 
+            /* 필터 전체 컨테이너 */
             .filter-section {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 15px;
+                display: flex;
+                gap: 40px;                  /* 각 필터 사이 간격 */
+                align-items: center;
+                justify-content: flex-start;
+                margin-bottom: 20px;
+                flex-wrap: wrap;             /* 좁을 땐 줄바꿈 */
+                max-width: 800px;            /* 전체 최대 너비 제한 */
+                width: 100%;                 /* 부모 너비에 따라 늘어남 */
+                box-sizing: border-box;
             }
 
+            /* 각 필터 묶음 */
             .filter-group {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 5px;
+                display: flex;
+                flex: 1 1 300px;             /* 최소 300px 확보, 공간에 따라 늘어남 */
+                align-items: center;
+                gap: 10px;
+                min-width: 250px;            /* 너무 작아지지 않도록 제한 */
+                box-sizing: border-box;
             }
 
-            .filter-select {
-                min-width: auto;
+            /* 라벨 */
+            .filter-label {
+                flex-shrink: 0;
+                font-weight: 600;
+                color: #333;
             }
+
+            /* 셀렉트 박스 */
+            .filter-select {
+                flex: 1;                     /* 남은 공간 꽉 채움 */
+                width: 180px;
+                min-width: 180px;
+                padding: 8px 12px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                background-color: #fff;
+                font-size: 14px;
+                color: #333;
+                outline: none;
+                transition: border-color 0.2s;
+                box-sizing: border-box;
+            }
+
+            .filter-select:focus {
+                border-color: #4a90e2;
+            }
+
         }
     </style>
 </head>

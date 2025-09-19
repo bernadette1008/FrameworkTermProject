@@ -410,6 +410,7 @@
         }
 
         .course-card, .assignment-card {
+            text-decoration: none;
             background: #f8f9fa;
             border-radius: 10px;
             padding: 20px;
@@ -526,11 +527,13 @@
                         <div>아직 등록된 과제가 없습니다.</div>
                     </div>
                     <div th:unless="${#lists.isEmpty(assignments)}" class="assignment-grid">
-                        <div th:each="assignment : ${assignments}" class="assignment-card">
-                            <div class="card-title" th:text="${assignment.title}">과제명</div>
-                            <div class="card-info">강의: <span th:text="${assignment.course.courseName}">강의명</span></div>
-                            <div class="card-info">마감일: <span th:text="${assignment.dueDate}">마감일</span></div>
-                        </div>
+                        <a style="text-decoration: none; color: black;" th:each="assignment : ${assignments}" th:href="@{/student/assignment/{code}(code=${assignment.assignmentCode})}">
+                            <div class="assignment-card">
+                                <div class="card-title" th:text="${assignment.title}">과제명</div>
+                                <div class="card-info">강의: <span th:text="${assignment.course.courseName}">강의명</span></div>
+                                <div class="card-info">마감일: <span th:text="${assignment.dueDate}">마감일</span></div>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </div>

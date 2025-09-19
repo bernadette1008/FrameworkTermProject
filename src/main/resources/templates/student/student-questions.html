@@ -90,13 +90,6 @@
             background: #2980b9;
         }
 
-        /*.container {*/
-        /*    flex: 1;*/
-        /*    max-width: 1200px;*/
-        /*    margin: 0 auto;*/
-        /*    padding: 20px;*/
-        /*}*/
-
         .container {
             flex: 1;
             max-width: 1200px;
@@ -364,27 +357,6 @@
             font-size: 14px;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #7fcdcd;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .view-assignment-btn {
             background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
             color: white;
@@ -401,10 +373,6 @@
 
         .view-assignment-btn:hover {
             transform: translateY(-1px);
-        }
-
-        .hidden {
-            display: none;
         }
 
         @media (max-width: 768px) {
@@ -482,16 +450,50 @@
             📋 질문 목록
         </div>
 
-        <div id="loadingSection" class="loading">
-            <div class="loading-spinner"></div>
-            <div>질문을 불러오는 중...</div>
+        <!-- Questions List -->
+        <div class="questions-list">
+            <div th:each="q : ${questions}" class="question-card"
+                 th:data-status="${q.answers != null and !q.answers.empty ? 'answered' : 'pending'}">
+
+                <div class="question-header">
+                    <div>
+                        <div class="question-title" th:text="${q.assignment?.title ?: '과제'}">과제 제목</div>
+                        <div class="question-info">
+                            📚 <span th:text="${q.assignment?.course?.courseName ?: '강의'}">강의명</span>
+                            | 📅 <span th:text="${#temporals.format(q.questionTime, 'yyyy-MM-dd HH:mm')}">질문 시간</span>
+                            <span th:class="'status-badge ' + (${q.answers != null and !q.answers.empty} ? 'status-answered' : 'status-pending')"
+                                  th:text="${q.answers != null and !q.answers.empty ? '✅ 답변 완료' : '⏳ 답변 대기'}">상태</span>
+                        </div>
+                    </div>
+                    <div class="question-meta">
+                        <a th:href="@{/student/assignment/{code}(code=${q.assignmentCode})}" class="view-assignment-btn">
+                            과제 보기
+                        </a>
+                    </div>
+                </div>
+
+                <div class="question-content" th:text="${q.content}">질문 내용</div>
+
+                <!-- Answers Section -->
+                <div th:if="${q.answers != null and !q.answers.empty}" class="answers-section">
+                    <div class="answers-title">
+                        💬 교수님 답변 (<span th:text="${#lists.size(q.answers)}">0</span>개)
+                    </div>
+                    <div th:each="answer : ${q.answers}" class="answer-card">
+                        <div class="answer-header">
+                            <div class="answer-author">
+                                👨‍🏫 <span th:text="${answer.professor?.name ?: '교수님'}">교수님</span>
+                            </div>
+                            <div class="answer-date" th:text="${#temporals.format(answer.answerTime, 'yyyy-MM-dd HH:mm')}">답변 시간</div>
+                        </div>
+                        <div class="answer-content" th:text="${answer.content}">답변 내용</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="questionsContainer" class="questions-list hidden">
-            <!-- 질문 목록이 여기에 동적으로 추가됩니다 -->
-        </div>
-
-        <div id="emptyState" class="empty-state hidden">
+        <!-- Empty State -->
+        <div th:if="${questions == null or questions.empty}" class="empty-state">
             <div class="empty-state-icon">❓</div>
             <div class="empty-state-text">등록된 질문이 없습니다</div>
             <div class="empty-state-subtext">과제 상세 페이지에서 질문을 등록해보세요!</div>
@@ -500,43 +502,20 @@
 </div>
 
 <script>
-    let allQuestions = [];
     let currentFilter = 'all';
+    let questionCards = [];
 
-    // 페이지 로드 시 질문 목록 로드
+    // 페이지 로드 시 초기화
     document.addEventListener('DOMContentLoaded', function() {
-        loadQuestions();
+        questionCards = Array.from(document.querySelectorAll('.question-card'));
+        updateStatistics();
         setupFilterButtons();
     });
 
-    // 질문 목록 로드
-    async function loadQuestions() {
-        try {
-            showLoading(true);
-
-            const response = await fetch('/api/student/questions');
-            const data = await response.json();
-
-            if (response.ok) {
-                allQuestions = data;
-                updateStatistics();
-                displayQuestions();
-            } else {
-                console.error('Failed to load questions:', data);
-                showEmptyState();
-            }
-        } catch (error) {
-            console.error('Error loading questions:', error);
-            showEmptyState();
-        } finally {
-            showLoading(false);
-        }
-    }
-
     // 통계 업데이트
     function updateStatistics() {
-        const total = allQuestions.length;
-        const answered = allQuestions.filter(q => q.answers && q.answers.length > 0).length;
+        const total = questionCards.length;
+        const answered = questionCards.filter(card => card.getAttribute('data-status') === 'answered').length;
         const pending = total - answered;
 
         document.getElementById('totalQuestions').textContent = total;
@@ -544,90 +523,43 @@
         document.getElementById('pendingQuestions').textContent = pending;
     }
 
-    // 질문 목록 표시
-    function displayQuestions() {
-        const container = document.getElementById('questionsContainer');
+    // 질문 목록 필터링
+    function displayFilteredQuestions() {
+        questionCards.forEach(card => {
+            const status = card.getAttribute('data-status');
+            let shouldShow = true;
 
-        if (allQuestions.length === 0) {
-            showEmptyState();
-            return;
-        }
+            if (currentFilter === 'answered') {
+                shouldShow = status === 'answered';
+            } else if (currentFilter === 'pending') {
+                shouldShow = status === 'pending';
+            }
 
-        // 현재 필터에 따라 질문 필터링
-        let filteredQuestions = allQuestions;
-        if (currentFilter === 'answered') {
-            filteredQuestions = allQuestions.filter(q => q.answers && q.answers.length > 0);
-        } else if (currentFilter === 'pending') {
-            filteredQuestions = allQuestions.filter(q => !q.answers || q.answers.length === 0);
-        }
+            card.style.display = shouldShow ? 'block' : 'none';
+        });
 
-        if (filteredQuestions.length === 0) {
-            container.innerHTML = '<div class="empty-state">' +
-                '<div class="empty-state-icon">🔍</div>' +
-                '<div class="empty-state-text">해당 조건의 질문이 없습니다</div>' +
-                '</div>';
-            container.classList.remove('hidden');
-            return;
-        }
-
-        // 질문을 최신순으로 정렬
-        filteredQuestions.sort((a, b) => new Date(b.questionTime) - new Date(a.questionTime));
-
-        container.innerHTML = filteredQuestions.map(question => createQuestionCard(question)).join('');
-        container.classList.remove('hidden');
+        // 필터링 후 보여지는 카드 수 확인
+        const visibleCards = questionCards.filter(card => card.style.display !== 'none');
+        showFilterEmptyState(visibleCards.length === 0 && questionCards.length > 0);
     }
 
-    // 질문 카드 생성
-    function createQuestionCard(question) {
-        const hasAnswers = question.answers && question.answers.length > 0;
-        const questionDate = formatDate(question.questionTime);
+    // 필터 빈 상태 표시/숨김
+    function showFilterEmptyState(show) {
+        let emptyState = document.querySelector('.filter-empty-state');
 
-        const answersHtml = hasAnswers ? `
-                <div class="answers-section">
-                    <div class="answers-title">
-                        💬 교수님 답변 (${question.answers.length}개)
-                    </div>
-                    ${question.answers.map(answer => `
-                        <div class="answer-card">
-                            <div class="answer-header">
-                                <div class="answer-author">
-                                    👨‍🏫 ${answer.professorName || '교수님'}
-                                </div>
-                                <div class="answer-date">
-                                    ${formatDate(answer.answerTime)}
-                                </div>
-                            </div>
-                            <div class="answer-content">${escapeHtml(answer.content)}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            ` : '';
-
-        return `
-                <div class="question-card">
-                    <div class="question-header">
-                        <div>
-                            <div class="question-title">${escapeHtml(question.assignmentTitle || '과제')}</div>
-                            <div class="question-info">
-                                📚 ${escapeHtml(question.courseName || '강의')}
-                                | 📅 ${questionDate}
-                                <span class="status-badge ${hasAnswers ? 'status-answered' : 'status-pending'}">
-                                    ${hasAnswers ? '✅ 답변 완료' : '⏳ 답변 대기'}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="question-meta">
-                            <a th:href="@{/student/assignment/{code}(code=${question.assignmentCode})}" class="view-assignment-btn">
-                                과제 보기
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="question-content">${escapeHtml(question.content)}</div>
-
-                    ${answersHtml}
-                </div>
+        if (show && !emptyState) {
+            const questionsSection = document.querySelector('.questions-section');
+            emptyState = document.createElement('div');
+            emptyState.className = 'filter-empty-state empty-state';
+            emptyState.innerHTML = `
+                <div class="empty-state-icon">🔍</div>
+                <div class="empty-state-text">해당 조건의 질문이 없습니다</div>
+                <div class="empty-state-subtext">다른 필터를 선택해보세요</div>
             `;
+            questionsSection.appendChild(emptyState);
+        } else if (!show && emptyState) {
+            emptyState.remove();
+        }
     }
 
     // 필터 버튼 설정
@@ -645,64 +577,10 @@
                 // 현재 필터 업데이트
                 currentFilter = this.getAttribute('data-filter');
 
-                // 질문 목록 다시 표시
-                displayQuestions();
+                // 질문 목록 필터링
+                displayFilteredQuestions();
             });
         });
-    }
-
-    // 로딩 상태 표시/숨김
-    function showLoading(show) {
-        const loadingSection = document.getElementById('loadingSection');
-        const questionsContainer = document.getElementById('questionsContainer');
-        const emptyState = document.getElementById('emptyState');
-
-        if (show) {
-            loadingSection.classList.remove('hidden');
-            questionsContainer.classList.add('hidden');
-            emptyState.classList.add('hidden');
-        } else {
-            loadingSection.classList.add('hidden');
-        }
-    }
-
-    // 빈 상태 표시
-    function showEmptyState() {
-        const questionsContainer = document.getElementById('questionsContainer');
-        const emptyState = document.getElementById('emptyState');
-
-        questionsContainer.classList.add('hidden');
-        emptyState.classList.remove('hidden');
-    }
-
-    // 날짜 포맷팅
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMs = now - date;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
-
-        if (diffMins < 1) return '방금 전';
-        if (diffMins < 60) return `${diffMins}분 전`;
-        if (diffHours < 24) return `${diffHours}시간 전`;
-        if (diffDays < 7) return `${diffDays}일 전`;
-
-        return date.toLocaleDateString('ko-KR', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
-
-    // HTML 이스케이프
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 </script>
 </body>

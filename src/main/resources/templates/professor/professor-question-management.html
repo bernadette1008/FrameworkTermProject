@@ -60,6 +60,22 @@
             font-weight: bold;
         }
 
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
         .logout-btn {
             text-decoration: none;
             background: #e74c3c;
@@ -80,6 +96,7 @@
             flex: 1;
             display: flex;
             max-width: 1200px;
+            min-width: 60%;
             margin: 0 auto;
             padding: 20px;
             gap: 20px;
@@ -118,25 +135,8 @@
             color: white;
         }
 
-        .logout-btn {
-            text-decoration: none;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: #c0392b;
-        }
-
         .main-content {
             flex: 1;
-            width: 1000px;
             background: white;
             border-radius: 15px;
             padding: 30px;
@@ -144,92 +144,164 @@
         }
 
         .page-title {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 30px;
             text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .filter-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .filter-select {
+            padding: 8px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            min-width: 120px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #7fcdcd;
+        }
+
+        .filter-btn {
+            background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .questions-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 500px;
         }
 
         .questions-list {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
 
-        .question-card {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-            border-left: 5px solid #7fcdcd;
+        .question-item {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #7fcdcd;
             transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
             text-decoration: none;
             color: inherit;
         }
 
-        .question-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+        .question-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .question-item.answered {
+            border-left-color: #28a745;
+        }
+
+        .question-item.pending {
+            border-left-color: #ffc107;
         }
 
         .question-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
-        .question-info {
+        .question-meta {
             flex: 1;
         }
 
+        .course-name {
+            font-size: 14px;
+            color: #7fcdcd;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
         .assignment-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #2c3e50;
             margin-bottom: 5px;
         }
 
-        .course-name {
-            font-size: 16px;
-            color: #7fcdcd;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
         .student-info {
-            font-size: 14px;
-            color: #7f8c8d;
+            font-size: 13px;
+            color: #6c757d;
         }
 
         .question-date {
-            font-size: 14px;
+            font-size: 12px;
             color: #95a5a6;
             text-align: right;
+            line-height: 1.3;
         }
 
         .question-content {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border-left: 3px solid #e9ecef;
-            line-height: 1.6;
+            font-size: 14px;
             color: #2c3e50;
+            line-height: 1.5;
+            margin: 15px 0;
+            padding-left: 15px;
+            border-left: 2px solid #e9ecef;
         }
 
-        .answer-status {
+        .question-status {
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
             margin-top: 15px;
         }
 
         .status-badge {
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
             font-weight: bold;
             text-transform: uppercase;
         }
@@ -244,23 +316,25 @@
             color: #856404;
         }
 
-        .answer-btn {
-            background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-decoration: none;
-            display: inline-block;
+        .answer-preview {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: #e8f5e8;
+            border-radius: 6px;
+            border-left: 3px solid #28a745;
+            font-size: 13px;
         }
 
-        .answer-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(127, 205, 205, 0.4);
+        .answer-author {
+            font-size: 11px;
+            color: #28a745;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .answer-text {
+            color: #2c3e50;
+            line-height: 1.4;
         }
 
         .empty-state {
@@ -270,19 +344,19 @@
         }
 
         .empty-state-icon {
-            font-size: 72px;
-            margin-bottom: 20px;
+            font-size: 48px;
+            margin-bottom: 15px;
         }
 
         .empty-state-title {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #2c3e50;
         }
 
         .empty-state-message {
-            font-size: 16px;
+            font-size: 14px;
             line-height: 1.5;
         }
 
@@ -295,44 +369,37 @@
             border: 1px solid #f5c6cb;
         }
 
-        .back-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-            text-decoration: none;
-            display: inline-block;
-            /*margin-bottom: 20px;*/
-        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
 
-        .back-btn:hover {
-            background: #5a6268;
-        }
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                overflow-x: auto;
+            }
 
-        .answer-preview {
-            margin-top: 10px;
-            padding: 10px 15px;
-            background: #e8f5e8;
-            border-radius: 8px;
-            border-left: 3px solid #28a745;
-        }
+            .sidebar-item {
+                min-width: 120px;
+                flex-shrink: 0;
+            }
 
-        .answer-author {
-            font-size: 12px;
-            color: #28a745;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
 
-        .answer-text {
-            font-size: 14px;
-            color: #2c3e50;
-            line-height: 1.4;
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 5px;
+            }
+
+            .filter-select {
+                min-width: auto;
+            }
         }
     </style>
 </head>
@@ -366,9 +433,38 @@
     </div>
 
     <div class="main-content">
-        <a th:href="@{/professor-main}" class="back-btn">← 대시보드로 돌아가기</a>
-
         <div class="page-title">질문 관리</div>
+
+        <!-- 필터 섹션 -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <span class="filter-label">강의</span>
+                <select id="courseSelect" class="filter-select" onchange="onCourseChange()">
+                    <option value="">모두 보기</option>
+                    <option th:each="course : ${courses}"
+                            th:value="${course.courseCode}"
+                            th:text="${course.courseName}"
+                            th:selected="${selectedCourseCode == course.courseCode}">
+                        강의명
+                    </option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-label">과제</span>
+                <select id="assignmentSelect" class="filter-select" onchange="onAssignmentChange()">
+                    <option value="">모두 보기</option>
+                    <option th:each="assignment : ${assignments}"
+                            th:value="${assignment.assignmentCode}"
+                            th:text="${assignment.title}"
+                            th:selected="${selectedAssignmentCode == assignment.assignmentCode.toString()}">
+                        과제명
+                    </option>
+                </select>
+            </div>
+
+            <button type="button" class="filter-btn" onclick="applyFilter()">검색</button>
+        </div>
 
         <!-- 에러 메시지 -->
         <div th:if="${error}" class="error-message" th:text="${error}">
@@ -376,63 +472,149 @@
         </div>
 
         <!-- 질문 목록 -->
-        <div th:if="${#lists.isEmpty(questions)}" class="empty-state">
-            <div class="empty-state-icon">❓</div>
-            <div class="empty-state-title">등록된 질문이 없습니다</div>
-            <div class="empty-state-message">
-                학생들이 과제에 대해 질문을 남기면<br>
-                이곳에서 확인하고 답변할 수 있습니다.
+        <div class="questions-container">
+            <div th:if="${#lists.isEmpty(questions)}" class="empty-state">
+                <div class="empty-state-icon">❓</div>
+                <div class="empty-state-title">질문이 없습니다</div>
+                <div class="empty-state-message">
+                    선택한 조건에 해당하는 질문이 없습니다.<br>
+                    필터 조건을 변경해보세요.
+                </div>
             </div>
-        </div>
 
-        <div th:unless="${#lists.isEmpty(questions)}" class="questions-list">
-            <a th:each="question : ${questions}"
-               th:href="@{'/professor/question/' + ${question.questionCode}}"
-               class="question-card">
+            <div th:unless="${#lists.isEmpty(questions)}" class="questions-list">
+                <a th:each="question : ${questions}"
+                   th:href="@{'/professor/question/' + ${question.questionCode}}"
+                   class="question-item"
+                   th:classappend="${#lists.isEmpty(question.answers)} ? 'pending' : 'answered'">
 
-                <div class="question-header">
-                    <div class="question-info">
-                        <div class="assignment-title" th:text="${question.assignment.title}">과제명</div>
-                        <div class="course-name" th:text="${question.assignment.course.courseName}">강의명</div>
-                        <div class="student-info">
-                            질문자: <span th:text="${question.student.name}">학생명</span>
-                            (<span th:text="${question.studentId}">학번</span>)
+                    <div class="question-header">
+                        <div class="question-meta">
+                            <div class="course-name" th:text="${question.assignment.course.courseName}">강의명</div>
+                            <div class="assignment-title" th:text="${question.assignment.title}">과제명</div>
+                            <div class="student-info">
+                                질문자: <span th:text="${question.student.name + ' (' + question.studentId + ')'}">학생명 (학번)</span>
+                            </div>
+                        </div>
+                        <div class="question-date">
+                            <div th:text="${#temporals.format(question.questionTime, 'yyyy-MM-dd')}">2024-01-01</div>
+                            <div th:text="${#temporals.format(question.questionTime, 'HH:mm')}">12:00</div>
                         </div>
                     </div>
-                    <div class="question-date">
-                        <div th:text="${#temporals.format(question.questionTime, 'yyyy-MM-dd')}">2024-01-01</div>
-                        <div th:text="${#temporals.format(question.questionTime, 'HH:mm')}">12:00</div>
+
+                    <div class="question-content" th:text="${#strings.abbreviate(question.content, 200)}">
+                        질문 내용이 여기에 표시됩니다...
                     </div>
-                </div>
 
-                <div class="question-content" th:text="${question.content}">
-                    질문 내용이 여기에 표시됩니다...
-                </div>
-
-                <!-- 답변 미리보기 (답변이 있는 경우) -->
-                <div th:if="${not #lists.isEmpty(question.answers)}" class="answer-preview">
-                    <div class="answer-author">답변 완료</div>
-                    <div class="answer-text" th:text="${#strings.abbreviate(question.answers[0].content, 100)}">
-                        답변 미리보기...
+                    <!-- 답변 미리보기 (답변이 있는 경우) -->
+                    <div th:if="${not #lists.isEmpty(question.answers)}" class="answer-preview">
+                        <div class="answer-author" th:text="${question.answers[0].professor.name + ' 교수님'}">교수님</div>
+                        <div class="answer-text" th:text="${#strings.abbreviate(question.answers[0].content, 100)}">
+                            답변 미리보기...
+                        </div>
                     </div>
-                </div>
 
-                <div class="answer-status">
-                    <span th:if="${#lists.isEmpty(question.answers)}" class="status-badge status-pending">
-                        답변 대기
-                    </span>
-                    <span th:unless="${#lists.isEmpty(question.answers)}" class="status-badge status-answered">
-                        답변 완료
-                    </span>
-
-                    <span class="answer-btn">
-                        <span th:if="${#lists.isEmpty(question.answers)}">답변하기</span>
-                        <span th:unless="${#lists.isEmpty(question.answers)}">답변 보기</span>
-                    </span>
-                </div>
-            </a>
+                    <div class="question-status">
+                        <span th:if="${#lists.isEmpty(question.answers)}" class="status-badge status-pending">
+                            답변 대기
+                        </span>
+                        <span th:unless="${#lists.isEmpty(question.answers)}" class="status-badge status-answered">
+                            답변 완료
+                        </span>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    // 강의 선택 변경 시 과제 목록 업데이트
+    function onCourseChange() {
+        const courseSelect = document.getElementById('courseSelect');
+        const assignmentSelect = document.getElementById('assignmentSelect');
+        const selectedCourse = courseSelect.value;
+
+        // 과제 선택 초기화
+        assignmentSelect.innerHTML = '<option value="">모두 보기</option>';
+
+        if (selectedCourse) {
+            // AJAX로 선택된 강의의 과제 목록 가져오기
+            fetch(`/professor/course/${selectedCourse}/assignments-json`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(assignments => {
+                    assignments.forEach(assignment => {
+                        const option = document.createElement('option');
+                        option.value = assignment.assignmentCode;
+                        option.textContent = assignment.title;
+                        assignmentSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching assignments:', error);
+                });
+        } else {
+            // 모든 강의 선택 시 모든 과제 표시
+            fetch('/professor/course/all/assignments-json')
+                .then(response => response.json())
+                .then(assignments => {
+                    assignments.forEach(assignment => {
+                        const option = document.createElement('option');
+                        option.value = assignment.assignmentCode;
+                        option.textContent = assignment.title;
+                        assignmentSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching assignments:', error);
+                });
+        }
+    }
+
+    // 과제 선택 변경 시
+    function onAssignmentChange() {
+        // 필요시 추가 로직 구현
+    }
+
+    // 필터 적용
+    function applyFilter() {
+        const courseCode = document.getElementById('courseSelect').value;
+        const assignmentCode = document.getElementById('assignmentSelect').value;
+
+        let url = '/professor/questions?';
+        const params = new URLSearchParams();
+
+        if (courseCode) {
+            params.append('courseCode', courseCode);
+        }
+        if (assignmentCode) {
+            params.append('assignmentCode', assignmentCode);
+        }
+
+        window.location.href = url + params.toString();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // 페이지 로드 시 선택된 강의에 따라 과제 목록 설정
+        const selectedCourse = document.getElementById('courseSelect').value;
+        if (selectedCourse) {
+            setTimeout(() => {
+                onCourseChange();
+                // 선택된 과제 복원
+                const selectedAssignment = '[[${selectedAssignmentCode}]]';
+                if (selectedAssignment && selectedAssignment !== 'null') {
+                    setTimeout(() => {
+                        document.getElementById('assignmentSelect').value = selectedAssignment;
+                    }, 100);
+                }
+            }, 100);
+        }
+    });
+</script>
 </body>
 </html>

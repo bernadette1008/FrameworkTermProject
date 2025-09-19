@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,6 +69,37 @@ public class ProfessorController {
         }
 
         return "professor/professor-course-management";
+    }
+
+    // 특정 과제의 질문 목록 조회
+    @GetMapping("/assignment/{assignmentCode}/questions")
+    public String assignmentQuestions(@PathVariable int assignmentCode,
+                                      Model model,
+                                      HttpSession session) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            return "redirect:/";
+        }
+
+        try {
+            Assignment assignment = professorService.getAssignmentDetails(assignmentCode);
+            List<Question> questions = professorService.getAssignmentQuestions(assignmentCode);
+
+            // 교수 권한 확인
+            if (!assignment.getCourse().getProfessorId().equals(professor.getProfessorId())) {
+                model.addAttribute("error", "접근 권한이 없습니다.");
+                return "error";
+            }
+
+            model.addAttribute("professor", professor);
+            model.addAttribute("assignment", assignment);
+            model.addAttribute("questions", questions);
+        } catch (Exception e) {
+            model.addAttribute("error", "질문 목록을 불러오는데 실패했습니다.");
+            return "error";
+        }
+
+        return "professor/professor-assignment-questions";
     }
 
     // 강의 상세 관리 페이지
@@ -191,6 +224,84 @@ public class ProfessorController {
         }
     }
 
+    // 질문 관리 페이지
+    @GetMapping("/questions")
+    public String questionManagement(@RequestParam(required = false) String courseCode,
+                                     @RequestParam(required = false) String assignmentCode,
+                                     Model model,
+                                     HttpSession session) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            return "redirect:/";
+        }
+
+        try {
+            // 교수의 모든 강의 목록 조회
+            List<Course> courses = professorService.getProfessorCourses(professor.getProfessorId());
+
+            // 초기 과제 목록 설정 (강의가 선택되지 않은 경우 모든 과제)
+            List<Assignment> assignments = new ArrayList<>();
+            if (courseCode != null && !courseCode.isEmpty()) {
+                // 특정 강의의 과제만 조회
+                assignments = professorService.getCourseAssignments(courseCode);
+            } else {
+                // 모든 강의의 과제 목록 조회 (기본값)
+                assignments = professorService.getProfessorAssignments(professor.getProfessorId());
+            }
+
+            // 필터링된 질문 목록 조회
+            List<Question> questions;
+            if (assignmentCode != null && !assignmentCode.isEmpty()) {
+                // 특정 과제의 질문만 조회
+                questions = professorService.getAssignmentQuestions(Integer.parseInt(assignmentCode));
+            } else if (courseCode != null && !courseCode.isEmpty()) {
+                // 특정 강의의 모든 질문 조회
+                questions = professorService.getCourseQuestions(courseCode);
+            } else {
+                // 교수의 모든 질문 조회 (기본값)
+                questions = professorService.getProfessorQuestions(professor.getProfessorId());
+            }
+
+            model.addAttribute("professor", professor);
+            model.addAttribute("courses", courses);
+            model.addAttribute("assignments", assignments);
+            model.addAttribute("questions", questions);
+            model.addAttribute("selectedCourseCode", courseCode);
+            model.addAttribute("selectedAssignmentCode", assignmentCode);
+
+        } catch (Exception e) {
+            model.addAttribute("error", "질문 목록을 불러오는데 실패했습니다: " + e.getMessage());
+        }
+
+        return "professor/professor-question-management";
+    }
+
+    // 강의별 과제 목록 조회 API (AJAX용)
+    @GetMapping("/course/{courseCode}/assignments-json")
+    @ResponseBody
+    public List<Assignment> getCourseAssignmentsJson(@PathVariable String courseCode,
+                                                     HttpSession session) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
+
+        try {
+            if (courseCode.equals("all")) {
+                return professorService.getProfessorAssignments(professor.getProfessorId());
+            } else {
+                Course course = professorService.getCourseDetails(courseCode);
+                // 교수 권한 확인
+                if (!course.getProfessorId().equals(professor.getProfessorId())) {
+                    throw new RuntimeException("접근 권한이 없습니다.");
+                }
+                return professorService.getCourseAssignments(courseCode);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("과제 목록을 불러올 수 없습니다: " + e.getMessage());
+        }
+    }
+
     // 특정 과제의 제출물 목록 조회
     @GetMapping("/assignment/{assignmentCode}/submissions")
     public String assignmentSubmissions(@PathVariable int assignmentCode,
@@ -274,23 +385,23 @@ public class ProfessorController {
     }
 
     // 질문 관리 페이지
-    @GetMapping("/questions")
-    public String questionManagement(Model model, HttpSession session) {
-        Professor professor = (Professor) session.getAttribute("user");
-        if (professor == null) {
-            return "redirect:/";
-        }
-
-        try {
-            List<Question> questions = professorService.getProfessorQuestions(professor.getProfessorId());
-            model.addAttribute("professor", professor);
-            model.addAttribute("questions", questions);
-        } catch (Exception e) {
-            model.addAttribute("error", "질문 목록을 불러오는데 실패했습니다.");
-        }
-
-        return "professor/professor-question-management";
-    }
+//    @GetMapping("/questions")
+//    public String questionManagement(Model model, HttpSession session) {
+//        Professor professor = (Professor) session.getAttribute("user");
+//        if (professor == null) {
+//            return "redirect:/";
+//        }
+//
+//        try {
+//            List<Question> questions = professorService.getProfessorQuestions(professor.getProfessorId());
+//            model.addAttribute("professor", professor);
+//            model.addAttribute("questions", questions);
+//        } catch (Exception e) {
+//            model.addAttribute("error", "질문 목록을 불러오는데 실패했습니다.");
+//        }
+//
+//        return "professor/professor-question-management";
+//    }
 
     // 질문 상세 보기
     @GetMapping("/question/{questionCode}")

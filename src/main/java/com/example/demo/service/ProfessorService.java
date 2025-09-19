@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -88,6 +89,38 @@ public class ProfessorService {
                 question.setAnswers(answers);
             }
             allQuestions.addAll(questions);
+        }
+
+        return allQuestions;
+    }
+
+    // 특정 과제의 질문 목록 조회
+    public List<Question> getAssignmentQuestions(int assignmentCode) {
+        List<Question> questions = questionRepository.findByAssignmentCode(assignmentCode);
+
+        // 각 질문에 대한 답변도 함께 로드
+        for (Question question : questions) {
+            List<Answer> answers = answerRepository.findByQuestionCodeOrderByAnswerTimeAsc(question.getQuestionCode());
+            question.setAnswers(answers);
+        }
+
+        return questions;
+    }
+
+    // 특정 수업의 질문 목록 조회
+    public List<Question> getCourseQuestions(String courseCode) {
+        List<Assignment> assignments = assignmentRepository.findByCourseCode(courseCode);
+        List<Question> allQuestions = new ArrayList<>();
+
+        for (Assignment assignment : assignments) {
+            List<Question> questions = questionRepository.findByAssignmentCode(assignment.getAssignmentCode());
+            allQuestions.addAll(questions);
+        }
+
+        // 각 질문에 대한 답변도 함께 로드
+        for (Question question : allQuestions) {
+            List<Answer> answers = answerRepository.findByQuestionCodeOrderByAnswerTimeAsc(question.getQuestionCode());
+            question.setAnswers(answers);
         }
 
         return allQuestions;

@@ -1,10 +1,325 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 - Ploytech 시스템</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: #5f3dc4;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+        }
+
+        .logo::before {
+            content: "👨‍💼";
+            font-size: 24px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .welcome-section {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .welcome-section h1 {
+            color: #2d3436;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-section p {
+            color: #636e72;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .stat-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+
+        .pending-icon {
+            background: linear-gradient(45deg, #ff7675, #fd79a8);
+        }
+
+        .approved-icon {
+            background: linear-gradient(45deg, #00b894, #55efc4);
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .pending-number {
+            color: #e17055;
+        }
+
+        .approved-number {
+            color: #00b894;
+        }
+
+        .stat-label {
+            font-size: 18px;
+            color: #636e72;
+            font-weight: 500;
+        }
+
+        .actions-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .action-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .action-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+            color: white;
+        }
+
+        .action-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3436;
+            margin-bottom: 15px;
+        }
+
+        .action-description {
+            color: #636e72;
+            font-size: 16px;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .action-btn {
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+        }
+
+        .notification-badge {
+            background: #ff7675;
+            color: white;
+            border-radius: 50%;
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        .badge-container {
+            position: relative;
+            display: inline-block;
+        }
+    </style>
 </head>
 <body>
+<div class="header">
+    <div class="header-left">
+        <div class="logo"></div>
+        <div class="title">Ploytech 관리자 시스템</div>
+    </div>
+    <div class="user-info">
+        <span class="user-name" th:text="${administrator.name + ' 관리자님'}">관리자님</span>
+        <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
+    </div>
+</div>
 
+<div class="container">
+    <div class="welcome-section">
+        <h1>관리자 대시보드</h1>
+        <p>Ploytech 과제 제출 시스템의 사용자 관리를 담당합니다</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon pending-icon">⏳</div>
+            <div class="stat-number pending-number" th:text="${stats.pendingStudents}">0</div>
+            <div class="stat-label">승인 대기 학생</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon approved-icon">✅</div>
+            <div class="stat-number approved-number" th:text="${stats.approvedStudents}">0</div>
+            <div class="stat-label">승인된 학생</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon pending-icon">⏳</div>
+            <div class="stat-number pending-number" th:text="${stats.pendingProfessors}">0</div>
+            <div class="stat-label">승인 대기 교수</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon approved-icon">✅</div>
+            <div class="stat-number approved-number" th:text="${stats.approvedProfessors}">0</div>
+            <div class="stat-label">승인된 교수</div>
+        </div>
+    </div>
+
+    <div class="actions-section">
+        <div class="action-card">
+            <div class="badge-container">
+                <div class="action-icon">📋</div>
+                <div class="notification-badge"
+                     th:if="${stats.pendingStudents + stats.pendingProfessors > 0}"
+                     th:text="${stats.pendingStudents + stats.pendingProfessors}">0</div>
+            </div>
+            <div class="action-title">승인 대기 목록</div>
+            <div class="action-description">
+                회원가입을 신청한 학생과 교수의 승인 요청을 검토하고 처리할 수 있습니다.
+            </div>
+            <a th:href="@{/admin/pending-users}" class="action-btn">승인 관리</a>
+        </div>
+
+        <div class="action-card">
+            <div class="action-icon">👥</div>
+            <div class="action-title">승인된 사용자</div>
+            <div class="action-description">
+                현재 시스템을 사용 중인 학생과 교수의 목록을 확인하고 권한을 관리할 수 있습니다.
+            </div>
+            <a th:href="@{/admin/approved-users}" class="action-btn">사용자 관리</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 5분마다 페이지 새로고침 (실시간 통계 업데이트)
+    setInterval(function() {
+        location.reload();
+    }, 300000);
+</script>
 </body>
 </html>

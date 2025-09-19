@@ -14,6 +14,7 @@ import lombok.Setter;
 @Getter
 public class Administrator {
     @Id
-    private String id;
-    private String username;
+    private String administratorId;  // 관리자 ID (PK)
+    private String name;             // 관리자 이름
+    private String password;         // 관리자 비밀번호
 }

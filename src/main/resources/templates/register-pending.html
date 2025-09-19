@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ploytech 과제 제출 시스템</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #fab1a0;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo::before {
+            content: "💡";
+            font-size: 24px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .pending-message {
+            color: #2c3e50;
+            margin-bottom: 60px;
+        }
+
+        .pending-message h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .pending-message p {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+
+        .pending-icon {
+            width: 120px;
+            height: 120px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            animation: pulse 2s infinite;
+        }
+
+        .pending-icon::before {
+            content: "⏳";
+            font-size: 60px;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .info-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            max-width: 600px;
+        }
+
+        .info-box h3 {
+            color: #e17055;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .info-box ul {
+            text-align: left;
+            color: #636e72;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #fab1a0, #ffeaa7);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(250, 177, 160, 0.4);
+        }
+
+        .page-indicator {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+            gap: 10px;
+        }
+
+        .indicator-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dee2e6;
+        }
+
+        .indicator-dot.active {
+            background: #fab1a0;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="logo"></div>
+    <div class="title">Ploytech 과제 제출 시스템</div>
+</div>
+
+<div class="container">
+    <div class="pending-message">
+        <h1 th:text="${userType + ' ' + userName + '님'}">학생 김학생님</h1>
+        <p th:text="${message}">회원가입이 완료되었습니다. 관리자의 승인을 기다려주세요.</p>
+    </div>
+
+    <div class="pending-icon"></div>
+
+    <div class="info-box">
+        <h3>💡 승인 과정 안내</h3>
+        <ul>
+            <li>회원가입 요청이 관리자에게 전달되었습니다</li>
+            <li>관리자가 신원을 확인한 후 승인을 진행합니다</li>
+            <li>승인이 완료되면 등록하신 정보로 로그인할 수 있습니다</li>
+            <li>승인 시간은 보통 1-2일 정도 소요됩니다</li>
+        </ul>
+    </div>
+
+    <a th:href="@{/}" class="btn-primary">로그인 페이지로 돌아가기</a>
+
+    <div class="page-indicator">
+        <div class="indicator-dot"></div>
+        <div class="indicator-dot"></div>
+        <div class="indicator-dot active"></div>
+    </div>
+</div>
+</body>
+</html>

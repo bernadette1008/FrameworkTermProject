@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>승인 대기 목록 - Ploytech 시스템</title>
+    <title>승인된 사용자 목록 - Ploytech 시스템</title>
     <style>
         body {
             margin: 0;
@@ -132,7 +132,7 @@
         }
 
         .count-badge {
-            background: #ff7675;
+            background: #00b894;
             color: white;
             padding: 5px 15px;
             border-radius: 20px;
@@ -154,10 +154,14 @@
             background: #f8f9fa;
         }
 
+        .user-card.approved {
+            border-color: #00b894;
+            background: #f0fff4;
+        }
+
         .user-card:hover {
-            border-color: #6c5ce7;
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.1);
+            box-shadow: 0 8px 25px rgba(0, 184, 148, 0.1);
         }
 
         .user-info {
@@ -174,12 +178,28 @@
         .user-id {
             color: #636e72;
             font-size: 16px;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .user-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .user-type {
             display: inline-block;
             background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #00b894, #55efc4);
             color: white;
             padding: 5px 12px;
             border-radius: 15px;
@@ -193,24 +213,7 @@
             justify-content: flex-end;
         }
 
-        .approve-btn {
-            background: linear-gradient(45deg, #00b894, #55efc4);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .approve-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
-        }
-
-        .reject-btn {
+        .revoke-btn {
             background: linear-gradient(45deg, #ff7675, #fd79a8);
             color: white;
             border: none;
@@ -222,7 +225,7 @@
             transition: all 0.3s;
         }
 
-        .reject-btn:hover {
+        .revoke-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(255, 118, 117, 0.3);
         }
@@ -246,16 +249,32 @@
             font-weight: 500;
         }
 
-        .alert-success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-
         .alert-warning {
             background: #fff3cd;
             border: 1px solid #ffeaa7;
             color: #856404;
+        }
+
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #6c5ce7;
         }
     </style>
 </head>
@@ -263,12 +282,12 @@
 <div class="header">
     <div class="header-left">
         <div class="logo"></div>
-        <div class="title">승인 대기 목록</div>
+        <div class="title">승인된 사용자</div>
     </div>
     <div class="nav-links">
         <a th:href="@{/admin/main}" class="nav-link">대시보드</a>
-        <a th:href="@{/admin/pending-users}" class="nav-link active">승인 대기</a>
-        <a th:href="@{/admin/approved-users}" class="nav-link">승인된 사용자</a>
+        <a th:href="@{/admin/pending-users}" class="nav-link">승인 대기</a>
+        <a th:href="@{/admin/approved-users}" class="nav-link active">승인된 사용자</a>
         <a th:href="@{/admin/courses}" class="nav-link">강의 관리</a>
         <a th:href="@{/admin/assignments}" class="nav-link">과제 관리</a>
         <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
@@ -277,54 +296,51 @@
 
 <div class="container">
     <!-- 성공/실패 메시지 -->
-    <div th:if="${param.approved != null}" class="alert alert-success">
-        <span th:if="${param.approved[0] == 'student'}">학생이 성공적으로 승인되었습니다.</span>
-        <span th:if="${param.approved[0] == 'professor'}">교수가 성공적으로 승인되었습니다.</span>
-    </div>
-
-    <div th:if="${param.rejected != null}" class="alert alert-warning">
-        <span th:if="${param.rejected[0] == 'student'}">학생 회원가입이 거부되었습니다.</span>
-        <span th:if="${param.rejected[0] == 'professor'}">교수 회원가입이 거부되었습니다.</span>
+    <div th:if="${param.revoked != null}" class="alert alert-warning">
+        <span th:if="${param.revoked[0] == 'student'}">학생의 권한이 회수되었습니다.</span>
+        <span th:if="${param.revoked[0] == 'professor'}">교수의 권한이 회수되었습니다.</span>
     </div>
 
     <div class="page-header">
-        <h1>회원가입 승인 관리</h1>
-        <p>새로 가입한 학생과 교수의 승인 요청을 검토하고 처리하세요</p>
+        <h1>승인된 사용자 관리</h1>
+        <p>현재 시스템을 사용 중인 학생과 교수를 관리하세요</p>
     </div>
 
-    <!-- 승인 대기 학생들 -->
+    <!-- 검색 기능 -->
+    <div class="search-section">
+        <input type="text" class="search-input" id="searchInput" placeholder="이름이나 ID로 검색하세요...">
+    </div>
+
+    <!-- 승인된 학생들 -->
     <div class="section">
         <div class="section-title">
             <span class="section-icon">👨‍🎓</span>
-            승인 대기 학생
-            <span class="count-badge" th:text="${#lists.size(pendingStudents)}">0</span>
+            승인된 학생
+            <span class="count-badge" th:text="${#lists.size(approvedStudents)}">0</span>
         </div>
 
-        <div th:if="${#lists.isEmpty(pendingStudents)}" class="empty-message">
+        <div th:if="${#lists.isEmpty(approvedStudents)}" class="empty-message">
             <div class="empty-icon">📚</div>
-            <p>승인 대기 중인 학생이 없습니다</p>
+            <p>승인된 학생이 없습니다</p>
         </div>
 
-        <div th:unless="${#lists.isEmpty(pendingStudents)}" class="users-grid">
-            <div th:each="student : ${pendingStudents}" class="user-card">
+        <div th:unless="${#lists.isEmpty(approvedStudents)}" class="users-grid" id="studentsGrid">
+            <div th:each="student : ${approvedStudents}" class="user-card approved"
+                 th:data-name="${student.name}" th:data-id="${student.studentId}">
                 <div class="user-info">
                     <div class="user-name" th:text="${student.name}">학생 이름</div>
                     <div class="user-id">학번: <span th:text="${student.studentId}">12345</span></div>
-                    <span class="user-type">학생</span>
+                    <div class="user-status">
+                        <span class="user-type">학생</span>
+                        <span class="status-badge">✓ 승인됨</span>
+                    </div>
                 </div>
                 <div class="user-actions">
-                    <form th:action="@{/admin/approve-student}" method="post" style="display: inline;">
+                    <form th:action="@{/admin/revoke-student}" method="post" style="display: inline;">
                         <input type="hidden" name="studentId" th:value="${student.studentId}">
-                        <button type="submit" class="approve-btn"
-                                onclick="return confirm('이 학생을 승인하시겠습니까?')">
-                            ✓ 승인
-                        </button>
-                    </form>
-                    <form th:action="@{/admin/reject-student}" method="post" style="display: inline;">
-                        <input type="hidden" name="studentId" th:value="${student.studentId}">
-                        <button type="submit" class="reject-btn"
-                                onclick="return confirm('이 학생의 가입을 거부하시겠습니까?')">
-                            ✗ 거부
+                        <button type="submit" class="revoke-btn"
+                                onclick="return confirm('이 학생의 권한을 회수하시겠습니까?\\n권한이 회수되면 로그인할 수 없습니다.')">
+                            ⚠ 권한 회수
                         </button>
                     </form>
                 </div>
@@ -332,39 +348,36 @@
         </div>
     </div>
 
-    <!-- 승인 대기 교수들 -->
+    <!-- 승인된 교수들 -->
     <div class="section">
         <div class="section-title">
             <span class="section-icon">👨‍🏫</span>
-            승인 대기 교수
-            <span class="count-badge" th:text="${#lists.size(pendingProfessors)}">0</span>
+            승인된 교수
+            <span class="count-badge" th:text="${#lists.size(approvedProfessors)}">0</span>
         </div>
 
-        <div th:if="${#lists.isEmpty(pendingProfessors)}" class="empty-message">
+        <div th:if="${#lists.isEmpty(approvedProfessors)}" class="empty-message">
             <div class="empty-icon">👨‍🏫</div>
-            <p>승인 대기 중인 교수가 없습니다</p>
+            <p>승인된 교수가 없습니다</p>
         </div>
 
-        <div th:unless="${#lists.isEmpty(pendingProfessors)}" class="users-grid">
-            <div th:each="professor : ${pendingProfessors}" class="user-card">
+        <div th:unless="${#lists.isEmpty(approvedProfessors)}" class="users-grid" id="professorsGrid">
+            <div th:each="professor : ${approvedProfessors}" class="user-card approved"
+                 th:data-name="${professor.name}" th:data-id="${professor.professorId}">
                 <div class="user-info">
                     <div class="user-name" th:text="${professor.name}">교수 이름</div>
                     <div class="user-id">교번: <span th:text="${professor.professorId}">P12345</span></div>
-                    <span class="user-type">교수</span>
+                    <div class="user-status">
+                        <span class="user-type">교수</span>
+                        <span class="status-badge">✓ 승인됨</span>
+                    </div>
                 </div>
                 <div class="user-actions">
-                    <form th:action="@{/admin/approve-professor}" method="post" style="display: inline;">
+                    <form th:action="@{/admin/revoke-professor}" method="post" style="display: inline;">
                         <input type="hidden" name="professorId" th:value="${professor.professorId}">
-                        <button type="submit" class="approve-btn"
-                                onclick="return confirm('이 교수를 승인하시겠습니까?')">
-                            ✓ 승인
-                        </button>
-                    </form>
-                    <form th:action="@{/admin/reject-professor}" method="post" style="display: inline;">
-                        <input type="hidden" name="professorId" th:value="${professor.professorId}">
-                        <button type="submit" class="reject-btn"
-                                onclick="return confirm('이 교수의 가입을 거부하시겠습니까?')">
-                            ✗ 거부
+                        <button type="submit" class="revoke-btn"
+                                onclick="return confirm('이 교수의 권한을 회수하시겠습니까?\\n권한이 회수되면 로그인할 수 없습니다.')">
+                            ⚠ 권한 회수
                         </button>
                     </form>
                 </div>
@@ -372,5 +385,38 @@
         </div>
     </div>
 </div>
+
+<script>
+    // 검색 기능
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const studentCards = document.querySelectorAll('#studentsGrid .user-card');
+        const professorCards = document.querySelectorAll('#professorsGrid .user-card');
+
+        // 학생 카드 필터링
+        studentCards.forEach(card => {
+            const name = card.dataset.name.toLowerCase();
+            const id = card.dataset.id.toLowerCase();
+
+            if (name.includes(searchTerm) || id.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // 교수 카드 필터링
+        professorCards.forEach(card => {
+            const name = card.dataset.name.toLowerCase();
+            const id = card.dataset.id.toLowerCase();
+
+            if (name.includes(searchTerm) || id.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
 </body>
 </html>

@@ -104,7 +104,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 30px;
             margin-bottom: 40px;
         }
@@ -156,6 +156,22 @@
             color: #00b894;
         }
 
+        .course-number {
+            color: #0984e3;
+        }
+
+        .assignment-number {
+            color: #6c5ce7;
+        }
+
+        .course-icon {
+            background: linear-gradient(45deg, #0984e3, #74b9ff);
+        }
+
+        .assignment-icon {
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+        }
+
         .stat-label {
             font-size: 18px;
             color: #636e72;
@@ -164,7 +180,7 @@
 
         .actions-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 30px;
         }
 
@@ -271,21 +287,33 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon approved-icon">✅</div>
-            <div class="stat-number approved-number" th:text="${stats.approvedStudents}">0</div>
-            <div class="stat-label">승인된 학생</div>
-        </div>
-
-        <div class="stat-card">
             <div class="stat-icon pending-icon">⏳</div>
             <div class="stat-number pending-number" th:text="${stats.pendingProfessors}">0</div>
             <div class="stat-label">승인 대기 교수</div>
         </div>
 
         <div class="stat-card">
+            <div class="stat-icon course-icon">📚</div>
+            <div class="stat-number course-number" th:text="${stats.totalCourses}">0</div>
+            <div class="stat-label">전체 강의</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon approved-icon">✅</div>
+            <div class="stat-number approved-number" th:text="${stats.approvedStudents}">0</div>
+            <div class="stat-label">승인된 학생</div>
+        </div>
+
+        <div class="stat-card">
             <div class="stat-icon approved-icon">✅</div>
             <div class="stat-number approved-number" th:text="${stats.approvedProfessors}">0</div>
             <div class="stat-label">승인된 교수</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon assignment-icon">📝</div>
+            <div class="stat-number assignment-number" th:text="${stats.totalAssignments}">0</div>
+            <div class="stat-label">전체 과제</div>
         </div>
     </div>
 
@@ -311,6 +339,24 @@
                 현재 시스템을 사용 중인 학생과 교수의 목록을 확인하고 권한을 관리할 수 있습니다.
             </div>
             <a th:href="@{/admin/approved-users}" class="action-btn">사용자 관리</a>
+        </div>
+
+        <div class="action-card">
+            <div class="action-icon">📚</div>
+            <div class="action-title">강의 관리</div>
+            <div class="action-description">
+                전체 강의 목록을 확인하고, 강의별 수강생과 과제를 관리할 수 있습니다.
+            </div>
+            <a th:href="@{/admin/courses}" class="action-btn">강의 관리</a>
+        </div>
+
+        <div class="action-card">
+            <div class="action-icon">📝</div>
+            <div class="action-title">과제 관리</div>
+            <div class="action-description">
+                전체 과제 목록을 확인하고, 과제별 제출 현황과 통계를 확인할 수 있습니다.
+            </div>
+            <a th:href="@{/admin/assignments}" class="action-btn">과제 관리</a>
         </div>
     </div>
 </div>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강의 상세 정보 - Ploytech 시스템</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: #5f3dc4;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            margin-right: 20px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .course-header {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .course-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2d3436;
+            margin-bottom: 15px;
+        }
+
+        .course-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #0984e3;
+        }
+
+        .info-label {
+            color: #636e72;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3436;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            margin-right: 15px;
+            font-size: 28px;
+        }
+
+        .students-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .student-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e1e8ed;
+            transition: all 0.3s;
+        }
+
+        .student-card:hover {
+            border-color: #0984e3;
+            transform: translateY(-2px);
+        }
+
+        .student-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2d3436;
+            margin-bottom: 8px;
+        }
+
+        .student-id {
+            color: #636e72;
+            font-size: 14px;
+        }
+
+        .assignments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .assignment-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e1e8ed;
+            transition: all 0.3s;
+        }
+
+        .assignment-card:hover {
+            border-color: #6c5ce7;
+            transform: translateY(-2px);
+        }
+
+        .assignment-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2d3436;
+            margin-bottom: 10px;
+        }
+
+        .assignment-dates {
+            font-size: 14px;
+            color: #636e72;
+            margin-bottom: 15px;
+        }
+
+        .assignment-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-active {
+            background: linear-gradient(45deg, #00b894, #55efc4);
+            color: white;
+        }
+
+        .status-overdue {
+            background: linear-gradient(45deg, #ff7675, #fd79a8);
+            color: white;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #636e72;
+            font-size: 16px;
+            padding: 40px;
+        }
+
+        .delete-course-btn {
+            background: linear-gradient(45deg, #ff7675, #fd79a8);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            float: right;
+            margin-top: 20px;
+        }
+
+        .delete-course-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 118, 117, 0.4);
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <a th:href="@{/admin/courses}" class="back-btn">← 뒤로가기</a>
+        <div class="title" th:text="${course.courseName}">강의명</div>
+    </div>
+    <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
+</div>
+
+<div class="container">
+    <div class="course-header">
+        <div class="course-title" th:text="${course.courseName}">강의명</div>
+        <p><strong>강의코드:</strong> <span th:text="${course.courseCode}">CS101</span></p>
+        <p><strong>담당교수:</strong> <span th:text="${course.professor != null ? course.professor.name : '정보 없음'}">김교수</span></p>
+
+        <div class="course-info">
+            <div class="info-item">
+                <div class="info-number" th:text="${course.studentCount}">0</div>
+                <div class="info-label">수강생 수</div>
+            </div>
+            <div class="info-item">
+                <div class="info-number" th:text="${course.assignmentCount}">0</div>
+                <div class="info-label">과제 수</div>
+            </div>
+            <div class="info-item">
+                <div class="info-number" th:text="${#lists.size(enrollments)}">0</div>
+                <div class="info-label">등록 현황</div>
+            </div>
+        </div>
+
+        <form th:action="@{/admin/delete-course}" method="post" style="display: inline;">
+            <input type="hidden" name="courseCode" th:value="${course.courseCode}">
+            <button type="submit" class="delete-course-btn"
+                    onclick="return confirm('이 강의를 삭제하시겠습니까?\\n\\n⚠️ 경고: 강의와 관련된 모든 데이터가 영구적으로 삭제됩니다.')">
+                🗑️ 강의 삭제
+            </button>
+        </form>
+    </div>
+
+    <!-- 수강생 목록 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="section-icon">👥</span>
+            수강생 목록
+        </div>
+
+        <div th:if="${#lists.isEmpty(enrollments)}" class="empty-message">
+            등록된 수강생이 없습니다.
+        </div>
+
+        <div th:unless="${#lists.isEmpty(enrollments)}" class="students-grid">
+            <div th:each="enrollment : ${enrollments}" class="student-card">
+                <div class="student-name" th:text="${enrollment.student != null ? enrollment.student.name : '정보 없음'}">학생 이름</div>
+                <div class="student-id">학번: <span th:text="${enrollment.studentId}">12345</span></div>
+                <div class="student-id">등록일: <span th:text="${#temporals.format(enrollment.enrollmentDate, 'yyyy-MM-dd')}">2024-01-01</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 과제 목록 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="section-icon">📝</span>
+            과제 목록
+        </div>
+
+        <div th:if="${#lists.isEmpty(assignments)}" class="empty-message">
+            등록된 과제가 없습니다.
+        </div>
+
+        <div th:unless="${#lists.isEmpty(assignments)}" class="assignments-grid">
+            <div th:each="assignment : ${assignments}" class="assignment-card">
+                <div class="assignment-title" th:text="${assignment.title}">과제 제목</div>
+                <div class="assignment-dates">
+                    생성일: <span th:text="${#temporals.format(assignment.createdDate, 'yyyy-MM-dd HH:mm')}">2024-01-01 09:00</span><br>
+                    마감일: <span th:text="${#temporals.format(assignment.dueDate, 'yyyy-MM-dd HH:mm')}">2024-01-15 23:59</span>
+                </div>
+                <span th:class="${#temporals.isAfter(#temporals.createNow(), assignment.dueDate) ? 'assignment-status status-overdue' : 'assignment-status status-active'}"
+                      th:text="${#temporals.isAfter(#temporals.createNow(), assignment.dueDate) ? '마감됨' : '진행중'}">진행중</span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.domain.*;
 import com.example.demo.repository.*;
-import com.example.demo.service.AdministratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,8 +36,7 @@ public class ProjectController {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
-    @Autowired
-    private AdministratorService administratorService;
+    // === 로그인 및 인증 ===
 
     // 메인 로그인 페이지
     @GetMapping("/")
@@ -58,7 +56,7 @@ public class ProjectController {
             // 관리자 로그인 성공
             session.setAttribute("user", administrator);
             session.setAttribute("userType", "관리자");
-            return "redirect:/administrator-main";
+            return "redirect:/admin/main";  // 변경된 경로
         }
 
         // 학생 테이블에서 확인
@@ -94,6 +92,15 @@ public class ProjectController {
         model.addAttribute("error", "아이디 또는 비밀번호가 틀렸습니다.");
         return "login";
     }
+
+    // 로그아웃
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/";
+    }
+
+    // === 회원가입 관련 ===
 
     // 기존의 /student-main 경로도 유지 (호환성을 위해)
     @GetMapping("/student-main")
@@ -185,132 +192,15 @@ public class ProjectController {
         return "register-success";
     }
 
-    // === 관리자 관련 매핑 ===
+    // === 관리자 관련 ===
 
-    // 관리자 메인 페이지
+    // 관리자 메인 페이지로의 리다이렉트 (호환성을 위해)
     @GetMapping("/administrator-main")
-    public String administratorMain(Model model, HttpSession session) {
-        Administrator administrator = (Administrator) session.getAttribute("user");
-        if (administrator == null) {
-            return "redirect:/";
-        }
-
-        // 통계 데이터 조회
-        AdministratorService.AdminStatistics stats = administratorService.getStatistics();
-
-        model.addAttribute("administrator", administrator);
-        model.addAttribute("stats", stats);
-
-        return "administrator/administrator-main";
+    public String administratorMainRedirect() {
+        return "redirect:/admin/main";
     }
 
-    // 승인 대기 목록 페이지
-    @GetMapping("/admin/pending-users")
-    public String pendingUsers(Model model, HttpSession session) {
-        Administrator administrator = (Administrator) session.getAttribute("user");
-        if (administrator == null) {
-            return "redirect:/";
-        }
-
-        List<Student> pendingStudents = administratorService.getPendingStudents();
-        List<Professor> pendingProfessors = administratorService.getPendingProfessors();
-
-        model.addAttribute("pendingStudents", pendingStudents);
-        model.addAttribute("pendingProfessors", pendingProfessors);
-
-        return "administrator/administrator-pending-users";
-    }
-
-    // 승인된 사용자 목록 페이지
-    @GetMapping("/admin/approved-users")
-    public String approvedUsers(Model model, HttpSession session) {
-        Administrator administrator = (Administrator) session.getAttribute("user");
-        if (administrator == null) {
-            return "redirect:/";
-        }
-
-        List<Student> approvedStudents = administratorService.getApprovedStudents();
-        List<Professor> approvedProfessors = administratorService.getApprovedProfessors();
-
-        model.addAttribute("approvedStudents", approvedStudents);
-        model.addAttribute("approvedProfessors", approvedProfessors);
-
-        return "administrator/approved-users";
-    }
-
-    // 학생 승인 처리
-    @PostMapping("/admin/approve-student")
-    public String approveStudent(@RequestParam String studentId, HttpSession session) {
-        Administrator administrator = (Administrator) session.getAttribute("user");
-        if (administrator == null) {
-            return "redirect:/";
-        }
-
-        administratorService.approveStudent(studentId);
-        return "redirect:/admin/pending-users?approved=student";
-    }
-
-    // 교수 승인 처리
-    @PostMapping("/admin/approve-professor")
-    public String approveProfessor(@RequestParam String professorId, HttpSession session) {
-        Administrator administrator = (Administrator) session.getAttribute("user");
-        if (administrator == null) {
-            return "redirect:/";
-        }
-
-        administratorService.approveProfessor(professorId);
-        return "redirect:/admin/pending-users?approved=professor";
-    }
-
-    // 학생 거부 처리
-    @PostMapping("/admin/reject-student")
-    public String rejectStudent(@RequestParam String studentId, HttpSession session) {
-        Administrator administrator = (Administrator) session.getAttribute("user");
-        if (administrator == null) {
-            return "redirect:/";
-        }
-
-        administratorService.rejectStudent(studentId);
-        return "redirect:/admin/pending-users?rejected=student";
-    }
-
-    // 교수 거부 처리
-    @PostMapping("/admin/reject-professor")
-    public String rejectProfessor(@RequestParam String professorId, HttpSession session) {
-        Administrator administrator = (Administrator) session.getAttribute("user");
-        if (administrator == null) {
-            return "redirect:/";
-        }
-
-        administratorService.rejectProfessor(professorId);
-        return "redirect:/admin/pending-users?rejected=professor";
-    }
-
-    // 학생 권한 회수 처리
-    @PostMapping("/admin/revoke-student")
-    public String revokeStudent(@RequestParam String studentId, HttpSession session) {
-        Administrator administrator = (Administrator) session.getAttribute("user");
-        if (administrator == null) {
-            return "redirect:/";
-        }
-
-        administratorService.revokeStudent(studentId);
-        return "redirect:/admin/approved-users?revoked=student";
-    }
-
-    // 교수 권한 회수 처리
-    @PostMapping("/admin/revoke-professor")
-    public String revokeProfessor(@RequestParam String professorId, HttpSession session) {
-        Administrator administrator = (Administrator) session.getAttribute("user");
-        if (administrator == null) {
-            return "redirect:/";
-        }
-
-        administratorService.revokeProfessor(professorId);
-        return "redirect:/admin/approved-users?revoked=professor";
-    }
-
-    // === 기존 교수 관련 매핑들 ===
+    // === 교수 관련 기능들 ===
 
     // 교수 메인 페이지
     @GetMapping("/professor-main")
@@ -429,12 +319,5 @@ public class ProjectController {
         assignmentRepository.save(newAssignment);
 
         return "redirect:/professor-main?assignmentCreated=true";
-    }
-
-    // 로그아웃
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/";
     }
 }

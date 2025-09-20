@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>과제 관리 - Ploytech 시스템</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: #5f3dc4;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .logo::before {
+            content: "📝";
+            font-size: 20px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            transition: background 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-header h1 {
+            color: #2d3436;
+            font-size: 32px;
+            margin: 0;
+        }
+
+        .page-header p {
+            color: #636e72;
+            font-size: 16px;
+            margin: 5px 0 0 0;
+        }
+
+        .stats-summary {
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stats-summary h3 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        .assignments-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .assignments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 25px;
+        }
+
+        .assignment-card {
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .assignment-card:hover {
+            border-color: #6c5ce7;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.1);
+        }
+
+        .assignment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .assignment-info {
+            flex: 1;
+        }
+
+        .assignment-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2d3436;
+            margin-bottom: 8px;
+        }
+
+        .assignment-course {
+            color: #636e72;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .assignment-professor {
+            color: #6c5ce7;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .assignment-dates {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f1f0ff;
+            border-radius: 8px;
+        }
+
+        .date-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .date-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .date-label {
+            color: #636e72;
+            font-weight: 500;
+        }
+
+        .date-value {
+            color: #2d3436;
+        }
+
+        .assignment-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .view-btn {
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .view-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        .delete-btn {
+            background: linear-gradient(45deg, #ff7675, #fd79a8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 118, 117, 0.3);
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #636e72;
+            font-size: 18px;
+            padding: 60px;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .assignment-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-active {
+            background: linear-gradient(45deg, #00b894, #55efc4);
+            color: white;
+        }
+
+        .status-overdue {
+            background: linear-gradient(45deg, #ff7675, #fd79a8);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div class="logo"></div>
+        <div class="title">과제 관리</div>
+    </div>
+    <div class="nav-links">
+        <a th:href="@{/admin/main}" class="nav-link">대시보드</a>
+        <a th:href="@{/admin/pending-users}" class="nav-link">승인 대기</a>
+        <a th:href="@{/admin/approved-users}" class="nav-link">승인된 사용자</a>
+        <a th:href="@{/admin/courses}" class="nav-link">강의 관리</a>
+        <a th:href="@{/admin/assignments}" class="nav-link active">과제 관리</a>
+        <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
+    </div>
+</div>
+
+<div class="container">
+    <!-- 성공/실패 메시지 -->
+    <div th:if="${param.deleted != null and param.deleted[0] == 'success'}" class="alert alert-success">
+        과제가 성공적으로 삭제되었습니다.
+    </div>
+
+    <div th:if="${param.deleted != null and param.deleted[0] == 'error'}" class="alert alert-danger">
+        과제 삭제 중 오류가 발생했습니다.
+    </div>
+
+    <div th:if="${param.error != null and param.error[0] == 'assignmentNotFound'}" class="alert alert-danger">
+        존재하지 않는 과제입니다.
+    </div>
+
+    <div class="page-header">
+        <div>
+            <h1>전체 과제 관리</h1>
+            <p>시스템에 등록된 모든 과제를 관리하세요</p>
+        </div>
+        <div class="stats-summary">
+            <h3 th:text="${#lists.size(assignments)}">0</h3>
+            <p>전체 과제 수</p>
+        </div>
+    </div>
+
+    <!-- 검색 기능 -->
+    <div class="search-section">
+        <input type="text" class="search-input" id="searchInput"
+               placeholder="과제명, 강의명, 교수명으로 검색하세요...">
+    </div>
+
+    <!-- 과제 목록 -->
+    <div class="assignments-section">
+        <div th:if="${#lists.isEmpty(assignments)}" class="empty-message">
+            <div class="empty-icon">📝</div>
+            <p>등록된 과제가 없습니다</p>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(assignments)}" class="assignments-grid" id="assignmentsGrid">
+            <div th:each="assignment : ${assignments}" class="assignment-card"
+                 th:data-title="${assignment.title}"
+                 th:data-course="${assignment.course != null ? assignment.course.courseName : ''}"
+                 th:data-professor="${assignment.course != null and assignment.course.professor != null ? assignment.course.professor.name : ''}">
+
+                <div class="assignment-header">
+                    <div class="assignment-info">
+                        <div class="assignment-title" th:text="${assignment.title}">과제명</div>
+                        <div class="assignment-course" th:text="${assignment.course != null ? assignment.course.courseName : '강의 정보 없음'}">강의명</div>
+                        <div class="assignment-professor" th:text="${assignment.course != null and assignment.course.professor != null ? assignment.course.professor.name + ' 교수' : '교수 정보 없음'}">김교수 교수</div>
+                    </div>
+<!--                    <span th:class="${#temporals.isAfter(#temporals.createNow(), assignment.dueDate) ? 'assignment-status status-overdue' : 'assignment-status status-active'}"-->
+<!--                          th:text="${#temporals.isAfter(#temporals.createNow(), assignment.dueDate) ? '마감됨' : '진행중'}">진행중</span>-->
+                    <span th:class="${assignment.dueDate.isBefore(T(java.time.LocalDateTime).now())
+                   ? 'assignment-status status-overdue'
+                   : 'assignment-status status-active'}"
+                          th:text="${assignment.dueDate.isBefore(T(java.time.LocalDateTime).now())
+                   ? '마감됨'
+                   : '진행중'}">
+    진행중
+</span>
+                </div>
+
+                <div class="assignment-dates">
+                    <div class="date-item">
+                        <span class="date-label">생성일:</span>
+                        <span class="date-value" th:text="${#temporals.format(assignment.createdDate, 'yyyy-MM-dd HH:mm')}">2024-01-01 09:00</span>
+                    </div>
+                    <div class="date-item">
+                        <span class="date-label">마감일:</span>
+                        <span class="date-value" th:text="${#temporals.format(assignment.dueDate, 'yyyy-MM-dd HH:mm')}">2024-01-15 23:59</span>
+                    </div>
+                </div>
+
+                <div class="assignment-actions">
+                    <a th:href="@{'/admin/assignment/' + ${assignment.assignmentCode}}" class="view-btn">상세보기</a>
+                    <form th:action="@{/admin/delete-assignment}" method="post" style="display: inline;">
+                        <input type="hidden" name="assignmentCode" th:value="${assignment.assignmentCode}">
+                        <button type="submit" class="delete-btn"
+                                onclick="return confirm('이 과제를 삭제하시겠습니까?\\n\\n⚠️ 경고: 과제와 관련된 모든 데이터가 삭제됩니다.\\n- 모든 제출물\\n- 모든 질문과 답변\\n\\n이 작업은 되돌릴 수 없습니다.')">
+                            🗑️ 삭제
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 검색 기능
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const assignmentCards = document.querySelectorAll('#assignmentsGrid .assignment-card');
+
+        assignmentCards.forEach(card => {
+            const title = card.dataset.title.toLowerCase();
+            const course = card.dataset.course.toLowerCase();
+            const professor = card.dataset.professor.toLowerCase();
+
+            if (title.includes(searchTerm) ||
+                course.includes(searchTerm) ||
+                professor.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -253,6 +253,14 @@
         <p><strong>강의코드:</strong> <span th:text="${course.courseCode}">CS101</span></p>
         <p><strong>담당교수:</strong> <span th:text="${course.professor != null ? course.professor.name : '정보 없음'}">김교수</span></p>
 
+        <form th:action="@{/admin/delete-course}" method="post" style="display: inline;">
+            <input type="hidden" name="courseCode" th:value="${course.courseCode}">
+            <button type="submit" class="delete-course-btn"
+                    onclick="return confirm('이 강의를 삭제하시겠습니까?\\n\\n⚠️ 경고: 강의와 관련된 모든 데이터가 영구적으로 삭제됩니다.')">
+                🗑️ 강의 삭제
+            </button>
+        </form>
+
         <div class="course-info">
             <div class="info-item">
                 <div class="info-number" th:text="${course.studentCount}">0</div>
@@ -267,14 +275,6 @@
                 <div class="info-label">등록 현황</div>
             </div>
         </div>
-
-        <form th:action="@{/admin/delete-course}" method="post" style="display: inline;">
-            <input type="hidden" name="courseCode" th:value="${course.courseCode}">
-            <button type="submit" class="delete-course-btn"
-                    onclick="return confirm('이 강의를 삭제하시겠습니까?\\n\\n⚠️ 경고: 강의와 관련된 모든 데이터가 영구적으로 삭제됩니다.')">
-                🗑️ 강의 삭제
-            </button>
-        </form>
     </div>
 
     <!-- 수강생 목록 -->

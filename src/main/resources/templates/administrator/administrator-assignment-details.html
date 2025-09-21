@@ -120,8 +120,9 @@
         }
 
         .stats-section {
+            width: 100%;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
             margin-bottom: 30px;
         }
@@ -253,7 +254,7 @@
             cursor: pointer;
             transition: all 0.3s;
             float: right;
-            margin-top: 20px;
+            /*margin-top: 20px;*/
         }
 
         .delete-assignment-btn:hover {
@@ -293,8 +294,22 @@
 <div class="container">
     <div class="assignment-header">
         <div class="assignment-title" th:text="${assignment.title}">과제 제목</div>
-        <span th:class="${#temporals.isAfter(#temporals.createNow(), assignment.dueDate) ? 'assignment-status status-overdue' : 'assignment-status status-active'}"
-              th:text="${#temporals.isAfter(#temporals.createNow(), assignment.dueDate) ? '마감됨' : '진행중'}">진행중</span>
+        <span th:class="${assignment.dueDate != null and assignment.dueDate.isBefore(T(java.time.LocalDateTime).now())
+                   ? 'assignment-status status-overdue'
+                   : 'assignment-status status-active'}"
+              th:text="${assignment.dueDate != null and assignment.dueDate.isBefore(T(java.time.LocalDateTime).now())
+                   ? '마감됨'
+                   : '진행중'}">
+                진행중
+            </span>
+
+        <form th:action="@{/admin/delete-assignment}" method="post" style="display: inline;">
+            <input type="hidden" name="assignmentCode" th:value="${assignment.assignmentCode}">
+            <button type="submit" class="delete-assignment-btn"
+                    onclick="return confirm('이 과제를 삭제하시겠습니까?\\n\\n⚠️ 경고: 과제와 관련된 모든 데이터가 영구적으로 삭제됩니다.')">
+                🗑️ 과제 삭제
+            </button>
+        </form>
 
         <div class="assignment-meta">
             <div class="meta-item">
@@ -320,13 +335,7 @@
             <p th:text="${assignment.content}">과제 내용이 여기에 표시됩니다.</p>
         </div>
 
-        <form th:action="@{/admin/delete-assignment}" method="post" style="display: inline;">
-            <input type="hidden" name="assignmentCode" th:value="${assignment.assignmentCode}">
-            <button type="submit" class="delete-assignment-btn"
-                    onclick="return confirm('이 과제를 삭제하시겠습니까?\\n\\n⚠️ 경고: 과제와 관련된 모든 데이터가 영구적으로 삭제됩니다.')">
-                🗑️ 과제 삭제
-            </button>
-        </form>
+
     </div>
 
     <!-- 통계 카드들 -->

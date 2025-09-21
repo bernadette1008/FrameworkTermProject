@@ -297,6 +297,23 @@
             background: #5a6268;
         }
 
+        .btn-danger{
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .btn-danger:hover{
+            background: #c0392b;
+        }
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -440,9 +457,21 @@
                     <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/submissions'}" class="btn-primary">
                         📋 제출물 보기
                     </a>
+                    <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/edit'}" class="btn-secondary">
+                        ✏️ 수정
+                    </a>
                     <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/questions'}" class="btn-secondary">
                         ❓ 질문 보기
                     </a>
+
+                    <form th:action="@{/professor/assignment/{code}/delete(code=${assignment.assignmentCode})}"
+                          method="post"
+                          onsubmit="return confirm('정말 삭제하시겠습니까?');"
+                          style="display:inline;">
+                        <button type="submit" class="btn-danger">
+                            🗑️ 과제 삭제
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

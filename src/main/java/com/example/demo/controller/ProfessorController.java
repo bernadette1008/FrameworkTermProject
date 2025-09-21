@@ -164,6 +164,34 @@ public class ProfessorController {
         return "redirect:/professor/courses";
     }
 
+    // 과제 삭제
+    @PostMapping("/assignment/{assignmentCode}/delete")
+    public String deleteAssignment(@PathVariable int assignmentCode,
+                                   HttpSession session,
+                                   RedirectAttributes redirectAttributes) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            return "redirect:/";
+        }
+
+        try {
+            Assignment assignment = professorService.getAssignmentDetails(assignmentCode);
+
+            // 교수 권한 확인
+            if (!assignment.getCourse().getProfessorId().equals(professor.getProfessorId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "권한이 없습니다.");
+                return "redirect:/professor/assignments";
+            }
+
+            professorService.deleteAssignment(assignmentCode);
+            redirectAttributes.addFlashAttribute("successMessage", "과제가 삭제되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/professor/assignments";
+    }
+
     // 수강생 강제 탈퇴
     @PostMapping("/course/{courseCode}/remove-student/{studentId}")
     public String removeStudent(@PathVariable String courseCode,
@@ -331,6 +359,91 @@ public class ProfessorController {
         }
 
         return "professor/professor-submissions";
+    }
+
+    // 과제 수정 페이지
+    @GetMapping("/assignment/{assignmentCode}/edit")
+    public String editAssignmentForm(@PathVariable int assignmentCode,
+                                     Model model,
+                                     HttpSession session) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            return "redirect:/";
+        }
+
+        try {
+            Assignment assignment = professorService.getAssignmentDetails(assignmentCode);
+
+            // 교수 권한 확인
+            if (!assignment.getCourse().getProfessorId().equals(professor.getProfessorId())) {
+                model.addAttribute("error", "접근 권한이 없습니다.");
+                return "error";
+            }
+
+            // 교수가 담당하는 강의 목록 (과제를 다른 강의로 이동할 수 있도록)
+            List<Course> courses = professorService.getProfessorCourses(professor.getProfessorId());
+
+            model.addAttribute("professor", professor);
+            model.addAttribute("assignment", assignment);
+            model.addAttribute("courses", courses);
+        } catch (Exception e) {
+            model.addAttribute("error", "과제 정보를 불러오는데 실패했습니다.");
+            return "error";
+        }
+
+        return "professor/professor-assignment-edit";
+    }
+
+    // 과제 수정 처리
+    @PostMapping("/assignment/{assignmentCode}/edit")
+    public String updateAssignment(@PathVariable int assignmentCode,
+                                   @RequestParam String courseCode,
+                                   @RequestParam String title,
+                                   @RequestParam String content,
+                                   @RequestParam String dueDate,
+                                   @RequestParam String dueTime,
+                                   HttpSession session,
+                                   RedirectAttributes redirectAttributes) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            return "redirect:/";
+        }
+
+        try {
+            Assignment assignment = professorService.getAssignmentDetails(assignmentCode);
+
+            // 교수 권한 확인
+            if (!assignment.getCourse().getProfessorId().equals(professor.getProfessorId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "권한이 없습니다.");
+                return "redirect:/professor/assignments";
+            }
+
+            // 선택한 강의도 해당 교수의 강의인지 확인
+            Course selectedCourse = professorService.getCourseDetails(courseCode);
+            if (!selectedCourse.getProfessorId().equals(professor.getProfessorId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "선택한 강의에 대한 권한이 없습니다.");
+                return "redirect:/professor/assignment/" + assignmentCode + "/edit";
+            }
+
+            // 입력값 유효성 검사
+            if (title == null || title.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "과제 제목을 입력해주세요.");
+                return "redirect:/professor/assignment/" + assignmentCode + "/edit";
+            }
+
+            if (content == null || content.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "과제 내용을 입력해주세요.");
+                return "redirect:/professor/assignment/" + assignmentCode + "/edit";
+            }
+
+            professorService.updateAssignment(assignmentCode, courseCode, title.trim(), content.trim(), dueDate, dueTime);
+            redirectAttributes.addFlashAttribute("successMessage", "과제가 수정되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/professor/assignment/" + assignmentCode + "/edit";
+        }
+
+        return "redirect:/professor/assignment/" + assignmentCode + "/submissions";
     }
 
     // 제출물 상세 보기 및 채점

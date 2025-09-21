@@ -6,7 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -277,5 +281,79 @@ public class ProfessorService {
         enrollmentRepository.deleteByStudentIdAndCourseCode(studentId, courseCode);
     }
 
+    // 과제 정보 수정
+    @Transactional
+    public void updateAssignment(int assignmentCode, String courseCode, String title, String content, String dueDate, String dueTime) {
+        Assignment assignment = assignmentRepository.findById(assignmentCode)
+                .orElseThrow(() -> new RuntimeException("과제를 찾을 수 없습니다."));
 
+        // 입력값 유효성 검사
+        if (title == null || title.trim().isEmpty()) {
+            throw new RuntimeException("과제 제목을 입력해주세요.");
+        }
+
+        if (content == null || content.trim().isEmpty()) {
+            throw new RuntimeException("과제 내용을 입력해주세요.");
+        }
+
+        if (dueDate == null || dueDate.trim().isEmpty() || dueTime == null || dueTime.trim().isEmpty()) {
+            throw new RuntimeException("마감일과 마감시간을 모두 입력해주세요.");
+        }
+
+        // 강의 존재 여부 확인
+        Course course = courseRepository.findById(courseCode)
+                .orElseThrow(() -> new RuntimeException("선택한 강의를 찾을 수 없습니다."));
+
+        try {
+            // 날짜와 시간을 합쳐서 LocalDateTime으로 변환
+            LocalDate date = LocalDate.parse(dueDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            LocalTime time = LocalTime.parse(dueTime, DateTimeFormatter.ofPattern("HH:mm"));
+            LocalDateTime dueDateTime = LocalDateTime.of(date, time);
+
+            // 마감일이 현재 시간보다 이전인지 확인 (선택적)
+            if (dueDateTime.isBefore(LocalDateTime.now())) {
+                throw new RuntimeException("마감일은 현재 시간보다 이후여야 합니다.");
+            }
+
+            // 과제 정보 업데이트
+            assignment.setCourseCode(courseCode);
+            assignment.setCourse(course);
+            assignment.setTitle(title.trim());
+            assignment.setContent(content.trim());
+            assignment.setDueDate(dueDateTime);
+
+            assignmentRepository.save(assignment);
+
+        } catch (DateTimeParseException e) {
+            throw new RuntimeException("날짜 또는 시간 형식이 올바르지 않습니다.");
+        }
+    }
+
+    // 과제 삭제 (제출물, 질문, 답변 모두 삭제)
+    @Transactional
+    public void deleteAssignment(int assignmentCode) {
+        Assignment assignment = assignmentRepository.findById(assignmentCode)
+                .orElseThrow(() -> new RuntimeException("과제를 찾을 수 없습니다."));
+
+        // 1. 모든 제출물 삭제
+        List<Submission> submissions = submissionRepository.findByAssignmentCode(assignmentCode);
+        if (!submissions.isEmpty()) {
+            submissionRepository.deleteAll(submissions);
+        }
+
+        // 2. 모든 질문과 답변 삭제
+        List<Question> questions = questionRepository.findByAssignmentCode(assignmentCode);
+        for (Question question : questions) {
+            List<Answer> answers = answerRepository.findByQuestionCode(question.getQuestionCode());
+            if (!answers.isEmpty()) {
+                answerRepository.deleteAll(answers);
+            }
+        }
+        if (!questions.isEmpty()) {
+            questionRepository.deleteAll(questions);
+        }
+
+        // 3. 과제 삭제
+        assignmentRepository.delete(assignment);
+    }
 }

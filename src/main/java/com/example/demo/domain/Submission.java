@@ -32,6 +32,19 @@ public class Submission {
     private String feedback;
     private LocalDateTime lastModifiedDate;
 
+    // 파일 업로드 관련 필드 추가
+    @Column(name = "file_name")
+    private String fileName;
+
+    @Column(name = "original_file_name")
+    private String originalFileName;
+
+    @Column(name = "file_path")
+    private String filePath;
+
+    @Column(name = "file_size")
+    private Long fileSize;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignment_code", insertable = false, updatable = false)
     private Assignment assignment;
@@ -39,4 +52,6 @@ public class Submission {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", insertable = false, updatable = false)
     private Student student;
+
+
 }

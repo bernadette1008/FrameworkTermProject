@@ -213,108 +213,6 @@
             box-shadow: 0 0 0 3px rgba(127, 205, 205, 0.1);
         }
 
-        .file-upload-area {
-            margin-top: 20px;
-            padding: 20px;
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            background: #f8f9fa;
-        }
-
-        .file-upload-area.dragover {
-            border-color: #7fcdcd;
-            background: #f0fffe;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-
-        .file-input {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-input-label {
-            background: #6c757d;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
-            display: inline-block;
-        }
-
-        .file-input-label:hover {
-            background: #5a6268;
-        }
-
-        .file-info {
-            margin-top: 10px;
-            padding: 10px;
-            background: white;
-            border-radius: 5px;
-            display: none;
-        }
-
-        .file-info.show {
-            display: block;
-        }
-
-        .file-name {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .file-size {
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-
-        .file-remove {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-
-        .file-remove:hover {
-            background: #c82333;
-        }
-
-        .submitted-file {
-            background: #e8f5e8;
-            border: 1px solid #28a745;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-        }
-
-        .file-download-btn {
-            background: #17a2b8;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
-            text-decoration: none;
-            display: inline-block;
-            margin-right: 10px;
-        }
-
-        .file-download-btn:hover {
-            background: #138496;
-        }
-
         .btn-primary {
             background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
             color: white;
@@ -478,20 +376,45 @@
             font-size: 14px;
         }
 
-        .checkbox-group {
-            margin-top: 10px;
-        }
-
-        .checkbox-group label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: normal;
+        /* 파일 업로드 스타일 */
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            background: #f8f9fa;
             cursor: pointer;
+            transition: border-color 0.3s;
+            margin-bottom: 10px;
         }
 
-        .checkbox-group input[type="checkbox"] {
-            margin: 0;
+        input[type="file"]:hover {
+            border-color: #7fcdcd;
+        }
+
+        input[type="file"]:focus {
+            outline: none;
+            border-color: #7fcdcd;
+            box-shadow: 0 0 0 3px rgba(127, 205, 205, 0.1);
+        }
+
+        .file-display {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 3px solid #28a745;
+        }
+
+        .file-info-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+
+        .drag-over {
+            border-color: #7fcdcd !important;
+            background-color: rgba(127, 205, 205, 0.1) !important;
         }
 
         @media (max-width: 768px) {
@@ -578,22 +501,22 @@
                     <div id="noSubmission">
                         <h3>📤 과제를 제출해주세요</h3>
                         <p>아직 제출하지 않은 과제입니다.</p>
+
+                        <!-- 텍스트 입력 -->
                         <textarea id="submissionContent" class="textarea-large" placeholder="과제 내용을 여기에 작성해주세요..."></textarea>
 
-                        <!-- File Upload Area -->
-                        <div class="file-upload-area" id="fileUploadArea">
-                            <div class="file-input-wrapper">
-                                <input type="file" id="fileInput" class="file-input" accept="*/*">
-                                <label for="fileInput" class="file-input-label">📎 파일 첨부</label>
-                            </div>
-                            <p style="margin: 10px 0 0 0; color: #7f8c8d; font-size: 14px;">
-                                클릭하여 파일을 선택하거나 드래그앤드롭으로 업로드하세요 (최대 10MB)
-                            </p>
-                            <div id="fileInfo" class="file-info">
-                                <div class="file-name" id="fileName"></div>
-                                <div class="file-size" id="fileSize"></div>
-                                <button type="button" class="file-remove" onclick="removeFile()">삭제</button>
-                            </div>
+                        <!-- 파일 업로드 -->
+                        <div style="margin: 15px 0;">
+                            <label for="submissionFile" style="display: block; margin-bottom: 8px; font-weight: bold; color: #2c3e50;">
+                                📎 파일 첨부 (선택사항)
+                            </label>
+                            <input type="file"
+                                   id="submissionFile"
+                                   accept=".pdf,.doc,.docx,.txt,.hwp,.zip,.jpg,.jpeg,.png">
+                            <div id="submissionFileDisplay"></div>
+                            <small style="color: #7f8c8d;">
+                                허용 형식: PDF, DOC, DOCX, TXT, HWP, ZIP, JPG, PNG (최대 10MB)
+                            </small>
                         </div>
 
                         <div style="margin-top: 15px;">
@@ -604,9 +527,23 @@
                     <div id="hasSubmission" style="display: none;">
                         <h3>✅ 제출 완료</h3>
                         <p>제출일: <span id="submittedDate"></span></p>
+
+                        <!-- 제출된 내용 표시 -->
                         <div class="submission-content" id="submittedContent">
                             제출된 내용...
                         </div>
+
+                        <!-- 제출된 파일 정보 표시 -->
+                        <div id="submittedFileInfo" style="display: none; margin-top: 10px;">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 3px solid #28a745;">
+                                <strong>📎 첨부 파일:</strong>
+                                <div id="submittedFileName" style="margin-top: 5px;"></div>
+                                <button class="btn-secondary" onclick="downloadFile()" style="margin-top: 10px; padding: 6px 12px; font-size: 14px;">
+                                    다운로드
+                                </button>
+                            </div>
+                        </div>
+
                         <div style="margin-top: 15px;">
                             <button class="btn-secondary" onclick="editSubmission()">수정하기</button>
                             <button class="btn-danger" onclick="deleteSubmission()">삭제하기</button>
@@ -615,7 +552,24 @@
 
                     <div id="editSubmission" style="display: none;">
                         <h3>✏️ 과제 수정</h3>
+
+                        <!-- 텍스트 수정 -->
                         <textarea id="editSubmissionContent" class="textarea-large"></textarea>
+
+                        <!-- 파일 수정 -->
+                        <div style="margin: 15px 0;">
+                            <label for="editSubmissionFile" style="display: block; margin-bottom: 8px; font-weight: bold; color: #2c3e50;">
+                                📎 파일 변경 (선택사항)
+                            </label>
+                            <input type="file"
+                                   id="editSubmissionFile"
+                                   accept=".pdf,.doc,.docx,.txt,.hwp,.zip,.jpg,.jpeg,.png">
+                            <div id="editSubmissionFileDisplay"></div>
+                            <small style="color: #7f8c8d;">
+                                파일을 선택하지 않으면 기존 파일이 유지됩니다.
+                            </small>
+                        </div>
+
                         <div style="margin-top: 15px;">
                             <button class="btn-primary" onclick="updateSubmission()">수정 완료</button>
                             <button class="btn-secondary" onclick="cancelEdit()">취소</button>
@@ -674,13 +628,13 @@
                 </div>
 
                 <div class="sidebar-item">
-                    <h4>💬 취득 점수</h4>
-                    <p><span id="studentScore">0</span>점</p>
+                    <h4>💯 취득 점수</h4>
+                    <p><span id="studentScore">미채점</span>점</p>
                 </div>
 
                 <div class="sidebar-item">
                     <h4>💬 피드백</h4>
-                    <p><span id="feedback">0</span></p>
+                    <p><span id="feedback">피드백 없음</span></p>
                 </div>
             </div>
         </div>
@@ -688,11 +642,53 @@
 </div>
 
 <script>
+    // 안전한 요소 접근을 위한 유틸리티 함수들
+    function safeGetElement(id) {
+        const element = document.getElementById(id);
+        if (!element) {
+            console.warn(`Element with id '${id}' not found`);
+        }
+        return element;
+    }
+
+    function safeSetTextContent(id, content) {
+        const element = safeGetElement(id);
+        if (element) {
+            element.textContent = content;
+        }
+    }
+
+    function safeSetInnerHTML(id, content) {
+        const element = safeGetElement(id);
+        if (element) {
+            element.innerHTML = content;
+        }
+    }
+
+    function safeSetStyle(id, property, value) {
+        const element = safeGetElement(id);
+        if (element && element.style) {
+            element.style[property] = value;
+        }
+    }
+
+    function safeAddClass(id, className) {
+        const element = safeGetElement(id);
+        if (element && element.classList) {
+            element.classList.add(className);
+        }
+    }
+
+    function safeRemoveClass(id, className) {
+        const element = safeGetElement(id);
+        if (element && element.classList) {
+            element.classList.remove(className);
+        }
+    }
+
     let currentAssignment = null;
     let currentSubmission = null;
     let assignmentCode = null;
-    let selectedFile = null;
-    let editSelectedFile = null;
 
     // 페이지 로드 시 실행
     document.addEventListener('DOMContentLoaded', function() {
@@ -703,114 +699,83 @@
         if (assignmentCode) {
             loadAssignmentDetails();
             loadQuestions();
+            setupFileUpload(); // 파일 업로드 설정
         } else {
             showError('유효하지 않은 과제입니다.');
         }
 
         // 실시간 시간 업데이트
         setInterval(updateTimeRemaining, 60000);
-
-        // 파일 업로드 이벤트 설정
-        setupFileUpload();
     });
 
-    // 파일 업로드 기능 설정
+    // 파일 업로드 이벤트 설정
     function setupFileUpload() {
-        const fileInput = document.getElementById('fileInput');
-        const editFileInput = document.getElementById('editFileInput');
-        const fileUploadArea = document.getElementById('fileUploadArea');
-        const editFileUploadArea = document.getElementById('editFileUploadArea');
+        const submissionFile = safeGetElement('submissionFile');
+        const editSubmissionFile = safeGetElement('editSubmissionFile');
 
-        // 메인 파일 입력
-        fileInput.addEventListener('change', function(e) {
-            handleFileSelect(e.target.files[0], false);
-        });
+        if (submissionFile) {
+            submissionFile.addEventListener('change', function() {
+                handleFileSelect('submissionFile', 'submissionFileDisplay');
+            });
+        }
 
-        // 수정 파일 입력
-        editFileInput.addEventListener('change', function(e) {
-            handleFileSelect(e.target.files[0], true);
-        });
-
-        // 드래그앤드롭 설정
-        setupDragAndDrop(fileUploadArea, false);
-        setupDragAndDrop(editFileUploadArea, true);
-    }
-
-    // 드래그앤드롭 설정
-    function setupDragAndDrop(element, isEdit) {
-        element.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            element.classList.add('dragover');
-        });
-
-        element.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            element.classList.remove('dragover');
-        });
-
-        element.addEventListener('drop', function(e) {
-            e.preventDefault();
-            element.classList.remove('dragover');
-
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFileSelect(files[0], isEdit);
-            }
-        });
+        if (editSubmissionFile) {
+            editSubmissionFile.addEventListener('change', function() {
+                handleFileSelect('editSubmissionFile', 'editSubmissionFileDisplay');
+            });
+        }
     }
 
     // 파일 선택 처리
-    function handleFileSelect(file, isEdit) {
-        if (!file) return;
+    function handleFileSelect(inputId, displayId) {
+        const fileInput = safeGetElement(inputId);
+        const fileDisplay = safeGetElement(displayId);
 
-        // 파일 크기 제한 (10MB)
-        const maxSize = 10 * 1024 * 1024;
+        if (!fileInput || !fileDisplay) return;
+
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+
+            if (validateFile(file)) {
+                fileDisplay.innerHTML = `
+                    <div class="file-display">
+                        <strong>선택된 파일:</strong> ${file.name}<br>
+                        <strong>크기:</strong> ${fileSize} MB<br>
+                        <strong>타입:</strong> ${file.type || '알 수 없음'}
+                    </div>
+                `;
+            } else {
+                fileDisplay.innerHTML = `
+                    <div class="file-display file-info-error">
+                        <strong>오류:</strong> 유효하지 않은 파일입니다.
+                    </div>
+                `;
+                fileInput.value = '';
+            }
+        } else {
+            fileDisplay.innerHTML = '';
+        }
+    }
+
+    // 파일 유효성 검사
+    function validateFile(file) {
+        const maxSize = 10 * 1024 * 1024; // 10MB
         if (file.size > maxSize) {
             alert('파일 크기는 10MB를 초과할 수 없습니다.');
-            return;
+            return false;
         }
 
-        if (isEdit) {
-            editSelectedFile = file;
-            displayFileInfo(file, true);
-        } else {
-            selectedFile = file;
-            displayFileInfo(file, false);
+        const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt', '.hwp', '.zip', '.jpg', '.jpeg', '.png'];
+        const fileName = file.name.toLowerCase();
+        const isValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+        if (!isValidExtension) {
+            alert('허용되지 않는 파일 형식입니다.\n허용 형식: ' + allowedExtensions.join(', '));
+            return false;
         }
-    }
 
-    // 파일 정보 표시
-    function displayFileInfo(file, isEdit) {
-        const prefix = isEdit ? 'edit' : '';
-        const fileInfo = document.getElementById(prefix + 'fileInfo');
-        const fileName = document.getElementById(prefix + 'fileName');
-        const fileSize = document.getElementById(prefix + 'fileSize');
-
-        fileName.textContent = file.name;
-        fileSize.textContent = formatFileSize(file.size);
-        fileInfo.classList.add('show');
-    }
-
-    // 파일 제거
-    function removeFile() {
-        selectedFile = null;
-        document.getElementById('fileInput').value = '';
-        document.getElementById('fileInfo').classList.remove('show');
-    }
-
-    function removeEditFile() {
-        editSelectedFile = null;
-        document.getElementById('editFileInput').value = '';
-        document.getElementById('editFileInfo').classList.remove('show');
-    }
-
-    // 파일 크기 포맷팅
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        return true;
     }
 
     // 과제 상세 정보 로드
@@ -827,8 +792,8 @@
                 displayAssignmentDetails();
                 updateSubmissionArea();
 
-                document.getElementById('loadingSpinner').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
+                safeSetStyle('loadingSpinner', 'display', 'none');
+                safeSetStyle('mainContent', 'display', 'block');
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -838,62 +803,147 @@
 
     // 과제 상세 정보 표시
     function displayAssignmentDetails() {
-        document.getElementById('assignmentTitle').textContent = currentAssignment.title;
-        document.getElementById('assignmentContent').textContent = currentAssignment.content;
-        document.getElementById('createdDate').textContent = formatDate(currentAssignment.createdDate);
-        document.getElementById('dueDate').textContent = formatDate(currentAssignment.dueDate);
+        if (!currentAssignment) return;
 
-        // 상태 표시
+        safeSetTextContent('assignmentTitle', currentAssignment.title);
+        safeSetTextContent('assignmentContent', currentAssignment.content);
+        safeSetTextContent('createdDate', formatDate(currentAssignment.createdDate));
+        safeSetTextContent('dueDate', formatDate(currentAssignment.dueDate));
+
+        // 점수와 피드백 표시
+        if (currentSubmission) {
+            safeSetTextContent('studentScore',
+                currentSubmission.score !== null ? currentSubmission.score : '미채점');
+            safeSetTextContent('feedback',
+                currentSubmission.feedback || '피드백 없음');
+        }
+
         updateStatus();
         updateTimeRemaining();
     }
 
     // 제출 영역 업데이트
     function updateSubmissionArea() {
-        const noSubmission = document.getElementById('noSubmission');
-        const hasSubmission = document.getElementById('hasSubmission');
-        const submissionStatus = document.getElementById('submissionStatus');
-        const submittedFile = document.getElementById('submittedFile');
+        const noSubmission = safeGetElement('noSubmission');
+        const hasSubmission = safeGetElement('hasSubmission');
 
         if (currentSubmission) {
-            // 제출됨
-            noSubmission.style.display = 'none';
-            hasSubmission.style.display = 'block';
+            if (noSubmission) noSubmission.style.display = 'none';
+            if (hasSubmission) hasSubmission.style.display = 'block';
 
-            document.getElementById('submittedDate').textContent = formatDate(currentSubmission.submittedDate);
-            document.getElementById('submittedContent').textContent = currentSubmission.content;
-            document.getElementById('submissionArea').classList.add('has-submission');
-            submissionStatus.textContent = '제출 완료';
-
-            // 점수 및 피드백 표시
-            const score = currentSubmission.score !== null ? currentSubmission.score : '-';
-            const feedback = currentSubmission.feedback || '-';
-            document.getElementById('studentScore').textContent = score;
-            document.getElementById('feedback').textContent = feedback;
+            safeSetTextContent('submittedDate', formatDate(currentSubmission.submittedDate));
+            safeSetTextContent('submittedContent', currentSubmission.content);
+            safeAddClass('submissionArea', 'has-submission');
+            safeSetTextContent('submissionStatus', '제출 완료');
 
             // 파일 정보 표시
-            if (currentSubmission.hasFile) {
-                submittedFile.style.display = 'block';
-                document.getElementById('submittedFileName').textContent = currentSubmission.fileName;
-                document.getElementById('submittedFileSize').textContent = formatFileSize(currentSubmission.fileSize);
-                document.getElementById('downloadLink').href = `/api/student/submission/${currentSubmission.submissionCode}/download`;
-            } else {
-                submittedFile.style.display = 'none';
+            const submittedFileInfo = safeGetElement('submittedFileInfo');
+            if (currentSubmission.fileName && submittedFileInfo) {
+                submittedFileInfo.style.display = 'block';
+                safeSetInnerHTML('submittedFileName', `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>${currentSubmission.originalFileName || currentSubmission.fileName}</span>
+                        <span style="font-size: 12px; color: #7f8c8d;">
+                            ${currentSubmission.fileSize ? formatFileSize(currentSubmission.fileSize) : ''}
+                        </span>
+                    </div>
+                `);
+            } else if (submittedFileInfo) {
+                submittedFileInfo.style.display = 'none';
             }
         } else {
-            // 미제출
-            noSubmission.style.display = 'block';
-            hasSubmission.style.display = 'none';
-            document.getElementById('submissionArea').classList.remove('has-submission');
-            submissionStatus.textContent = '미제출';
-            document.getElementById('studentScore').textContent = '-';
-            document.getElementById('feedback').textContent = '-';
+            if (noSubmission) noSubmission.style.display = 'block';
+            if (hasSubmission) hasSubmission.style.display = 'none';
+            safeRemoveClass('submissionArea', 'has-submission');
+            safeSetTextContent('submissionStatus', '미제출');
         }
+    }
+
+    // 파일 크기 포맷팅
+    function formatFileSize(bytes) {
+        if (!bytes) return '';
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
     }
 
     // 과제 제출
     function submitAssignment() {
-        const content = document.getElementById('submissionContent').value.trim();
+        const contentElement = safeGetElement('submissionContent');
+        const fileInput = safeGetElement('submissionFile');
+
+        if (!contentElement) {
+            alert('제출 폼을 찾을 수 없습니다.');
+            return;
+        }
+
+        const content = contentElement.value.trim();
+        const hasFile = fileInput && fileInput.files.length > 0;
+
+        if (hasFile) {
+            if (validateFile(fileInput.files[0])) {
+                submitAssignmentWithFile();
+            }
+        } else {
+            submitAssignmentTextOnly();
+        }
+    }
+
+    // 텍스트만 제출
+    function submitAssignmentTextOnly() {
+        const contentElement = safeGetElement('submissionContent');
+        if (!contentElement) {
+            alert('제출 폼을 찾을 수 없습니다.');
+            return;
+        }
+
+        const content = contentElement.value.trim();
+        if (!content) {
+            alert('제출할 내용을 입력해주세요.');
+            return;
+        }
+
+        if (!confirm('과제를 제출하시겠습니까?')) {
+            return;
+        }
+
+        fetch('/api/student/submission', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                assignmentCode: assignmentCode,
+                content: content
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess('과제가 성공적으로 제출되었습니다.');
+                    loadAssignmentDetails();
+                } else {
+                    alert(data.message || '제출에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('네트워크 오류가 발생했습니다.');
+            });
+    }
+
+    // 파일과 함께 제출
+    function submitAssignmentWithFile() {
+        const contentElement = safeGetElement('submissionContent');
+        const fileInput = safeGetElement('submissionFile');
+
+        if (!contentElement || !fileInput) {
+            alert('제출 폼을 찾을 수 없습니다.');
+            return;
+        }
+
+        const content = contentElement.value.trim();
+        const file = fileInput.files[0];
 
         if (!content) {
             alert('제출할 내용을 입력해주세요.');
@@ -908,11 +958,11 @@
         formData.append('assignmentCode', assignmentCode);
         formData.append('content', content);
 
-        if (selectedFile) {
-            formData.append('file', selectedFile);
+        if (file) {
+            formData.append('file', file);
         }
 
-        fetch('/api/student/submission', {
+        fetch('/api/student/submission/file', {
             method: 'POST',
             body: formData
         })
@@ -933,42 +983,95 @@
 
     // 제출물 수정 모드
     function editSubmission() {
-        const hasSubmission = document.getElementById('hasSubmission');
-        const editSubmission = document.getElementById('editSubmission');
-        const editContent = document.getElementById('editSubmissionContent');
-        const currentFileInfo = document.getElementById('currentFileInfo');
+        const hasSubmission = safeGetElement('hasSubmission');
+        const editSubmission = safeGetElement('editSubmission');
+        const editContent = safeGetElement('editSubmissionContent');
 
-        hasSubmission.style.display = 'none';
-        editSubmission.style.display = 'block';
-        editContent.value = currentSubmission.content;
-
-        // 현재 파일 정보 표시
-        if (currentSubmission.hasFile) {
-            currentFileInfo.style.display = 'block';
-            document.getElementById('currentFileName').textContent = currentSubmission.fileName;
-            document.getElementById('currentFileSize').textContent = formatFileSize(currentSubmission.fileSize);
-        } else {
-            currentFileInfo.style.display = 'none';
+        if (hasSubmission) hasSubmission.style.display = 'none';
+        if (editSubmission) editSubmission.style.display = 'block';
+        if (editContent && currentSubmission) {
+            editContent.value = currentSubmission.content;
         }
-
-        // 체크박스 초기화
-        document.getElementById('deleteFileCheckbox').checked = false;
-        removeEditFile();
     }
 
-    // 제출물 수정 취소
+    // 수정 취소
     function cancelEdit() {
-        const hasSubmission = document.getElementById('hasSubmission');
-        const editSubmission = document.getElementById('editSubmission');
+        const hasSubmission = safeGetElement('hasSubmission');
+        const editSubmission = safeGetElement('editSubmission');
 
-        hasSubmission.style.display = 'block';
-        editSubmission.style.display = 'none';
-        removeEditFile();
+        if (hasSubmission) hasSubmission.style.display = 'block';
+        if (editSubmission) editSubmission.style.display = 'none';
     }
 
     // 제출물 수정
     function updateSubmission() {
-        const content = document.getElementById('editSubmissionContent').value.trim();
+        const fileInput = safeGetElement('editSubmissionFile');
+        const hasFile = fileInput && fileInput.files.length > 0;
+
+        if (hasFile) {
+            if (validateFile(fileInput.files[0])) {
+                updateSubmissionWithFile();
+            }
+        } else {
+            updateSubmissionTextOnly();
+        }
+    }
+
+    // 텍스트만 수정
+    function updateSubmissionTextOnly() {
+        const editContentElement = safeGetElement('editSubmissionContent');
+        if (!editContentElement) {
+            alert('수정 폼을 찾을 수 없습니다.');
+            return;
+        }
+
+        const content = editContentElement.value.trim();
+        if (!content) {
+            alert('수정할 내용을 입력해주세요.');
+            return;
+        }
+
+        if (!confirm('제출물을 수정하시겠습니까?')) {
+            return;
+        }
+
+        fetch('/api/student/submission', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                submissionCode: currentSubmission.submissionCode,
+                content: content
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess('제출물이 성공적으로 수정되었습니다.');
+                    loadAssignmentDetails();
+                } else {
+                    alert(data.message || '수정에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('네트워크 오류가 발생했습니다.');
+            });
+    }
+
+    // 파일과 함께 수정
+    function updateSubmissionWithFile() {
+        const editContentElement = safeGetElement('editSubmissionContent');
+        const fileInput = safeGetElement('editSubmissionFile');
+
+        if (!editContentElement || !fileInput) {
+            alert('수정 폼을 찾을 수 없습니다.');
+            return;
+        }
+
+        const content = editContentElement.value.trim();
+        const file = fileInput.files[0];
 
         if (!content) {
             alert('수정할 내용을 입력해주세요.');
@@ -983,13 +1086,8 @@
         formData.append('submissionCode', currentSubmission.submissionCode);
         formData.append('content', content);
 
-        // 파일 삭제 체크
-        const deleteFile = document.getElementById('deleteFileCheckbox').checked;
-        formData.append('deleteFile', deleteFile);
-
-        // 새 파일이 있으면 추가
-        if (editSelectedFile) {
-            formData.append('file', editSelectedFile);
+        if (file) {
+            formData.append('file', file);
         }
 
         fetch('/api/student/submission/update', {
@@ -1024,7 +1122,7 @@
             .then(data => {
                 if (data.success) {
                     showSuccess('제출물이 삭제되었습니다.');
-                    loadAssignmentDetails(); // 새로고침
+                    loadAssignmentDetails();
                 } else {
                     alert(data.message || '삭제에 실패했습니다.');
                 }
@@ -1035,10 +1133,24 @@
             });
     }
 
+    // 파일 다운로드
+    function downloadFile() {
+        if (!currentSubmission || !currentSubmission.submissionCode) {
+            alert('다운로드할 파일이 없습니다.');
+            return;
+        }
+        window.open(`/api/student/submission/${currentSubmission.submissionCode}/download`, '_blank');
+    }
+
     // 질문 등록
     function submitQuestion() {
-        const content = document.getElementById('questionContent').value.trim();
+        const contentElement = safeGetElement('questionContent');
+        if (!contentElement) {
+            alert('질문 폼을 찾을 수 없습니다.');
+            return;
+        }
 
+        const content = contentElement.value.trim();
         if (!content) {
             alert('질문 내용을 입력해주세요.');
             return;
@@ -1058,8 +1170,8 @@
             .then(data => {
                 if (data.success) {
                     showSuccess('질문이 등록되었습니다.');
-                    document.getElementById('questionContent').value = '';
-                    loadQuestions(); // 질문 목록 새로고침
+                    contentElement.value = '';
+                    loadQuestions();
                 } else {
                     alert(data.message || '질문 등록에 실패했습니다.');
                 }
@@ -1077,22 +1189,22 @@
             .then(data => {
                 if (Array.isArray(data)) {
                     displayQuestions(data);
-                    document.getElementById('questionCount').textContent = data.length;
+                    safeSetTextContent('questionCount', data.length);
                 } else {
                     throw new Error('질문 데이터 형식이 올바르지 않습니다.');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                document.getElementById('questionsContainer').innerHTML =
-                    '<div class="alert alert-danger">질문을 불러오는데 실패했습니다.</div>';
+                safeSetInnerHTML('questionsContainer',
+                    '<div class="alert alert-danger">질문을 불러오는데 실패했습니다.</div>');
             });
     }
 
-
     // 질문 목록 표시
     function displayQuestions(questions) {
-        const container = document.getElementById('questionsContainer');
+        const container = safeGetElement('questionsContainer');
+        if (!container) return;
 
         if (questions.length === 0) {
             container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">아직 등록된 질문이 없습니다.</p>';
@@ -1102,26 +1214,26 @@
         let html = '';
         questions.forEach(question => {
             html += `
-            <div class="question-item">
-                <div class="question-header">
-                    <strong>Q.</strong>
-                    <span class="question-date">${formatDate(question.createdDate)}</span>
-                </div>
-                <div class="question-content">${question.content}</div>
-        `;
+                <div class="question-item">
+                    <div class="question-header">
+                        <strong>Q.</strong>
+                        <span class="question-date">${formatDate(question.createdDate)}</span>
+                    </div>
+                    <div class="question-content">${question.content}</div>
+            `;
 
             if (question.answers && question.answers.length > 0) {
                 html += '<div class="answer-list">';
                 question.answers.forEach(answer => {
                     html += `
-                    <div class="answer-item">
-                        <div class="answer-header">
-                            <span>💬 교수님 답변</span>
-                            <span style="font-size: 12px; color: #7f8c8d;">${formatDate(answer.createdDate)}</span>
+                        <div class="answer-item">
+                            <div class="answer-header">
+                                <span>💬 교수님 답변</span>
+                                <span style="font-size: 12px; color: #7f8c8d;">${formatDate(answer.createdDate)}</span>
+                            </div>
+                            <div class="answer-content">${answer.content}</div>
                         </div>
-                        <div class="answer-content">${answer.content}</div>
-                    </div>
-                `;
+                    `;
                 });
                 html += '</div>';
             } else {
@@ -1136,7 +1248,9 @@
 
     // 상태 업데이트
     function updateStatus() {
-        const statusBadge = document.getElementById('statusBadge');
+        const statusBadge = safeGetElement('statusBadge');
+        if (!statusBadge || !currentAssignment) return;
+
         const now = new Date();
         const dueDate = new Date(currentAssignment.dueDate);
 
@@ -1154,7 +1268,9 @@
 
     // 남은 시간 업데이트
     function updateTimeRemaining() {
-        const timeRemaining = document.getElementById('timeRemaining');
+        const timeRemaining = safeGetElement('timeRemaining');
+        if (!timeRemaining || !currentAssignment) return;
+
         const now = new Date();
         const dueDate = new Date(currentAssignment.dueDate);
         const timeDiff = dueDate - now;
@@ -1175,9 +1291,9 @@
                 timeRemaining.textContent = `${minutes}분`;
             }
 
-            if (timeDiff < 24 * 60 * 60 * 1000) { // 24시간 미만
+            if (timeDiff < 24 * 60 * 60 * 1000) {
                 timeRemaining.style.color = '#dc3545';
-            } else if (timeDiff < 72 * 60 * 60 * 1000) { // 72시간 미만
+            } else if (timeDiff < 72 * 60 * 60 * 1000) {
                 timeRemaining.style.color = '#ffc107';
             } else {
                 timeRemaining.style.color = '#28a745';
@@ -1187,40 +1303,38 @@
 
     // 날짜 포맷팅
     function formatDate(dateString) {
+        if (!dateString) return '';
         const date = new Date(dateString);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         const hour = String(date.getHours()).padStart(2, '0');
         const minute = String(date.getMinutes()).padStart(2, '0');
-
         return `${year}-${month}-${day} ${hour}:${minute}`;
     }
 
     // 성공 메시지 표시
     function showSuccess(message) {
-        const alert = document.getElementById('successAlert');
-        document.getElementById('successMessage').textContent = message;
-        alert.style.display = 'block';
-
-        setTimeout(() => {
-            alert.style.display = 'none';
-        }, 3000);
-
-        // 페이지 상단으로 스크롤
-        window.scrollTo(0, 0);
+        const alert = safeGetElement('successAlert');
+        if (alert) {
+            safeSetTextContent('successMessage', message);
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+            window.scrollTo(0, 0);
+        }
     }
 
     // 오류 메시지 표시
     function showError(message) {
-        const alert = document.getElementById('errorAlert');
-        document.getElementById('errorMessage').textContent = message;
-        alert.style.display = 'block';
-
-        document.getElementById('loadingSpinner').style.display = 'none';
-
-        // 페이지 상단으로 스크롤
-        window.scrollTo(0, 0);
+        const alert = safeGetElement('errorAlert');
+        if (alert) {
+            safeSetTextContent('errorMessage', message);
+            alert.style.display = 'block';
+            safeSetStyle('loadingSpinner', 'display', 'none');
+            window.scrollTo(0, 0);
+        }
     }
 </script>
 </body>

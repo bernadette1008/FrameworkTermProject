@@ -7,12 +7,20 @@ import com.example.demo.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.io.File;
 
 @RestController
 @RequestMapping("/api/student")
@@ -79,7 +87,7 @@ public class StudentApiController {
         }
     }
 
-    // 과제 제출
+    // 과제 제출 (텍스트만)
     @PostMapping("/submission")
     public ResponseEntity<?> submitAssignment(@RequestBody Map<String, Object> request, HttpSession session) {
         try {
@@ -121,7 +129,95 @@ public class StudentApiController {
         }
     }
 
-    // 제출물 수정
+    // 과제 제출 (파일 포함)
+    @PostMapping("/submission/file")
+    public ResponseEntity<?> submitAssignmentWithFile(
+            @RequestParam("assignmentCode") int assignmentCode,
+            @RequestParam("content") String content,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            HttpSession session) {
+        try {
+            String studentId = (String) session.getAttribute("userId");
+            if (studentId == null) {
+                return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
+            }
+
+            if (content.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(createErrorResponse("제출 내용을 입력해주세요."));
+            }
+
+            // 파일이 있으면 파일과 함께 제출, 없으면 텍스트만 제출
+            Submission submission;
+            if (file != null && !file.isEmpty()) {
+                submission = studentService.submitAssignmentWithFile(assignmentCode, studentId, content, file);
+            } else {
+                submission = studentService.submitAssignment(assignmentCode, studentId, content);
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "과제가 성공적으로 제출되었습니다.");
+            response.put("submissionId", submission.getSubmissionCode());
+            response.put("submissionCode", submission.getSubmissionCode());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/submission/{submissionCode}/download")
+    public ResponseEntity<Resource> downloadFile(@PathVariable int submissionCode, HttpSession session) {
+        try {
+            String studentId = (String) session.getAttribute("userId");
+            if (studentId == null) {
+                return ResponseEntity.status(401).build();
+            }
+
+            // 제출물 조회 및 권한 확인
+            Submission submission = studentService.getSubmissionById(submissionCode);
+            if (submission == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // 본인의 제출물인지 확인
+            if (!submission.getStudentId().equals(studentId)) {
+                return ResponseEntity.status(403).build();
+            }
+
+            // 파일이 존재하는지 확인
+            if (submission.getFilePath() == null || submission.getFilePath().isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            File file = new File(submission.getFilePath());
+            if (!file.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Resource resource = new FileSystemResource(file);
+
+            // 파일명 UTF-8 인코딩
+            String encodedFileName = URLEncoder.encode(
+                    submission.getOriginalFileName() != null ? submission.getOriginalFileName() : submission.getFileName(),
+                    StandardCharsets.UTF_8.toString()
+            ).replaceAll("\\+", "%20");
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFileName)
+                    .header(HttpHeaders.CONTENT_TYPE, submission.getFileContentType() != null ?
+                            submission.getFileContentType() : MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                    .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.length()))
+                    .body(resource);
+
+        } catch (Exception e) {
+            System.err.println("Error downloading file: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // 제출물 수정 (텍스트만)
     @PutMapping("/submission")
     public ResponseEntity<?> updateSubmission(@RequestBody Map<String, Object> request, HttpSession session) {
         try {
@@ -152,6 +248,36 @@ public class StudentApiController {
             return ResponseEntity.ok(createSuccessResponse("과제가 성공적으로 수정되었습니다."));
         } catch (NumberFormatException e) {
             return ResponseEntity.badRequest().body(createErrorResponse("유효하지 않은 제출물 ID입니다."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    // 제출물 수정 (파일 포함)
+    @PostMapping("/submission/update")
+    public ResponseEntity<?> updateSubmissionWithFile(
+            @RequestParam("submissionCode") int submissionCode,
+            @RequestParam("content") String content,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            HttpSession session) {
+        try {
+            String studentId = (String) session.getAttribute("userId");
+            if (studentId == null) {
+                return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
+            }
+
+            if (content.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(createErrorResponse("수정할 내용을 입력해주세요."));
+            }
+
+            // 파일이 있으면 파일과 함께 수정, 없으면 텍스트만 수정
+            if (file != null && !file.isEmpty()) {
+                studentService.updateSubmissionWithFile(submissionCode, content, file);
+            } else {
+                studentService.updateSubmission(submissionCode, content);
+            }
+
+            return ResponseEntity.ok(createSuccessResponse("과제가 성공적으로 수정되었습니다."));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
@@ -281,8 +407,6 @@ public class StudentApiController {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
     }
-
-
 
     // 학생의 모든 질문 조회
     @GetMapping("/questions")

@@ -8,7 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -177,6 +180,138 @@ public class StudentService {
         submission.setLastModifiedDate(LocalDateTime.now());
 
         return submissionRepository.save(submission);
+    }
+
+    // 파일과 함께 과제 제출
+    @Transactional
+    public Submission submitAssignmentWithFile(int assignmentCode, String studentId, String content, MultipartFile file) {
+        Assignment assignment = getAssignmentDetails(assignmentCode);
+        Student student = studentRepository.findByStudentId(studentId);
+
+        if (student == null) {
+            throw new RuntimeException("학생을 찾을 수 없습니다.");
+        }
+
+        // 학생이 해당 과제의 수업에 등록되어 있는지 확인
+        boolean isEnrolled = enrollmentRepository.existsByStudentIdAndCourseCode(studentId, assignment.getCourseCode());
+        if (!isEnrolled) {
+            throw new RuntimeException("해당 수업에 등록되어 있지 않습니다.");
+        }
+
+        // 마감일 확인
+        if (assignment.getDueDate() != null && assignment.getDueDate().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("과제 제출 기한이 지났습니다.");
+        }
+
+        // 이미 제출된 과제인지 확인
+        Optional<Submission> existingSubmission = submissionRepository.findByAssignmentCodeAndStudentId(assignmentCode, studentId);
+        if (existingSubmission.isPresent()) {
+            throw new RuntimeException("이미 제출된 과제입니다.");
+        }
+
+        try {
+            // 파일 저장 처리
+            String fileName = null;
+            String filePath = null;
+
+            if (file != null && !file.isEmpty()) {
+                // 파일명 생성: 학번_과제코드_원본파일명
+                String originalFileName = file.getOriginalFilename();
+                String fileExtension = "";
+                if (originalFileName != null && originalFileName.contains(".")) {
+                    fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+                }
+                fileName = studentId + "_" + assignmentCode + "_" + System.currentTimeMillis() + fileExtension;
+
+                // 파일 저장 경로 (실제 환경에서는 설정 파일로 관리)
+                String uploadDir = System.getProperty("user.dir") + "/uploads/submissions/";
+                File directory = new File(uploadDir);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+
+                filePath = uploadDir + fileName;
+                file.transferTo(new File(filePath));
+            }
+
+            Submission submission = new Submission();
+            submission.setAssignmentCode(assignmentCode);
+            submission.setStudentId(studentId);
+            submission.setContent(content);
+            submission.setSubmissionTime(LocalDateTime.now());
+            submission.setLastModifiedDate(LocalDateTime.now());
+
+            // 파일 정보가 있으면 저장 (Submission 엔티티에 fileName, filePath 필드 추가 필요)
+            // submission.setFileName(fileName);
+            // submission.setFilePath(filePath);
+
+            return submissionRepository.save(submission);
+
+        } catch (IOException e) {
+            throw new RuntimeException("파일 저장 중 오류가 발생했습니다: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("과제 제출 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+    public Submission getSubmissionById(int submissionCode) {
+        return submissionRepository.findBySubmissionCode(submissionCode).orElse(null);
+    }
+
+    // 파일과 함께 제출물 수정
+    @Transactional
+    public Submission updateSubmissionWithFile(int submissionCode, String content, MultipartFile file) {
+        Submission submission = submissionRepository.findBySubmissionCode(submissionCode)
+                .orElseThrow(() -> new RuntimeException("제출물을 찾을 수 없습니다."));
+
+        // 마감일 확인
+        Assignment assignment = getAssignmentDetails(submission.getAssignmentCode());
+        if (assignment.getDueDate() != null && assignment.getDueDate().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("과제 제출 기한이 지나 수정할 수 없습니다.");
+        }
+
+        try {
+            // 새 파일이 있으면 기존 파일 삭제 후 새 파일 저장
+            if (file != null && !file.isEmpty()) {
+                // 기존 파일 삭제 (filePath가 있으면)
+                // if (submission.getFilePath() != null) {
+                //     File existingFile = new File(submission.getFilePath());
+                //     if (existingFile.exists()) {
+                //         existingFile.delete();
+                //     }
+                // }
+
+                // 새 파일 저장
+                String originalFileName = file.getOriginalFilename();
+                String fileExtension = "";
+                if (originalFileName != null && originalFileName.contains(".")) {
+                    fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+                }
+                String fileName = submission.getStudentId() + "_" + submission.getAssignmentCode() + "_" + System.currentTimeMillis() + fileExtension;
+
+                String uploadDir = System.getProperty("user.dir") + "/uploads/submissions/";
+                File directory = new File(uploadDir);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+
+                String filePath = uploadDir + fileName;
+                file.transferTo(new File(filePath));
+
+                // submission.setFileName(fileName);
+                // submission.setFilePath(filePath);
+            }
+
+            submission.setContent(content);
+            submission.setLastModifiedDate(LocalDateTime.now());
+
+            return submissionRepository.save(submission);
+
+        } catch (IOException e) {
+            throw new RuntimeException("파일 저장 중 오류가 발생했습니다: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("제출물 수정 중 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 
     // 제출물 삭제

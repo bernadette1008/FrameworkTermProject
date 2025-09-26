@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.domain.*;
 import com.example.demo.dto.SubmissionDTO;
 import com.example.demo.service.ProfessorService;
+import com.example.demo.util.XSSUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -394,7 +395,7 @@ public class ProfessorController {
         return "professor/professor-assignment-edit";
     }
 
-    // 과제 수정 처리
+    // 과제 수정 처리 (XSS 방어 추가)
     @PostMapping("/assignment/{assignmentCode}/edit")
     public String updateAssignment(@PathVariable int assignmentCode,
                                    @RequestParam String courseCode,
@@ -436,8 +437,29 @@ public class ProfessorController {
                 return "redirect:/professor/assignment/" + assignmentCode + "/edit";
             }
 
+            // XSS 검증
+            if (XSSUtils.containsXSS(title) || XSSUtils.containsXSS(content)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "제목 또는 내용에 허용되지 않는 문자가 포함되어 있습니다.");
+                return "redirect:/professor/assignment/" + assignmentCode + "/edit";
+            }
+
+            // 길이 제한
+            if (title.length() > 200) {
+                redirectAttributes.addFlashAttribute("errorMessage", "과제 제목이 너무 깁니다. (최대 200자)");
+                return "redirect:/professor/assignment/" + assignmentCode + "/edit";
+            }
+
+            if (content.length() > 5000) {
+                redirectAttributes.addFlashAttribute("errorMessage", "과제 내용이 너무 깁니다. (최대 5,000자)");
+                return "redirect:/professor/assignment/" + assignmentCode + "/edit";
+            }
+
             professorService.updateAssignment(assignmentCode, courseCode, title.trim(), content.trim(), dueDate, dueTime);
             redirectAttributes.addFlashAttribute("successMessage", "과제가 수정되었습니다.");
+        } catch (IllegalArgumentException e) {
+            // XSS 검증 실패
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/professor/assignment/" + assignmentCode + "/edit";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/professor/assignment/" + assignmentCode + "/edit";
@@ -500,7 +522,7 @@ public class ProfessorController {
 //        return "redirect:/professor/submission/" + submissionCode;
 //    }
 
-    // 제출물 채점
+    // 제출물 채점 (피드백 XSS 방어 추가)
     @PostMapping("/submission/{submissionCode}/grade")
     public String gradeSubmission(@PathVariable int submissionCode,
                                   @RequestParam("score") int score,
@@ -522,9 +544,25 @@ public class ProfessorController {
                 return "redirect:/professor/assignments";
             }
 
+            // 피드백 XSS 검증
+            if (feedback != null && !feedback.trim().isEmpty()) {
+                if (XSSUtils.containsXSS(feedback)) {
+                    redirectAttributes.addFlashAttribute("error", "피드백에 허용되지 않는 문자가 포함되어 있습니다.");
+                    return "redirect:/professor/submission/" + submissionCode;
+                }
+
+                if (feedback.length() > 1000) {
+                    redirectAttributes.addFlashAttribute("error", "피드백이 너무 깁니다. (최대 1,000자)");
+                    return "redirect:/professor/submission/" + submissionCode;
+                }
+            }
+
             // 점수와 피드백 저장
             professorService.gradeSubmission(submissionCode, score, feedback);
             redirectAttributes.addFlashAttribute("successMessage", "채점이 완료되었습니다.");
+        } catch (IllegalArgumentException e) {
+            // XSS 검증 실패
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "채점 처리 중 오류가 발생했습니다: " + e.getMessage());
         }
@@ -581,7 +619,7 @@ public class ProfessorController {
         return "professor/professor-question-detail";
     }
 
-    // 질문 답변 처리
+    // 질문 답변 처리 (XSS 방어 추가)
     @PostMapping("/question/{questionCode}/answer")
     public String answerQuestion(@PathVariable int questionCode,
                                  @RequestParam String content,
@@ -593,10 +631,31 @@ public class ProfessorController {
         }
 
         try {
+            // 빈 내용 체크
+            if (content == null || content.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "답변 내용을 입력해주세요.");
+                return "redirect:/professor/question/" + questionCode;
+            }
+
+            // XSS 검증 (이미 서비스에서 하지만 컨트롤러에서도 추가로)
+            if (XSSUtils.containsXSS(content)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "답변 내용에 허용되지 않는 문자가 포함되어 있습니다.");
+                return "redirect:/professor/question/" + questionCode;
+            }
+
+            // 길이 제한
+            if (content.length() > 3000) {
+                redirectAttributes.addFlashAttribute("errorMessage", "답변이 너무 깁니다. (최대 3,000자)");
+                return "redirect:/professor/question/" + questionCode;
+            }
+
             professorService.answerQuestion(questionCode, professor.getProfessorId(), content);
             redirectAttributes.addFlashAttribute("successMessage", "답변이 등록되었습니다.");
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
+            // XSS 검증 실패
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "답변 등록 중 오류가 발생했습니다: " + e.getMessage());
         }
 
         return "redirect:/professor/question/" + questionCode;

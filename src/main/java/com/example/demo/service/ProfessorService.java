@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.domain.*;
 import com.example.demo.repository.*;
+import com.example.demo.util.XSSUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,12 +65,23 @@ public class ProfessorService {
                 .orElseThrow(() -> new RuntimeException("제출물을 찾을 수 없습니다."));
     }
 
-    // 채점 처리
+    // 채점 처리 (피드백 XSS 방어 추가)
     public void gradeSubmission(int submissionCode, Integer score, String feedback) {
         Submission submission = getSubmissionDetails(submissionCode);
 
         if (score < 0 || score > 100) {
             throw new RuntimeException("점수는 0-100 사이의 값이어야 합니다.");
+        }
+
+        // 피드백에 대한 XSS 검증
+        if (feedback != null && !feedback.trim().isEmpty()) {
+            XSSUtils.validateInput(feedback, "피드백");
+
+            if (feedback.length() > 1000) {
+                throw new RuntimeException("피드백이 너무 깁니다. (최대 1,000자)");
+            }
+
+            feedback = XSSUtils.sanitizeInput(feedback.trim());
         }
 
         submission.setScore(score);
@@ -142,8 +154,16 @@ public class ProfessorService {
         return question;
     }
 
-    // 질문 답변 등록
+    // 질문 답변 등록 (XSS 방어 추가)
     public Answer answerQuestion(int questionCode, String professorId, String content) {
+        // XSS 검증
+        XSSUtils.validateInput(content, "답변 내용");
+
+        // 길이 제한
+        if (content != null && content.length() > 3000) {
+            throw new RuntimeException("답변 내용이 너무 깁니다. (최대 3,000자)");
+        }
+
         Question question = getQuestionDetails(questionCode);
         Professor professor = professorRepository.findByProfessorId(professorId);
 
@@ -154,7 +174,7 @@ public class ProfessorService {
         Answer answer = new Answer();
         answer.setQuestionCode(questionCode);
         answer.setProfessorId(professorId);
-        answer.setContent(content);
+        answer.setContent(XSSUtils.sanitizeInput(content.trim())); // XSS 정제
         answer.setAnswerTime(LocalDateTime.now());
 
         return answerRepository.save(answer);
@@ -281,7 +301,7 @@ public class ProfessorService {
         enrollmentRepository.deleteByStudentIdAndCourseCode(studentId, courseCode);
     }
 
-    // 과제 정보 수정
+    // 과제 정보 수정 (XSS 방어 추가)
     @Transactional
     public void updateAssignment(int assignmentCode, String courseCode, String title, String content, String dueDate, String dueTime) {
         Assignment assignment = assignmentRepository.findById(assignmentCode)
@@ -300,6 +320,19 @@ public class ProfessorService {
             throw new RuntimeException("마감일과 마감시간을 모두 입력해주세요.");
         }
 
+        // XSS 검증 추가
+        XSSUtils.validateInput(title, "과제 제목");
+        XSSUtils.validateInput(content, "과제 내용");
+
+        // 길이 제한
+        if (title.length() > 200) {
+            throw new RuntimeException("과제 제목이 너무 깁니다. (최대 200자)");
+        }
+
+        if (content.length() > 5000) {
+            throw new RuntimeException("과제 내용이 너무 깁니다. (최대 5,000자)");
+        }
+
         // 강의 존재 여부 확인
         Course course = courseRepository.findById(courseCode)
                 .orElseThrow(() -> new RuntimeException("선택한 강의를 찾을 수 없습니다."));
@@ -315,11 +348,11 @@ public class ProfessorService {
                 throw new RuntimeException("마감일은 현재 시간보다 이후여야 합니다.");
             }
 
-            // 과제 정보 업데이트
+            // 과제 정보 업데이트 (XSS 정제된 값으로)
             assignment.setCourseCode(courseCode);
             assignment.setCourse(course);
-            assignment.setTitle(title.trim());
-            assignment.setContent(content.trim());
+            assignment.setTitle(XSSUtils.sanitizeInput(title.trim()));
+            assignment.setContent(XSSUtils.sanitizeInput(content.trim()));
             assignment.setDueDate(dueDateTime);
 
             assignmentRepository.save(assignment);

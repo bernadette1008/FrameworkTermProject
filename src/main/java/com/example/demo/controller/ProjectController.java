@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.domain.*;
 import com.example.demo.repository.*;
+import com.example.demo.util.XSSUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -240,7 +241,6 @@ public class ProjectController {
         return "professor/create-course";
     }
 
-    // 강의 생성 처리
     @PostMapping("/create-course")
     public String processCreateCourse(@RequestParam String courseName,
                                       @RequestParam String courseCode,
@@ -251,21 +251,70 @@ public class ProjectController {
             return "redirect:/";
         }
 
-        // 강의 코드 중복 체크
-        if (courseRepository.existsByCourseCode(courseCode)) {
+        try {
+            // 입력값 검증
+            if (courseName == null || courseName.trim().isEmpty()) {
+                model.addAttribute("professor", professor);
+                model.addAttribute("error", "강의명을 입력해주세요.");
+                return "professor/create-course";
+            }
+
+            if (courseCode == null || courseCode.trim().isEmpty()) {
+                model.addAttribute("professor", professor);
+                model.addAttribute("error", "강의 코드를 입력해주세요.");
+                return "professor/create-course";
+            }
+
+            // XSS 검증
+            XSSUtils.validateInput(courseName, "강의명");
+            XSSUtils.validateInput(courseCode, "강의 코드");
+
+            // 길이 제한
+            if (courseName.length() > 100) {
+                model.addAttribute("professor", professor);
+                model.addAttribute("error", "강의명이 너무 깁니다. (최대 100자)");
+                return "professor/create-course";
+            }
+
+            if (courseCode.length() > 20) {
+                model.addAttribute("professor", professor);
+                model.addAttribute("error", "강의 코드가 너무 깁니다. (최대 20자)");
+                return "professor/create-course";
+            }
+
+            // 강의 코드 형식 검증 (영문, 숫자, 하이픈, 언더스코어만 허용)
+            if (!courseCode.matches("^[A-Za-z0-9_-]+$")) {
+                model.addAttribute("professor", professor);
+                model.addAttribute("error", "강의 코드는 영문, 숫자, 하이픈(-), 언더스코어(_)만 사용할 수 있습니다.");
+                return "professor/create-course";
+            }
+
+            // 강의 코드 중복 체크
+            if (courseRepository.existsByCourseCode(courseCode.trim())) {
+                model.addAttribute("professor", professor);
+                model.addAttribute("error", "이미 사용 중인 강의 코드입니다.");
+                return "professor/create-course";
+            }
+
+            Course newCourse = new Course();
+            newCourse.setCourseName(XSSUtils.sanitizeInput(courseName.trim()));
+            newCourse.setCourseCode(courseCode.trim().toUpperCase()); // 강의코드는 대문자로 통일
+            newCourse.setProfessorId(professor.getProfessorId());
+
+            courseRepository.save(newCourse);
+
+            return "redirect:/professor-main?courseCreated=true";
+
+        } catch (IllegalArgumentException e) {
+            // XSS 검증 실패
             model.addAttribute("professor", professor);
-            model.addAttribute("error", "이미 사용 중인 강의 코드입니다.");
+            model.addAttribute("error", e.getMessage());
+            return "professor/create-course";
+        } catch (Exception e) {
+            model.addAttribute("professor", professor);
+            model.addAttribute("error", "강의 생성 중 오류가 발생했습니다: " + e.getMessage());
             return "professor/create-course";
         }
-
-        Course newCourse = new Course();
-        newCourse.setCourseName(courseName);
-        newCourse.setCourseCode(courseCode);
-        newCourse.setProfessorId(professor.getProfessorId());
-
-        courseRepository.save(newCourse);
-
-        return "redirect:/professor-main?courseCreated=true";
     }
 
     // 과제 생성 페이지
@@ -297,28 +346,86 @@ public class ProjectController {
             return "redirect:/";
         }
 
-        Course course = courseRepository.findById(courseId).orElse(null);
-        if (course == null) {
-            model.addAttribute("error", "잘못된 강의를 선택했습니다.");
+        try {
+            // XSS 검증
+            XSSUtils.validateInput(title, "과제 제목");
+            XSSUtils.validateInput(content, "과제 내용");
+
+            // 입력값 길이 제한
+            if (title.length() > 200) {
+                model.addAttribute("error", "과제 제목이 너무 깁니다. (최대 200자)");
+                List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+                model.addAttribute("professor", professor);
+                model.addAttribute("courses", courses);
+                return "professor/create-assignment";
+            }
+
+            if (content.length() > 5000) {
+                model.addAttribute("error", "과제 내용이 너무 깁니다. (최대 5,000자)");
+                List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+                model.addAttribute("professor", professor);
+                model.addAttribute("courses", courses);
+                return "professor/create-assignment";
+            }
+
+            Course course = courseRepository.findById(courseId).orElse(null);
+            if (course == null) {
+                model.addAttribute("error", "잘못된 강의를 선택했습니다.");
+                List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+                model.addAttribute("professor", professor);
+                model.addAttribute("courses", courses);
+                return "professor/create-assignment";
+            }
+
+            // 교수 권한 확인 (해당 강의의 담당 교수인지)
+            if (!course.getProfessorId().equals(professor.getProfessorId())) {
+                model.addAttribute("error", "해당 강의에 대한 권한이 없습니다.");
+                List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+                model.addAttribute("professor", professor);
+                model.addAttribute("courses", courses);
+                return "professor/create-assignment";
+            }
+
+            Assignment newAssignment = new Assignment();
+            newAssignment.setCourseCode(courseId);
+            newAssignment.setCourse(course);
+            newAssignment.setTitle(XSSUtils.sanitizeInput(title.trim())); // XSS 정제
+            newAssignment.setContent(XSSUtils.sanitizeInput(content.trim())); // XSS 정제
+
+            // 날짜와 시간을 합쳐서 LocalDateTime으로 변환
+            LocalDate date = LocalDate.parse(dueDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            LocalTime time = LocalTime.parse(dueTime, DateTimeFormatter.ofPattern("HH:mm"));
+            LocalDateTime dueDateTime = LocalDateTime.of(date, time);
+
+            // 마감일이 현재 시간보다 이전인지 확인
+            if (dueDateTime.isBefore(LocalDateTime.now())) {
+                model.addAttribute("error", "마감일은 현재 시간보다 이후여야 합니다.");
+                List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+                model.addAttribute("professor", professor);
+                model.addAttribute("courses", courses);
+                return "professor/create-assignment";
+            }
+
+            newAssignment.setDueDate(dueDateTime);
+            newAssignment.setCreatedDate(LocalDateTime.now());
+
+            assignmentRepository.save(newAssignment);
+
+            return "redirect:/professor-main?assignmentCreated=true";
+
+        } catch (IllegalArgumentException e) {
+            // XSS 검증 실패
+            model.addAttribute("error", e.getMessage());
+            List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+            model.addAttribute("professor", professor);
+            model.addAttribute("courses", courses);
+            return "professor/create-assignment";
+        } catch (Exception e) {
+            model.addAttribute("error", "과제 생성 중 오류가 발생했습니다: " + e.getMessage());
+            List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+            model.addAttribute("professor", professor);
+            model.addAttribute("courses", courses);
             return "professor/create-assignment";
         }
-
-        Assignment newAssignment = new Assignment();
-        newAssignment.setCourseCode(courseId);
-        newAssignment.setCourse(course);
-        newAssignment.setTitle(title);
-        newAssignment.setContent(content);
-
-        // 날짜와 시간을 합쳐서 LocalDateTime으로 변환
-        LocalDate date = LocalDate.parse(dueDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        LocalTime time = LocalTime.parse(dueTime, DateTimeFormatter.ofPattern("HH:mm"));
-        LocalDateTime dueDateTime = LocalDateTime.of(date, time);
-        newAssignment.setDueDate(dueDateTime);
-
-        newAssignment.setCreatedDate(LocalDateTime.now());
-
-        assignmentRepository.save(newAssignment);
-
-        return "redirect:/professor-main?assignmentCreated=true";
     }
 }

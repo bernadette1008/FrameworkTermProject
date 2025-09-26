@@ -446,7 +446,7 @@ public class ProfessorController {
         return "redirect:/professor/assignment/" + assignmentCode + "/submissions";
     }
 
-    // 제출물 상세 보기 및 채점
+    // 제출물 상세 보기 및 채점 (세션 설정 추가)
     @GetMapping("/submission/{submissionCode}")
     public String submissionDetail(@PathVariable int submissionCode,
                                    Model model,
@@ -455,6 +455,9 @@ public class ProfessorController {
         if (professor == null) {
             return "redirect:/";
         }
+
+        // API 다운로드를 위한 세션 설정
+        session.setAttribute("userId", professor.getProfessorId());
 
         try {
             Submission submission = professorService.getSubmissionDetails(submissionCode);

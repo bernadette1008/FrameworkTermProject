@@ -443,6 +443,29 @@
         학생이 제출한 과제 내용이 여기에 표시됩니다...
       </div>
 
+      <!-- 제출된 파일 정보 표시 -->
+      <div th:if="${submission.fileName != null and !#strings.isEmpty(submission.fileName)}" style="margin-top: 25px;">
+        <div class="section-title">
+          📎 첨부 파일
+        </div>
+        <div class="submitted-file-info">
+          <div class="file-details">
+            <div class="file-name">
+              <span th:text="${submission.originalFileName != null ? submission.originalFileName : submission.fileName}">파일명</span>
+            </div>
+            <div class="file-size" th:if="${submission.fileSize != null}">
+              크기: <span th:text="${#numbers.formatDecimal(submission.fileSize / 1024.0 / 1024.0, 1, 2)}">0</span> MB
+            </div>
+            <div class="file-type" th:if="${submission.fileContentType != null}">
+              형식: <span th:text="${submission.fileContentType}">파일 형식</span>
+            </div>
+          </div>
+          <div class="file-actions">
+            <button class="btn-download" onclick="downloadSubmissionFile()">📥 다운로드</button>
+          </div>
+        </div>
+      </div>
+
       <!-- 기존 피드백 표시 (있는 경우) -->
       <div th:if="${submission.feedback != null and !#strings.isEmpty(submission.feedback)}" style="margin-top: 25px;">
         <div class="section-title">

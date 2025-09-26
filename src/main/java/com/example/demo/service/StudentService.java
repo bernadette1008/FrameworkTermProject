@@ -210,30 +210,6 @@ public class StudentService {
         }
 
         try {
-            // 파일 저장 처리
-            String fileName = null;
-            String filePath = null;
-
-            if (file != null && !file.isEmpty()) {
-                // 파일명 생성: 학번_과제코드_원본파일명
-                String originalFileName = file.getOriginalFilename();
-                String fileExtension = "";
-                if (originalFileName != null && originalFileName.contains(".")) {
-                    fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-                }
-                fileName = studentId + "_" + assignmentCode + "_" + System.currentTimeMillis() + fileExtension;
-
-                // 파일 저장 경로 (실제 환경에서는 설정 파일로 관리)
-                String uploadDir = System.getProperty("user.dir") + "/uploads/submissions/";
-                File directory = new File(uploadDir);
-                if (!directory.exists()) {
-                    directory.mkdirs();
-                }
-
-                filePath = uploadDir + fileName;
-                file.transferTo(new File(filePath));
-            }
-
             Submission submission = new Submission();
             submission.setAssignmentCode(assignmentCode);
             submission.setStudentId(studentId);
@@ -241,9 +217,31 @@ public class StudentService {
             submission.setSubmissionTime(LocalDateTime.now());
             submission.setLastModifiedDate(LocalDateTime.now());
 
-            // 파일 정보가 있으면 저장 (Submission 엔티티에 fileName, filePath 필드 추가 필요)
-            // submission.setFileName(fileName);
-            // submission.setFilePath(filePath);
+            // 파일 처리
+            if (file != null && !file.isEmpty()) {
+                String originalFileName = file.getOriginalFilename();
+                String fileExtension = "";
+                if (originalFileName != null && originalFileName.contains(".")) {
+                    fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+                }
+                String fileName = studentId + "_" + assignmentCode + "_" + System.currentTimeMillis() + fileExtension;
+
+                String uploadDir = System.getProperty("user.dir") + "/uploads/submissions/";
+                File directory = new File(uploadDir);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+
+                String filePath = uploadDir + fileName;
+                file.transferTo(new File(filePath));
+
+                // 파일 정보 저장 (주석 해제)
+                submission.setFileName(fileName);
+                submission.setFilePath(filePath);
+                submission.setOriginalFileName(originalFileName);
+                submission.setFileSize(file.getSize());
+                submission.setFileContentType(file.getContentType());
+            }
 
             return submissionRepository.save(submission);
 
@@ -252,10 +250,6 @@ public class StudentService {
         } catch (Exception e) {
             throw new RuntimeException("과제 제출 중 오류가 발생했습니다: " + e.getMessage());
         }
-    }
-
-    public Submission getSubmissionById(int submissionCode) {
-        return submissionRepository.findBySubmissionCode(submissionCode).orElse(null);
     }
 
     // 파일과 함께 제출물 수정
@@ -273,13 +267,13 @@ public class StudentService {
         try {
             // 새 파일이 있으면 기존 파일 삭제 후 새 파일 저장
             if (file != null && !file.isEmpty()) {
-                // 기존 파일 삭제 (filePath가 있으면)
-                // if (submission.getFilePath() != null) {
-                //     File existingFile = new File(submission.getFilePath());
-                //     if (existingFile.exists()) {
-                //         existingFile.delete();
-                //     }
-                // }
+                // 기존 파일 삭제
+                if (submission.getFilePath() != null) {
+                    File existingFile = new File(submission.getFilePath());
+                    if (existingFile.exists()) {
+                        existingFile.delete();
+                    }
+                }
 
                 // 새 파일 저장
                 String originalFileName = file.getOriginalFilename();
@@ -298,8 +292,12 @@ public class StudentService {
                 String filePath = uploadDir + fileName;
                 file.transferTo(new File(filePath));
 
-                // submission.setFileName(fileName);
-                // submission.setFilePath(filePath);
+                // 파일 정보 저장 (주석 해제)
+                submission.setFileName(fileName);
+                submission.setFilePath(filePath);
+                submission.setOriginalFileName(originalFileName);
+                submission.setFileSize(file.getSize());
+                submission.setFileContentType(file.getContentType());
             }
 
             submission.setContent(content);
@@ -314,7 +312,7 @@ public class StudentService {
         }
     }
 
-    // 제출물 삭제
+    // 제출물 삭제 (파일도 함께 삭제)
     public void deleteSubmission(int submissionCode) {
         Submission submission = submissionRepository.findBySubmissionCode(submissionCode)
                 .orElseThrow(() -> new RuntimeException("제출물을 찾을 수 없습니다."));
@@ -325,8 +323,21 @@ public class StudentService {
             throw new RuntimeException("과제 제출 기한이 지나 삭제할 수 없습니다.");
         }
 
+        // 파일이 있다면 삭제
+        if (submission.getFilePath() != null) {
+            File file = new File(submission.getFilePath());
+            if (file.exists()) {
+                file.delete();
+            }
+        }
+
         submissionRepository.deleteById(submissionCode);
     }
+
+    public Submission getSubmissionById(int submissionCode) {
+        return submissionRepository.findBySubmissionCode(submissionCode).orElse(null);
+    }
+
 
     // 질문 등록
     public Question submitQuestion(int assignmentCode, String studentId, String content) {

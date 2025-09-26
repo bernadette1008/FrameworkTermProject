@@ -29,7 +29,7 @@ public class StudentApiController {
     @Autowired
     private StudentService studentService;
 
-    // 과제 상세 정보 조회
+    // 과제 상세 정보 조회 (수정된 버전)
     @GetMapping("/assignment/{assignmentCode}")
     public ResponseEntity<?> getAssignmentDetails(@PathVariable int assignmentCode, HttpSession session) {
         try {
@@ -42,7 +42,7 @@ public class StudentApiController {
             Optional<Submission> submission = studentService.getSubmission(assignmentCode, studentId);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("assignmentId", assignment.getAssignmentCode()); // JavaScript 호환성을 위해
+            response.put("assignmentId", assignment.getAssignmentCode());
             response.put("assignmentCode", assignment.getAssignmentCode());
             response.put("title", assignment.getTitle());
             response.put("content", assignment.getContent());
@@ -50,12 +50,24 @@ public class StudentApiController {
             response.put("createdDate", assignment.getCreatedDate());
 
             if (submission.isPresent()) {
+                Submission sub = submission.get();
                 Map<String, Object> submissionData = new HashMap<>();
-                submissionData.put("submissionId", submission.get().getSubmissionCode());
-                submissionData.put("submissionCode", submission.get().getSubmissionCode());
-                submissionData.put("content", submission.get().getContent());
-                submissionData.put("submittedDate", submission.get().getSubmissionTime());
-                submissionData.put("lastModifiedDate", submission.get().getLastModifiedDate());
+                submissionData.put("submissionId", sub.getSubmissionCode());
+                submissionData.put("submissionCode", sub.getSubmissionCode());
+                submissionData.put("content", sub.getContent());
+                submissionData.put("submittedDate", sub.getSubmissionTime());
+                submissionData.put("lastModifiedDate", sub.getLastModifiedDate());
+                submissionData.put("score", sub.getScore());
+                submissionData.put("feedback", sub.getFeedback());
+
+                // 파일 정보 추가
+                submissionData.put("hasFile", sub.getFileName() != null && !sub.getFileName().isEmpty());
+                if (sub.getFileName() != null && !sub.getFileName().isEmpty()) {
+                    submissionData.put("fileName", sub.getOriginalFileName() != null ? sub.getOriginalFileName() : sub.getFileName());
+                    submissionData.put("fileSize", sub.getFileSize());
+                    submissionData.put("fileContentType", sub.getFileContentType());
+                }
+
                 response.put("submission", submissionData);
             }
 
@@ -169,19 +181,32 @@ public class StudentApiController {
     @GetMapping("/submission/{submissionCode}/download")
     public ResponseEntity<Resource> downloadFile(@PathVariable int submissionCode, HttpSession session) {
         try {
-            String studentId = (String) session.getAttribute("userId");
-            if (studentId == null) {
+            String userId = (String) session.getAttribute("userId");
+            Object user = session.getAttribute("user");
+
+            if (userId == null || user == null) {
                 return ResponseEntity.status(401).build();
             }
 
-            // 제출물 조회 및 권한 확인
+            // 제출물 조회
             Submission submission = studentService.getSubmissionById(submissionCode);
             if (submission == null) {
                 return ResponseEntity.notFound().build();
             }
 
-            // 본인의 제출물인지 확인
-            if (!submission.getStudentId().equals(studentId)) {
+            // 권한 확인: 학생 본인 또는 담당 교수만 다운로드 가능
+            boolean hasPermission = false;
+
+            if (user instanceof Student) {
+                // 학생인 경우: 본인의 제출물인지 확인
+                hasPermission = submission.getStudentId().equals(userId);
+            } else if (user instanceof Professor) {
+                // 교수인 경우: 해당 과제의 담당 교수인지 확인
+                Assignment assignment = studentService.getAssignmentDetails(submission.getAssignmentCode());
+                hasPermission = assignment.getCourse().getProfessorId().equals(((Professor) user).getProfessorId());
+            }
+
+            if (!hasPermission) {
                 return ResponseEntity.status(403).build();
             }
 

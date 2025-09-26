@@ -461,7 +461,11 @@
             </div>
           </div>
           <div class="file-actions">
-            <button class="btn-download" onclick="downloadSubmissionFile()">📥 다운로드</button>
+            <button class="btn-download"
+                    th:data-submission-code="${submission.submissionCode}"
+                    onclick="downloadSubmissionFile(this.dataset.submissionCode)">
+              📥 다운로드
+            </button>
           </div>
         </div>
       </div>
@@ -618,6 +622,15 @@
         button.classList.add('active');
       }
     });
+  }
+
+  // 파일 다운로드
+  function downloadSubmissionFile(submissionCode) {
+    if (!submissionCode) {
+      alert('다운로드할 파일이 없습니다.');
+      return;
+    }
+    window.open(`/api/student/submission/${submissionCode}/download`, '_blank');
   }
 
   // 점수에 따른 색상 변경

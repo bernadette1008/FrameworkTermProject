@@ -478,11 +478,33 @@ public class ProfessorController {
         return "professor/professor-submission-detail";
     }
 
-    // 채점 처리
+//    // 채점 처리
+//    @PostMapping("/submission/{submissionCode}/grade")
+//    public String gradeSubmission(@PathVariable int submissionCode,
+//                                  @RequestParam Integer score,
+//                                  @RequestParam(required = false) String feedback,
+//                                  HttpSession session,
+//                                  RedirectAttributes redirectAttributes) {
+//        Professor professor = (Professor) session.getAttribute("user");
+//        if (professor == null) {
+//            return "redirect:/";
+//        }
+//
+//        try {
+//            professorService.gradeSubmission(submissionCode, score, feedback);
+//            redirectAttributes.addFlashAttribute("successMessage", "채점이 완료되었습니다.");
+//        } catch (Exception e) {
+//            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+//        }
+//
+//        return "redirect:/professor/submission/" + submissionCode;
+//    }
+
+    // 제출물 채점
     @PostMapping("/submission/{submissionCode}/grade")
     public String gradeSubmission(@PathVariable int submissionCode,
-                                  @RequestParam Integer score,
-                                  @RequestParam(required = false) String feedback,
+                                  @RequestParam("score") int score,
+                                  @RequestParam(value = "feedback", required = false) String feedback,
                                   HttpSession session,
                                   RedirectAttributes redirectAttributes) {
         Professor professor = (Professor) session.getAttribute("user");
@@ -491,12 +513,23 @@ public class ProfessorController {
         }
 
         try {
+            Submission submission = professorService.getSubmissionDetails(submissionCode);
+
+            // 권한 체크 (해당 과제를 담당하는 교수인지 확인)
+            if (!submission.getAssignment().getCourse().getProfessorId()
+                    .equals(professor.getProfessorId())) {
+                redirectAttributes.addFlashAttribute("error", "권한이 없습니다.");
+                return "redirect:/professor/assignments";
+            }
+
+            // 점수와 피드백 저장
             professorService.gradeSubmission(submissionCode, score, feedback);
             redirectAttributes.addFlashAttribute("successMessage", "채점이 완료되었습니다.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "채점 처리 중 오류가 발생했습니다: " + e.getMessage());
         }
 
+        // 채점 후 다시 해당 제출물 상세 페이지로 리다이렉트
         return "redirect:/professor/submission/" + submissionCode;
     }
 

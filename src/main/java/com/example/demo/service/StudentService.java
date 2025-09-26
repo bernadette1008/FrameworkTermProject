@@ -4,6 +4,7 @@ import com.example.demo.domain.*;
 import com.example.demo.dto.QuestionDTO;
 import com.example.demo.dto.SubmissionDTO;
 import com.example.demo.repository.*;
+import com.example.demo.util.XSSUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
@@ -129,8 +130,14 @@ public class StudentService {
         return submissionRepository.findByAssignmentCodeAndStudentId(assignmentCode, studentId);
     }
 
-    // 과제 제출
+    // 과제 제출 메서드 수정
     public Submission submitAssignment(int assignmentCode, String studentId, String content) {
+        // XSS 검증
+        XSSUtils.validateInput(content, "과제 내용");
+
+        // 입력값 정제
+        String sanitizedContent = XSSUtils.sanitizeInput(content);
+
         Assignment assignment = getAssignmentDetails(assignmentCode);
         Student student = studentRepository.findByStudentId(studentId);
 
@@ -158,15 +165,21 @@ public class StudentService {
         Submission submission = new Submission();
         submission.setAssignmentCode(assignmentCode);
         submission.setStudentId(studentId);
-        submission.setContent(content);
+        submission.setContent(sanitizedContent); // 정제된 내용 저장
         submission.setSubmissionTime(LocalDateTime.now());
         submission.setLastModifiedDate(LocalDateTime.now());
 
         return submissionRepository.save(submission);
     }
 
-    // 제출물 수정
+    // 제출물 수정 메서드 수정
     public Submission updateSubmission(int submissionCode, String content) {
+        // XSS 검증
+        XSSUtils.validateInput(content, "과제 내용");
+
+        // 입력값 정제
+        String sanitizedContent = XSSUtils.sanitizeInput(content);
+
         Submission submission = submissionRepository.findBySubmissionCode(submissionCode)
                 .orElseThrow(() -> new RuntimeException("제출물을 찾을 수 없습니다."));
 
@@ -176,7 +189,7 @@ public class StudentService {
             throw new RuntimeException("과제 제출 기한이 지나 수정할 수 없습니다.");
         }
 
-        submission.setContent(content);
+        submission.setContent(sanitizedContent); // 정제된 내용 저장
         submission.setLastModifiedDate(LocalDateTime.now());
 
         return submissionRepository.save(submission);
@@ -339,8 +352,14 @@ public class StudentService {
     }
 
 
-    // 질문 등록
+    // 질문 등록 메서드 수정
     public Question submitQuestion(int assignmentCode, String studentId, String content) {
+        // XSS 검증
+        XSSUtils.validateInput(content, "질문 내용");
+
+        // 입력값 정제
+        String sanitizedContent = XSSUtils.sanitizeInput(content);
+
         Assignment assignment = getAssignmentDetails(assignmentCode);
         Student student = studentRepository.findByStudentId(studentId);
 
@@ -357,7 +376,7 @@ public class StudentService {
         Question question = new Question();
         question.setAssignmentCode(assignmentCode);
         question.setStudentId(studentId);
-        question.setContent(content);
+        question.setContent(sanitizedContent); // 정제된 내용 저장
         question.setQuestionTime(LocalDateTime.now());
 
         return questionRepository.save(question);

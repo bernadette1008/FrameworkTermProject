@@ -432,14 +432,259 @@
                 margin-top: 10px;
             }
         }
+
+        .submitted-file-info {
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            border-left: 4px solid #28a745;
+        }
+
+        .file-details {
+            margin-bottom: 15px;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #155724;
+            margin-bottom: 8px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-size {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .file-actions {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .btn-download {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-download:hover {
+            background: linear-gradient(45deg, #218838, #1e7e34);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* 파일 업로드 영역 개선 */
+        .file-display {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+            font-size: 14px;
+        }
+
+        .file-display.file-info-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+
+        input[type="file"]:hover {
+            border-color: #7fcdcd;
+            background: #f0fdfd;
+        }
+
+        <!-- 학생용 페이지 (student-assignment-detail.html)에 추가할 CSS -->
+        <style>
+             /* 제출된 파일 정보 표시 스타일 */
+         .submitted-file-info {
+             background: #e8f5e8;
+             border: 1px solid #c3e6cb;
+             border-radius: 10px;
+             padding: 20px;
+             margin-top: 15px;
+             border-left: 4px solid #28a745;
+         }
+
+        .file-details {
+            margin-bottom: 15px;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #155724;
+            margin-bottom: 8px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-size {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .file-actions {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .btn-download {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-download:hover {
+            background: linear-gradient(45deg, #218838, #1e7e34);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-download:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 파일 선택 및 표시 영역 스타일 개선 */
+        .file-display {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+            font-size: 14px;
+        }
+
+        .file-display.file-info-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+
+        .file-display strong {
+            color: #155724;
+        }
+
+        .file-info-error strong {
+            color: #721c24;
+        }
+
+        /* 드래그 앤 드롭 스타일 */
+        input[type="file"]:hover {
+            border-color: #7fcdcd;
+            background: #f0fdfd;
+        }
+
+        .drag-over {
+            border-color: #7fcdcd !important;
+            background-color: rgba(127, 205, 205, 0.1) !important;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .file-name {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .btn-download {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .file-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+
+    <!-- 공통 파일 아이콘 스타일 -->
+    <style>
+        /* 파일 타입별 아이콘 색상 */
+        .file-icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+
+        .file-icon.pdf { color: #dc3545; }
+        .file-icon.doc, .file-icon.docx { color: #007bff; }
+        .file-icon.txt { color: #6c757d; }
+        .file-icon.hwp { color: #28a745; }
+        .file-icon.zip { color: #ffc107; }
+        .file-icon.image { color: #17a2b8; }
+
+        /* 다운로드 상태 표시 */
+        .download-loading {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .download-loading::after {
+            content: " 다운로드 중...";
+            font-size: 12px;
+        }
+
+        /* 파일 정보 테이블 스타일 (선택사항) */
+        .file-info-table {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .file-info-table td {
+            padding: 5px 0;
+            font-size: 14px;
+        }
+
+        .file-info-table td:first-child {
+            font-weight: bold;
+            color: #495057;
+            width: 80px;
+        }
+
+        .file-info-table td:last-child {
+            color: #6c757d;
+        }
     </style>
 </head>
 <body>
 <div class="header">
-    <div class="header-left">
+    <a class="header-left" th:href="@{/student/main}" style="text-decoration: none;">
         <div class="logo"></div>
         <div class="title">Ploytech 과제 제출 시스템</div>
-    </div>
+    </a>
     <div class="user-info">
         <span th:text="${student.name + ' 학생'}">학생</span>
         <span th:text="'(' + ${student.studentId} + ')'">학번</span>
@@ -620,7 +865,7 @@
                 <div class="sidebar-item">
                     <h4>📋 제출 안내</h4>
                     <p>• 마감일 전까지 수정 가능<br>
-                        • 텍스트 형태로 제출<br>
+                        • 텍스트 형태 또는 파일로 제출<br>
                         • 질문은 언제든지 가능</p>
                 </div>
 

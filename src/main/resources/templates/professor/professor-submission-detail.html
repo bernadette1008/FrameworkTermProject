@@ -377,14 +377,82 @@
         justify-content: center;
       }
     }
+    .submitted-file-info {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .file-details {
+      flex: 1;
+    }
+
+    .file-name {
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
+
+    .file-size, .file-type {
+      font-size: 14px;
+      color: #7f8c8d;
+      margin-bottom: 3px;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-download {
+      background: #17a2b8;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-download:hover {
+      background: #138496;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 768px) {
+      .submitted-file-info {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+
+      .file-actions {
+        justify-content: center;
+      }
+    }
+
   </style>
 </head>
 <body>
 <div class="header">
-  <div class="header-left">
+  <a class="header-left" th:href="@{/professor-main}" style="text-decoration: none">
     <div class="logo"></div>
     <div class="title">Ploytech 과제 제출 시스템</div>
-  </div>
+  </a>
     <div class="user-info">
         <span th:text="${professor.name + ' 교수님'}">교수님</span>
         <a th:href="@{'/professor/assignment/' + ${submission.assignment.assignmentCode} + '/submissions'}" class="back-btn">← 제출물 목록</a>

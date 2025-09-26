@@ -4,6 +4,7 @@ import com.example.demo.domain.*;
 import com.example.demo.dto.QuestionDTO;
 import com.example.demo.dto.SubmissionDTO;
 import com.example.demo.service.StudentService;
+import com.example.demo.util.XSSUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -95,48 +96,6 @@ public class StudentApiController {
         } catch (Exception e) {
             System.err.println("DEBUG: Error in getAssignmentQuestions: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
-        }
-    }
-
-    // 과제 제출 (텍스트만)
-    @PostMapping("/submission")
-    public ResponseEntity<?> submitAssignment(@RequestBody Map<String, Object> request, HttpSession session) {
-        try {
-            String studentId = (String) session.getAttribute("userId");
-            if (studentId == null) {
-                return ResponseEntity.status(401).body(createErrorResponse("로그인이 필요합니다."));
-            }
-
-            // 안전한 타입 변환
-            Object assignmentCodeObj = request.get("assignmentId") != null ?
-                    request.get("assignmentId") : request.get("assignmentCode");
-            Object contentObj = request.get("content");
-
-            if (assignmentCodeObj == null || contentObj == null) {
-                return ResponseEntity.badRequest().body(createErrorResponse("필수 정보가 누락되었습니다."));
-            }
-
-            // Object를 안전하게 int로 변환
-            int assignmentCode = parseToInt(assignmentCodeObj);
-            String content = contentObj.toString();
-
-            if (content.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(createErrorResponse("제출 내용을 입력해주세요."));
-            }
-
-            Submission submission = studentService.submitAssignment(assignmentCode, studentId, content);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "과제가 성공적으로 제출되었습니다.");
-            response.put("submissionId", submission.getSubmissionCode());
-            response.put("submissionCode", submission.getSubmissionCode());
-
-            return ResponseEntity.ok(response);
-        } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body(createErrorResponse("유효하지 않은 과제 ID입니다."));
-        } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
     }
@@ -242,9 +201,9 @@ public class StudentApiController {
         }
     }
 
-    // 제출물 수정 (텍스트만)
-    @PutMapping("/submission")
-    public ResponseEntity<?> updateSubmission(@RequestBody Map<String, Object> request, HttpSession session) {
+    // 과제 제출 메서드 수정
+    @PostMapping("/submission")
+    public ResponseEntity<?> submitAssignment(@RequestBody Map<String, Object> request, HttpSession session) {
         try {
             String studentId = (String) session.getAttribute("userId");
             if (studentId == null) {
@@ -252,27 +211,44 @@ public class StudentApiController {
             }
 
             // 안전한 타입 변환
-            Object submissionCodeObj = request.get("submissionId") != null ?
-                    request.get("submissionId") : request.get("submissionCode");
+            Object assignmentCodeObj = request.get("assignmentId") != null ?
+                    request.get("assignmentId") : request.get("assignmentCode");
             Object contentObj = request.get("content");
 
-            if (submissionCodeObj == null || contentObj == null) {
+            if (assignmentCodeObj == null || contentObj == null) {
                 return ResponseEntity.badRequest().body(createErrorResponse("필수 정보가 누락되었습니다."));
             }
 
             // Object를 안전하게 int로 변환
-            int submissionCode = parseToInt(submissionCodeObj);
+            int assignmentCode = parseToInt(assignmentCodeObj);
             String content = contentObj.toString();
 
             if (content.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(createErrorResponse("수정할 내용을 입력해주세요."));
+                return ResponseEntity.badRequest().body(createErrorResponse("제출 내용을 입력해주세요."));
             }
 
-            studentService.updateSubmission(submissionCode, content);
+            // XSS 검증 추가
+            if (XSSUtils.containsXSS(content)) {
+                return ResponseEntity.badRequest().body(createErrorResponse("허용되지 않는 문자가 포함되어 있습니다."));
+            }
 
-            return ResponseEntity.ok(createSuccessResponse("과제가 성공적으로 수정되었습니다."));
-        } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body(createErrorResponse("유효하지 않은 제출물 ID입니다."));
+            // 내용 길이 제한 (선택사항)
+            if (content.length() > 10000) {
+                return ResponseEntity.badRequest().body(createErrorResponse("내용이 너무 깁니다. (최대 10,000자)"));
+            }
+
+            Submission submission = studentService.submitAssignment(assignmentCode, studentId, content);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "과제가 성공적으로 제출되었습니다.");
+            response.put("submissionId", submission.getSubmissionCode());
+            response.put("submissionCode", submission.getSubmissionCode());
+
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            // XSS 검증 실패 시
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }
@@ -325,7 +301,7 @@ public class StudentApiController {
         }
     }
 
-    // 질문 등록
+    // 질문 등록 메서드 수정
     @PostMapping("/question")
     public ResponseEntity<?> submitQuestion(@RequestBody Map<String, Object> request, HttpSession session) {
         try {
@@ -351,6 +327,16 @@ public class StudentApiController {
                 return ResponseEntity.badRequest().body(createErrorResponse("질문 내용을 입력해주세요."));
             }
 
+            // XSS 검증 추가
+            if (XSSUtils.containsXSS(content)) {
+                return ResponseEntity.badRequest().body(createErrorResponse("허용되지 않는 문자가 포함되어 있습니다."));
+            }
+
+            // 내용 길이 제한
+            if (content.length() > 5000) {
+                return ResponseEntity.badRequest().body(createErrorResponse("질문 내용이 너무 깁니다. (최대 5,000자)"));
+            }
+
             Question question = studentService.submitQuestion(assignmentCode, studentId, content);
 
             Map<String, Object> response = new HashMap<>();
@@ -360,8 +346,9 @@ public class StudentApiController {
             response.put("questionCode", question.getQuestionCode());
 
             return ResponseEntity.ok(response);
-        } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body(createErrorResponse("유효하지 않은 과제 ID입니다."));
+        } catch (IllegalArgumentException e) {
+            // XSS 검증 실패 시
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         }

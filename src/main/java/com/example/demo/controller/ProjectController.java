@@ -253,6 +253,7 @@ public class ProjectController {
 
         // 강의 코드 중복 체크
         if (courseRepository.existsByCourseCode(courseCode)) {
+            model.addAttribute("professor", professor);
             model.addAttribute("error", "이미 사용 중인 강의 코드입니다.");
             return "professor/create-course";
         }

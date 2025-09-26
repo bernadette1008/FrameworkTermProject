@@ -343,10 +343,11 @@
                 <div>아직 개설된 강의가 없습니다.<br>새 강의를 개설해보세요!</div>
             </div>
             <div th:unless="${#lists.isEmpty(courses)}" class="course-grid">
-                <div th:each="course : ${courses}" class="course-card">
+                <a th:each="course : ${courses}" class="course-card" style="text-decoration: none;"
+                   th:href="@{/professor/course/{code}/manage(code=${course.courseCode})}">
                     <div class="card-title" th:text="${course.courseName}">강의명</div>
                     <div class="card-info">강의 코드: <span th:text="${course.courseCode}">CS101</span></div>
-                </div>
+                </a>
             </div>
         </div>
 
@@ -358,7 +359,7 @@
                 <div>아직 등록된 과제가 없습니다.<br>새 과제를 등록해보세요!</div>
             </div>
             <div th:unless="${#lists.isEmpty(assignments)}" class="assignment-grid">
-                <a th:each="assignment : ${assignments}" class="assignment-card">
+                <a th:each="assignment : ${assignments}" class="assignment-card" th:href="@{/professor/assignment/{code}/submissions(code=${assignment.assignmentCode})}">
                     <div class="card-title" th:text="${assignment.title}">과제명</div>
                     <div class="card-info">강의: <span th:text="${assignment.course.courseName}">강의명</span></div>
                     <div class="card-info">마감일: <span th:text="${assignment.dueDate}">마감일</span></div>

@@ -110,6 +110,167 @@ public class ProjectController {
         return "redirect:/";
     }
 
+    // === 비밀번호 찾기 ===
+
+    // 비밀번호 변경 페이지
+    @GetMapping("/password-reset")
+    public String passwordResetForm(Model model) {
+        return "password-reset";
+    }
+
+    // 비밀번호 변경 처리
+    @PostMapping("/password-reset")
+    public String processPasswordReset(@RequestParam String userId,
+                                       @RequestParam String name,
+                                       @RequestParam String newPassword,
+                                       @RequestParam String confirmPassword,
+                                       Model model) {
+        try {
+            // 입력값 검증
+            if (userId == null || userId.trim().isEmpty()) {
+                model.addAttribute("error", "아이디를 입력해주세요.");
+                return "password-reset";
+            }
+
+            if (name == null || name.trim().isEmpty()) {
+                model.addAttribute("error", "이름을 입력해주세요.");
+                return "password-reset";
+            }
+
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                model.addAttribute("error", "새 비밀번호를 입력해주세요.");
+                return "password-reset";
+            }
+
+            if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+                model.addAttribute("error", "비밀번호 확인을 입력해주세요.");
+                return "password-reset";
+            }
+
+            // 비밀번호 일치 확인
+            if (!newPassword.equals(confirmPassword)) {
+                model.addAttribute("error", "새 비밀번호가 일치하지 않습니다.");
+                return "password-reset";
+            }
+
+            // XSS 검증
+            XSSUtils.validateInput(userId, "아이디");
+            XSSUtils.validateInput(name, "이름");
+
+            String sanitizedUserId = userId.trim();
+            String sanitizedName = name.trim();
+
+            // 학생 계정 확인
+            Student student = studentRepository.findByStudentId(sanitizedUserId);
+            if (student != null) {
+                if (student.getName().equals(sanitizedName)) {
+                    // AuthenticationService를 통해 비밀번호 변경 (유효성 검사 포함)
+                    try {
+                        authenticationService.registerStudent(sanitizedUserId, sanitizedName, newPassword);
+                    } catch (RuntimeException e) {
+                        // 이미 존재하는 경우 직접 업데이트
+                        if (e.getMessage().contains("이미 존재")) {
+                            // 비밀번호 유효성 검사 (AuthenticationService의 로직 재사용)
+                            if (newPassword.length() < 8) {
+                                model.addAttribute("error", "비밀번호는 8자 이상이어야 합니다.");
+                                return "password-reset";
+                            }
+                            if (newPassword.length() > 50) {
+                                model.addAttribute("error", "비밀번호는 50자 이하여야 합니다.");
+                                return "password-reset";
+                            }
+
+                            boolean hasLetter = false;
+                            boolean hasNumber = false;
+                            for (char c : newPassword.toCharArray()) {
+                                if (Character.isLetter(c)) hasLetter = true;
+                                if (Character.isDigit(c)) hasNumber = true;
+                            }
+                            if (!hasLetter || !hasNumber) {
+                                model.addAttribute("error", "비밀번호는 영문자와 숫자를 모두 포함해야 합니다.");
+                                return "password-reset";
+                            }
+
+                            // 비밀번호 업데이트
+                            student.setPassword(authenticationService.hashPassword(newPassword));
+                            studentRepository.save(student);
+                        } else {
+                            throw e;
+                        }
+                    }
+
+                    model.addAttribute("success", "비밀번호가 성공적으로 변경되었습니다!");
+                    return "password-reset";
+                } else {
+                    model.addAttribute("error", "이름이 일치하지 않습니다.");
+                    return "password-reset";
+                }
+            }
+
+            // 교수 계정 확인
+            Professor professor = professorRepository.findByProfessorId(sanitizedUserId);
+            if (professor != null) {
+                if (professor.getName().equals(sanitizedName)) {
+                    try {
+                        authenticationService.registerProfessor(sanitizedUserId, sanitizedName, newPassword);
+                    } catch (RuntimeException e) {
+                        if (e.getMessage().contains("이미 존재")) {
+                            // 비밀번호 유효성 검사
+                            if (newPassword.length() < 8) {
+                                model.addAttribute("error", "비밀번호는 8자 이상이어야 합니다.");
+                                return "password-reset";
+                            }
+                            if (newPassword.length() > 50) {
+                                model.addAttribute("error", "비밀번호는 50자 이하여야 합니다.");
+                                return "password-reset";
+                            }
+
+                            boolean hasLetter = false;
+                            boolean hasNumber = false;
+                            for (char c : newPassword.toCharArray()) {
+                                if (Character.isLetter(c)) hasLetter = true;
+                                if (Character.isDigit(c)) hasNumber = true;
+                            }
+                            if (!hasLetter || !hasNumber) {
+                                model.addAttribute("error", "비밀번호는 영문자와 숫자를 모두 포함해야 합니다.");
+                                return "password-reset";
+                            }
+
+                            professor.setPassword(authenticationService.hashPassword(newPassword));
+                            professorRepository.save(professor);
+                        } else {
+                            throw e;
+                        }
+                    }
+
+                    model.addAttribute("success", "비밀번호가 성공적으로 변경되었습니다!");
+                    return "password-reset";
+                } else {
+                    model.addAttribute("error", "이름이 일치하지 않습니다.");
+                    return "password-reset";
+                }
+            }
+
+            // 관리자 계정 확인
+            Administrator administrator = administratorRepository.findByAdministratorId(sanitizedUserId);
+            if (administrator != null) {
+                model.addAttribute("error", "관리자 계정은 별도 문의가 필요합니다.");
+                return "password-reset";
+            }
+
+            // 계정을 찾을 수 없음
+            model.addAttribute("error", "해당 아이디로 등록된 계정을 찾을 수 없습니다.");
+            return "password-reset";
+
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "password-reset";
+        } catch (Exception e) {
+            model.addAttribute("error", "비밀번호 변경 중 오류가 발생했습니다.");
+            return "password-reset";
+        }
+    }
+
     // === 회원가입 관련 ===
 
     // 기존의 /student-main 경로도 유지 (호환성을 위해)

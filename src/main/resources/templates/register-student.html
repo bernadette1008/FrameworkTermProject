@@ -166,6 +166,24 @@
         .back-link a:hover {
             text-decoration: underline;
         }
+
+        .password-requirements {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #636e72;
+        }
+
+        .password-requirements ul {
+            margin: 10px 0 0 0;
+            padding-left: 20px;
+        }
+
+        .password-requirements li {
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
@@ -199,6 +217,13 @@
                 <label for="password">비밀번호</label>
                 <input type="password" class="form-control" id="password" name="password"
                        placeholder="비밀번호를 입력해주세요 (숫자만 입력)" required>
+                <div class="password-requirements">
+                    <strong>비밀번호 요구사항:</strong>
+                    <ul>
+                        <li>최소 8자 이상, 최대 50자 이하</li>
+                        <li>영문자와 숫자를 모두 포함</li>
+                    </ul>
+                </div>
             </div>
 
             <button type="submit" class="btn-primary">회원가입</button>

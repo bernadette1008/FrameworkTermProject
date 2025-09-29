@@ -27,6 +27,12 @@ public class AuthenticationService {
     @Autowired
     private AdministratorRepository administratorRepository;
 
+    // 비밀번호 해시화 메서드 (public으로 추가)
+    public String hashPassword(String password) {
+        validatePassword(password);
+        return passwordEncoder.encode(password);
+    }
+
     // 학생 회원가입
     public boolean registerStudent(String studentId, String name, String password) {
         // 이미 존재하는 학번인지 확인

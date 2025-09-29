@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.ArrayList;
 
 @Service
 @Transactional
@@ -40,6 +39,8 @@ public class AdministratorService {
 
     @Autowired
     private AnswerRepository answerRepository;
+
+    // 인증 관련 메서드들은 AuthenticationService로 이동되었으므로 제거
 
     // 승인 대기중인 학생 목록 조회
     public List<Student> getPendingStudents() {
@@ -381,7 +382,6 @@ public class AdministratorService {
             this.totalCourses = totalCourses;
             this.totalAssignments = totalAssignments;
         }
-
     }
 
     // 과제 통계 데이터를 담을 내부 클래스
@@ -399,6 +399,5 @@ public class AdministratorService {
             this.notSubmittedCount = notSubmittedCount;
             this.questionCount = questionCount;
         }
-
     }
 }

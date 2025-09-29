@@ -10,7 +10,7 @@ public interface StudentRepository extends JpaRepository<Student, String> {
 
     Student findByStudentId(String studentId);
     boolean existsByStudentId(String studentId);
-    Student findByStudentIdAndPassword(String studentId, String password);
+//    Student findByStudentIdAndPassword(String studentId, String password);
 
     // 승인 관련 메서드 추가
     List<Student> findByAllowed(boolean allowed);

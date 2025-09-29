@@ -10,7 +10,7 @@ public interface ProfessorRepository extends JpaRepository<Professor, String> {
 
     Professor findByProfessorId(String professorId);
     boolean existsByProfessorId(String professorId);
-    Professor findByProfessorIdAndPassword(String professorId, String password);
+//    Professor findByProfessorIdAndPassword(String professorId, String password);
 
     // 승인 관련 메서드 추가
     List<Professor> findByAllowed(boolean allowed);

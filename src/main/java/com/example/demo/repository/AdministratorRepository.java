@@ -9,5 +9,5 @@ public interface AdministratorRepository extends JpaRepository<Administrator, St
 
     Administrator findByAdministratorId(String administratorId);
     boolean existsByAdministratorId(String administratorId);
-    Administrator findByAdministratorIdAndPassword(String administratorId, String password);
+//    Administrator findByAdministratorIdAndPassword(String administratorId, String password);
 }

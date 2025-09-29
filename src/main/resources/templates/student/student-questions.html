@@ -16,7 +16,6 @@
     <div class="user-info">
         <span th:text="${student.name + ' 학생'}">학생</span>
         <span th:text="'(' + ${student.studentId} + ')'">학번</span>
-        <a th:href="@{/student/main}" class="back-btn">메인으로</a>
         <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
     </div>
 </div>

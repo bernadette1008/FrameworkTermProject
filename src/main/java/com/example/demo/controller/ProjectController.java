@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.domain.*;
 import com.example.demo.repository.*;
+import com.example.demo.service.AuthenticationService;
 import com.example.demo.util.XSSUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -37,6 +38,9 @@ public class ProjectController {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
+    @Autowired
+    private AuthenticationService authenticationService;
+
     // === 로그인 및 인증 ===
 
     // 메인 로그인 페이지
@@ -51,47 +55,52 @@ public class ProjectController {
                                HttpSession session,
                                Model model) {
 
-        // 관리자 테이블에서 먼저 확인
-        Administrator administrator = administratorRepository.findByAdministratorIdAndPassword(userId, password);
-        if (administrator != null) {
-            // 관리자 로그인 성공
-            session.setAttribute("user", administrator);
-            session.setAttribute("userType", "관리자");
-            return "redirect:/admin/main";  // 변경된 경로
-        }
+        try {
+            // 관리자 로그인 시도
+            Administrator administrator = authenticationService.authenticateAdministrator(userId, password);
+            if (administrator != null) {
+                session.setAttribute("user", administrator);
+                session.setAttribute("userType", "관리자");
+                return "redirect:/admin/main";
+            }
 
-        // 학생 테이블에서 확인
-        Student student = studentRepository.findByStudentIdAndPassword(userId, password);
-        if (student != null) {
-            // 승인 여부 확인
-            if (!student.isAllowed()) {
-                model.addAttribute("error", "아직 관리자의 승인을 받지 않았습니다. 승인 후 로그인해주세요.");
+            // 학생 로그인 시도
+            try {
+                Student student = authenticationService.authenticateStudent(userId, password);
+                if (student != null) {
+                    session.setAttribute("user", student);
+                    session.setAttribute("userType", "학생");
+                    session.setAttribute("userId", student.getStudentId());
+                    return "redirect:/student/main";
+                }
+            } catch (RuntimeException e) {
+                // 승인 대기 메시지 처리
+                model.addAttribute("error", e.getMessage());
                 return "login";
             }
-            // 학생 로그인 성공
-            session.setAttribute("user", student);
-            session.setAttribute("userType", "학생");
-            session.setAttribute("userId", student.getStudentId()); // API용 세션 추가
-            return "redirect:/student/main"; // 경로 변경
-        }
 
-        // 교수 테이블에서 확인
-        Professor professor = professorRepository.findByProfessorIdAndPassword(userId, password);
-        if (professor != null) {
-            // 승인 여부 확인
-            if (!professor.isAllowed()) {
-                model.addAttribute("error", "아직 관리자의 승인을 받지 않았습니다. 승인 후 로그인해주세요.");
+            // 교수 로그인 시도
+            try {
+                Professor professor = authenticationService.authenticateProfessor(userId, password);
+                if (professor != null) {
+                    session.setAttribute("user", professor);
+                    session.setAttribute("userType", "교수");
+                    return "redirect:/professor-main";
+                }
+            } catch (RuntimeException e) {
+                // 승인 대기 메시지 처리
+                model.addAttribute("error", e.getMessage());
                 return "login";
             }
-            // 교수 로그인 성공
-            session.setAttribute("user", professor);
-            session.setAttribute("userType", "교수");
-            return "redirect:/professor-main";
-        }
 
-        // 로그인 실패
-        model.addAttribute("error", "아이디 또는 비밀번호가 틀렸습니다.");
-        return "login";
+            // 모든 로그인 시도 실패
+            model.addAttribute("error", "아이디 또는 비밀번호가 틀렸습니다.");
+            return "login";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "로그인 중 오류가 발생했습니다.");
+            return "login";
+        }
     }
 
     // 로그아웃
@@ -134,24 +143,65 @@ public class ProjectController {
                                          @RequestParam String password,
                                          Model model) {
 
-        if (studentRepository.existsByStudentId(studentNumber) || professorRepository.existsByProfessorId(studentNumber)) {
-            model.addAttribute("error", "이미 사용 중인 아이디입니다.");
+        try {
+            // 입력값 검증
+            if (name == null || name.trim().isEmpty()) {
+                model.addAttribute("error", "이름을 입력해주세요.");
+                return "register-student";
+            }
+
+            if (studentNumber == null || studentNumber.trim().isEmpty()) {
+                model.addAttribute("error", "학번을 입력해주세요.");
+                return "register-student";
+            }
+
+            if (password == null || password.trim().isEmpty()) {
+                model.addAttribute("error", "비밀번호를 입력해주세요.");
+                return "register-student";
+            }
+
+            // XSS 검증
+            XSSUtils.validateInput(name, "이름");
+            XSSUtils.validateInput(studentNumber, "학번");
+
+            // 길이 제한
+            if (name.length() > 50) {
+                model.addAttribute("error", "이름이 너무 깁니다. (최대 50자)");
+                return "register-student";
+            }
+
+            if (studentNumber.length() > 20) {
+                model.addAttribute("error", "학번이 너무 깁니다. (최대 20자)");
+                return "register-student";
+            }
+
+            // 학번 중복 체크 (학생과 교수 모두)
+            if (studentRepository.existsByStudentId(studentNumber) ||
+                    professorRepository.existsByProfessorId(studentNumber)) {
+                model.addAttribute("error", "이미 사용 중인 학번입니다.");
+                return "register-student";
+            }
+
+            // AuthenticationService를 통해 회원가입 처리
+            authenticationService.registerStudent(
+                    studentNumber.trim(),
+                    XSSUtils.sanitizeInput(name.trim()),
+                    password
+            );
+
+            model.addAttribute("userType", "학생");
+            model.addAttribute("userName", XSSUtils.sanitizeInput(name.trim()));
+            model.addAttribute("message", "회원가입이 완료되었습니다. 관리자의 승인을 기다려주세요.");
+
+            return "register-pending";
+
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
+            return "register-student";
+        } catch (Exception e) {
+            model.addAttribute("error", "회원가입 중 오류가 발생했습니다: " + e.getMessage());
             return "register-student";
         }
-
-        Student newStudent = new Student();
-        newStudent.setStudentId(studentNumber);
-        newStudent.setName(name);
-        newStudent.setPassword(password);
-        newStudent.setAllowed(false); // 기본값은 승인되지 않음
-
-        studentRepository.save(newStudent);
-
-        model.addAttribute("userType", "학생");
-        model.addAttribute("userName", name);
-        model.addAttribute("message", "회원가입이 완료되었습니다. 관리자의 승인을 기다려주세요.");
-
-        return "register-pending";
     }
 
     // 교수 회원가입 처리
@@ -161,24 +211,65 @@ public class ProjectController {
                                            @RequestParam String password,
                                            Model model) {
 
-        if (professorRepository.existsByProfessorId(professorNumber) || studentRepository.existsByStudentId(professorNumber)) {
-            model.addAttribute("error", "이미 사용 중인 아이디입니다.");
+        try {
+            // 입력값 검증
+            if (name == null || name.trim().isEmpty()) {
+                model.addAttribute("error", "이름을 입력해주세요.");
+                return "register-professor";
+            }
+
+            if (professorNumber == null || professorNumber.trim().isEmpty()) {
+                model.addAttribute("error", "교수번호를 입력해주세요.");
+                return "register-professor";
+            }
+
+            if (password == null || password.trim().isEmpty()) {
+                model.addAttribute("error", "비밀번호를 입력해주세요.");
+                return "register-professor";
+            }
+
+            // XSS 검증
+            XSSUtils.validateInput(name, "이름");
+            XSSUtils.validateInput(professorNumber, "교수번호");
+
+            // 길이 제한
+            if (name.length() > 50) {
+                model.addAttribute("error", "이름이 너무 깁니다. (최대 50자)");
+                return "register-professor";
+            }
+
+            if (professorNumber.length() > 20) {
+                model.addAttribute("error", "교수번호가 너무 깁니다. (최대 20자)");
+                return "register-professor";
+            }
+
+            // 교수번호 중복 체크 (교수와 학생 모두)
+            if (professorRepository.existsByProfessorId(professorNumber) ||
+                    studentRepository.existsByStudentId(professorNumber)) {
+                model.addAttribute("error", "이미 사용 중인 교수번호입니다.");
+                return "register-professor";
+            }
+
+            // AuthenticationService를 통해 회원가입 처리
+            authenticationService.registerProfessor(
+                    professorNumber.trim(),
+                    XSSUtils.sanitizeInput(name.trim()),
+                    password
+            );
+
+            model.addAttribute("userType", "교수");
+            model.addAttribute("userName", XSSUtils.sanitizeInput(name.trim()));
+            model.addAttribute("message", "회원가입이 완료되었습니다. 관리자의 승인을 기다려주세요.");
+
+            return "register-pending";
+
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
+            return "register-professor";
+        } catch (Exception e) {
+            model.addAttribute("error", "회원가입 중 오류가 발생했습니다: " + e.getMessage());
             return "register-professor";
         }
-
-        Professor newProfessor = new Professor();
-        newProfessor.setProfessorId(professorNumber);
-        newProfessor.setName(name);
-        newProfessor.setPassword(password);
-        newProfessor.setAllowed(false); // 기본값은 승인되지 않음
-
-        professorRepository.save(newProfessor);
-
-        model.addAttribute("userType", "교수");
-        model.addAttribute("userName", name);
-        model.addAttribute("message", "회원가입이 완료되었습니다. 관리자의 승인을 기다려주세요.");
-
-        return "register-pending";
     }
 
     // 회원가입 대기 페이지

@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>내 질문 - Ploytech 과제 제출 시스템</title>
-    <link rel="stylesheet" th:href="@{/css/student/studentQuestionsStyleSheet.css}">
+    <link rel="stylesheet" th:href="@{/css/student/studentStyleSheet.css}">
+    <link rel="stylesheet" th:href="@{/css/student/studentQuestionSpecific.css}">
 </head>
 <body>
 <div class="header">
@@ -21,91 +22,114 @@
 </div>
 
 <div class="container">
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="page-title">❓ 내 질문 관리</div>
-        <div class="page-subtitle">등록한 질문과 교수님의 답변을 확인하세요</div>
+    <div class="sidebar">
+        <a th:href="@{/student/main}" class="sidebar-item-container">
+            <div class="sidebar-item">메인메뉴</div>
+        </a>
+        <a th:href="@{/student/courses}" class="sidebar-item-container">
+            <div class="sidebar-item">수업목록</div>
+        </a>
+        <a th:href="@{/student/assignments}" class="sidebar-item-container">
+            <div class="sidebar-item">과제 목록</div>
+        </a>
+        <a th:href="@{/student/submissions}" class="sidebar-item-container">
+            <div class="sidebar-item">제출 관리</div>
+        </a>
+        <a th:href="@{/student/questions}" class="sidebar-item-container">
+            <div class="sidebar-item active">질문 관리</div>
+        </a>
     </div>
 
-    <!-- Statistics Section -->
-    <div class="stats-section">
-        <div class="stat-card">
-            <div class="stat-number" id="totalQuestions">0</div>
-            <div class="stat-label">전체 질문</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number" id="answeredQuestions">0</div>
-            <div class="stat-label">답변 완료</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number" id="pendingQuestions">0</div>
-            <div class="stat-label">답변 대기</div>
-        </div>
-    </div>
-
-    <!-- Filter Section -->
-    <div class="filter-section">
-        <div class="filter-title">🔍 질문 필터</div>
-        <div class="filter-options">
-            <button class="filter-btn active" data-filter="all">전체 보기</button>
-            <button class="filter-btn" data-filter="answered">답변 완료</button>
-            <button class="filter-btn" data-filter="pending">답변 대기</button>
-        </div>
-    </div>
-
-    <!-- Questions Section -->
-    <div class="questions-section">
-        <div class="section-title">
-            📋 질문 목록
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-title">❓ 내 질문 관리</div>
+            <div class="page-subtitle">등록한 질문과 교수님의 답변을 확인하세요</div>
         </div>
 
-        <!-- Questions List -->
-        <div class="questions-list">
-            <div th:each="q : ${questions}" class="question-card"
-                 th:data-status="${q.answers != null and !q.answers.empty ? 'answered' : 'pending'}">
-
-                <div class="question-header">
-                    <div>
-                        <div class="question-title" th:text="${q.assignment?.title ?: '과제'}">과제 제목</div>
-                        <div class="question-info">
-                            📚 <span th:text="${q.assignment?.course?.courseName ?: '강의'}">강의명</span>
-                            | 📅 <span th:text="${#temporals.format(q.questionTime, 'yyyy-MM-dd HH:mm')}">질문 시간</span>
-                            <span th:class="'status-badge ' + (${q.answers != null and !q.answers.empty} ? 'status-answered' : 'status-pending')"
-                                  th:text="${q.answers != null and !q.answers.empty ? '✅ 답변 완료' : '⏳ 답변 대기'}">상태</span>
-                        </div>
-                    </div>
-                    <div class="question-meta">
-                        <a th:href="@{/student/assignment/{code}(code=${q.assignmentCode})}" class="view-assignment-btn">
-                            과제 보기
-                        </a>
-                    </div>
-                </div>
-
-                <div class="question-content" th:text="${q.content}">질문 내용</div>
-
-                <!-- Answers Section -->
-                <div th:if="${q.answers != null and !q.answers.empty}" class="answers-section">
-                    <div class="answers-title">
-                        💬 교수님 답변 (<span th:text="${#lists.size(q.answers)}">0</span>개)
-                    </div>
-                    <div th:each="answer : ${q.answers}" class="answer-card">
-                        <div class="answer-header">
-                            <div class="answer-author">
-                                👨‍🏫 <span th:text="${answer.professor?.name ?: '교수님'}">교수님</span>
-                            </div>
-                            <div class="answer-date" th:text="${#temporals.format(answer.answerTime, 'yyyy-MM-dd HH:mm')}">답변 시간</div>
-                        </div>
-                        <div class="answer-content" th:text="${answer.content}">답변 내용</div>
-                    </div>
-                </div>
+        <!-- Statistics Section -->
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-number" id="totalQuestions">0</div>
+                <div class="stat-label">전체 질문</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="answeredQuestions">0</div>
+                <div class="stat-label">답변 완료</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingQuestions">0</div>
+                <div class="stat-label">답변 대기</div>
             </div>
         </div>
 
-        <!-- Empty State -->
-        <div th:if="${questions == null or questions.empty}" class="empty-state">
-            <div class="empty-state-icon">❓</div>
-            <div class="empty-state-text">등록된 질문이 없습니다</div>
-            <div class="empty-state-subtext">과제 상세 페이지에서 질문을 등록해보세요!</div>
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="filter-title">🔍 질문 필터</div>
+            <div class="filter-options">
+                <button class="filter-btn active" data-filter="all">전체 보기</button>
+                <button class="filter-btn" data-filter="answered">답변 완료</button>
+                <button class="filter-btn" data-filter="pending">답변 대기</button>
+            </div>
+        </div>
+
+        <!-- Questions Section -->
+        <div class="questions-section">
+            <div class="section-title">
+                📋 질문 목록
+            </div>
+
+            <!-- Questions List -->
+            <div class="questions-list">
+                <a style="text-decoration: none;" th:href="@{/student/assignment/{code}(code=${q.assignmentCode})}"
+                   th:each="q : ${questions}"
+                   th:data-status="${q.answers != null and !q.answers.empty ? 'answered' : 'pending'}"
+                >
+                    <div class="question-card">
+                            <div class="question-header">
+                                <div>
+                                    <div class="question-title" th:text="${q.assignment?.title ?: '과제'}">과제 제목</div>
+                                    <div class="question-info">
+                                        📚 <span th:text="${q.assignment?.course?.courseName ?: '강의'}">강의명</span>
+                                        | 📅 <span th:text="${#temporals.format(q.questionTime, 'yyyy-MM-dd HH:mm')}">질문 시간</span>
+                                        <span th:class="'status-badge ' + (${q.answers != null and !q.answers.empty} ? 'status-answered' : 'status-pending')"
+                                              th:text="${q.answers != null and !q.answers.empty ? '✅ 답변 완료' : '⏳ 답변 대기'}">상태</span>
+                                    </div>
+                                </div>
+                                <div class="question-meta">
+                                    <a th:href="@{/student/assignment/{code}(code=${q.assignmentCode})}" class="view-assignment-btn">
+                                        과제 보기
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="question-content" th:text="${q.content}">질문 내용</div>
+
+                            <!-- Answers Section -->
+                            <div th:if="${q.answers != null and !q.answers.empty}" class="answers-section">
+                                <div class="answers-title">
+                                    💬 교수님 답변 (<span th:text="${#lists.size(q.answers)}">0</span>개)
+                                </div>
+                                <div th:each="answer : ${q.answers}" class="answer-card">
+                                    <div class="answer-header">
+                                        <div class="answer-author">
+                                            👨‍🏫 <span th:text="${answer.professor?.name ?: '교수님'}">교수님</span>
+                                        </div>
+                                        <div class="answer-date" th:text="${#temporals.format(answer.answerTime, 'yyyy-MM-dd HH:mm')}">답변 시간</div>
+                                    </div>
+                                    <div class="answer-content" th:text="${answer.content}">답변 내용</div>
+                                </div>
+                            </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${questions == null or questions.empty}" class="empty-state">
+                <div class="empty-state-icon">❓</div>
+                <div class="empty-state-text">등록된 질문이 없습니다</div>
+                <div class="empty-state-subtext">과제 상세 페이지에서 질문을 등록해보세요!</div>
+            </div>
         </div>
     </div>
 </div>

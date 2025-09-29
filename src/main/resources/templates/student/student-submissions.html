@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>제출 현황 - Ploytech 과제 제출 시스템</title>
-  <link rel="stylesheet" th:href="@{/css/student/studentQuestionsStyleSheet.css}">
+  <link rel="stylesheet" th:href="@{/css/student/studentStyleSheet.css}">
+  <link rel="stylesheet" th:href="@{/css/student/studentSubmissionsSpecific.css}">
 </head>
 <body>
 <div class="header">
@@ -21,59 +22,79 @@
 </div>
 
 <div class="container">
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="page-title">📋 제출 현황</div>
-    <div class="page-subtitle">나의 과제 제출 현황을 한눈에 확인하세요</div>
+  <div class="sidebar">
+    <a th:href="@{/student/main}" class="sidebar-item-container">
+      <div class="sidebar-item">메인메뉴</div>
+    </a>
+    <a th:href="@{/student/courses}" class="sidebar-item-container">
+      <div class="sidebar-item">수업목록</div>
+    </a>
+    <a th:href="@{/student/assignments}" class="sidebar-item-container">
+      <div class="sidebar-item">과제 목록</div>
+    </a>
+    <a th:href="@{/student/submissions}" class="sidebar-item-container">
+      <div class="sidebar-item active">제출 관리</div>
+    </a>
+    <a th:href="@{/student/questions}" class="sidebar-item-container">
+      <div class="sidebar-item">질문 관리</div>
+    </a>
   </div>
 
-  <!-- Statistics -->
-  <div class="stats-section">
-    <div class="stat-card">
-      <div class="stat-number" id="totalSubmissions">0</div>
-      <div class="stat-label">총 제출 과제</div>
+  <div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title">📋 제출 현황</div>
+      <div class="page-subtitle">나의 과제 제출 현황을 한눈에 확인하세요</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-number" id="gradedSubmissions">0</div>
-      <div class="stat-label">채점 완료</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" id="avgScore">0</div>
-      <div class="stat-label">평균 점수</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" id="recentSubmissions">0</div>
-      <div class="stat-label">최근 1주일</div>
-    </div>
-  </div>
 
-  <!-- Filter Section -->
-  <div class="filter-section">
-    <div class="filter-title">필터</div>
-    <div class="filter-options">
-      <button class="filter-btn active" onclick="filterSubmissions('all')">전체</button>
-      <button class="filter-btn" onclick="filterSubmissions('graded')">채점 완료</button>
-      <button class="filter-btn" onclick="filterSubmissions('pending')">채점 대기</button>
-      <button class="filter-btn" onclick="filterSubmissions('recent')">최근 1주일</button>
+    <!-- Statistics -->
+    <div class="stats-section">
+      <div class="stat-card">
+        <div class="stat-number" id="totalSubmissions">0</div>
+        <div class="stat-label">총 제출 과제</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="gradedSubmissions">0</div>
+        <div class="stat-label">채점 완료</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="avgScore">0</div>
+        <div class="stat-label">평균 점수</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="recentSubmissions">0</div>
+        <div class="stat-label">최근 1주일</div>
+      </div>
     </div>
-  </div>
 
-  <!-- Submissions Section -->
-  <div class="submissions-section">
-    <div class="section-title">
-      📝 제출한 과제들
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="filter-title">필터</div>
+      <div class="filter-options">
+        <button class="filter-btn active" onclick="filterSubmissions('all')">전체</button>
+        <button class="filter-btn" onclick="filterSubmissions('graded')">채점 완료</button>
+        <button class="filter-btn" onclick="filterSubmissions('pending')">채점 대기</button>
+        <button class="filter-btn" onclick="filterSubmissions('recent')">최근 1주일</button>
+      </div>
     </div>
-    <div id="loadingDiv" class="loading">
-      <div class="loading-spinner"></div>
-      제출 현황을 불러오는 중...
-    </div>
-    <div id="submissionsContainer" class="submissions-grid" style="display: none;">
-      <!-- 제출물들이 여기에 동적으로 추가됩니다 -->
-    </div>
-    <div id="emptyState" class="empty-state" style="display: none;">
-      <div class="empty-state-icon">📋</div>
-      <div class="empty-state-text">아직 제출한 과제가 없습니다</div>
-      <div class="empty-state-subtext">과제를 제출하면 여기에서 확인할 수 있습니다</div>
+
+    <!-- Submissions Section -->
+    <div class="submissions-section">
+      <div class="section-title">
+        📝 제출한 과제들
+      </div>
+      <div id="loadingDiv" class="loading">
+        <div class="loading-spinner"></div>
+        제출 현황을 불러오는 중...
+      </div>
+      <div id="submissionsContainer" class="submissions-grid" style="display: none;">
+        <!-- 제출물들이 여기에 동적으로 추가됩니다 -->
+      </div>
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-state-icon">📋</div>
+        <div class="empty-state-text">아직 제출한 과제가 없습니다</div>
+        <div class="empty-state-subtext">과제를 제출하면 여기에서 확인할 수 있습니다</div>
+      </div>
     </div>
   </div>
 </div>

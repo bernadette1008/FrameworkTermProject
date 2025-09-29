@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>과제 목록 - Ploytech</title>
-    <link rel="stylesheet" th:href="@{/css/student/studentAssignmentsStyleSheet.css}">
+    <link rel="stylesheet" th:href="@{/css/student/studentStyleSheet.css}">
+    <link rel="stylesheet" th:href="@{/css/student/studentAssignmentsSpecific.css}">
 </head>
 <body>
 <div class="header">
@@ -20,115 +21,135 @@
 </div>
 
 <div class="container">
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="page-title">📝 과제 목록</div>
-        <div class="page-subtitle">내 과제를 한눈에 확인하고 관리하세요</div>
+    <div class="sidebar">
+        <a th:href="@{/student/main}" class="sidebar-item-container">
+            <div class="sidebar-item">메인메뉴</div>
+        </a>
+        <a th:href="@{/student/courses}" class="sidebar-item-container">
+            <div class="sidebar-item">수업목록</div>
+        </a>
+        <a th:href="@{/student/assignments}" class="sidebar-item-container">
+            <div class="sidebar-item active">과제 목록</div>
+        </a>
+        <a th:href="@{/student/submissions}" class="sidebar-item-container">
+            <div class="sidebar-item">제출 관리</div>
+        </a>
+        <a th:href="@{/student/questions}" class="sidebar-item-container">
+            <div class="sidebar-item">질문 관리</div>
+        </a>
     </div>
 
-    <!-- Error Message -->
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-
-    <!-- Statistics Cards -->
-    <div class="stats-cards">
-        <div class="stat-card">
-            <div class="stat-number" th:text="${#lists.size(assignments)}">0</div>
-            <div class="stat-label">전체 과제</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number" id="submittedCount">0</div>
-            <div class="stat-label">제출 완료</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number" id="pendingCount">0</div>
-            <div class="stat-label">미제출</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number" id="overdueCount">0</div>
-            <div class="stat-label">기한 초과</div>
-        </div>
-    </div>
-
-    <!-- Filter Section -->
-    <div class="filter-section">
-        <div class="filter-group">
-            <label for="statusFilter">상태:</label>
-            <select id="statusFilter" class="filter-select" onchange="filterAssignments()">
-                <option value="all">전체</option>
-                <option value="pending">미제출</option>
-                <option value="submitted">제출완료</option>
-                <option value="overdue">기한초과</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label for="courseFilter">강의:</label>
-            <select id="courseFilter" class="filter-select" onchange="filterAssignments()">
-                <option value="all">전체 강의</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label for="sortFilter">정렬:</label>
-            <select id="sortFilter" class="filter-select" onchange="sortAssignments()">
-                <option value="dueDate">마감일순</option>
-                <option value="createdDate">생성일순</option>
-                <option value="title">제목순</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- Assignments Grid -->
-    <div id="assignmentsContainer">
-        <div th:if="${#lists.isEmpty(assignments)}" class="empty-state">
-            <div class="empty-state-icon">📝</div>
-            <h3>아직 과제가 없습니다</h3>
-            <p>수업을 등록하면 과제를 확인할 수 있어요!</p>
-            <a th:href="@{/student/main}" class="btn-primary">메인으로 돌아가기</a>
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-title">📝 과제 목록</div>
+            <div class="page-subtitle">내 과제를 한눈에 확인하고 관리하세요</div>
         </div>
 
-        <div th:unless="${#lists.isEmpty(assignments)}" class="assignments-grid" id="assignmentsGrid">
-            <a th:each="assignment : ${assignments}"
-                 class="assignment-card"
-               th:href="@{/student/assignment/{code}(code=${assignment.assignmentCode})}"
-               th:data-status="${assignment.isSubmitted() ? 'submitted' : (assignment.isOverdue() ? 'overdue' : 'pending')}"
-               th:data-course="${assignment.course.courseCode}"
-               th:data-due-date="${assignment.dueDate}"
-               th:data-created-date="${assignment.createdDate}"
-               th:data-title="${assignment.title}">
+        <!-- Error Message -->
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-                <div class="assignment-header">
-                    <h3 class="assignment-title" th:text="${assignment.title}">과제 제목</h3>
-                    <span class="status-badge"
-                          th:class="${'status-badge ' + (assignment.isSubmitted() ? 'status-submitted' : (assignment.isOverdue() ? 'status-overdue' : 'status-pending'))}"
-                          th:text="${assignment.isSubmitted() ? '제출완료' : (assignment.isOverdue() ? '기한초과' : '미제출')}">상태</span>
-                </div>
+        <!-- Statistics Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-number" th:text="${#lists.size(assignments)}">0</div>
+                <div class="stat-label">전체 과제</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="submittedCount">0</div>
+                <div class="stat-label">제출 완료</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingCount">0</div>
+                <div class="stat-label">미제출</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="overdueCount">0</div>
+                <div class="stat-label">기한 초과</div>
+            </div>
+        </div>
 
-                <div class="course-info">
-                    <span>📚</span>
-                    <span th:text="${assignment.course.courseName}">강의명</span>
-                    <span th:text="'(' + ${assignment.course.courseCode} + ')'">강의코드</span>
-                </div>
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="statusFilter">상태:</label>
+                <select id="statusFilter" class="filter-select" onchange="filterAssignments()">
+                    <option value="all">전체</option>
+                    <option value="pending">미제출</option>
+                    <option value="submitted">제출완료</option>
+                    <option value="overdue">기한초과</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="courseFilter">강의:</label>
+                <select id="courseFilter" class="filter-select" onchange="filterAssignments()">
+                    <option value="all">전체 강의</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="sortFilter">정렬:</label>
+                <select id="sortFilter" class="filter-select" onchange="sortAssignments()">
+                    <option value="dueDate">마감일순</option>
+                    <option value="createdDate">생성일순</option>
+                    <option value="title">제목순</option>
+                </select>
+            </div>
+        </div>
 
-                <div class="assignment-description" th:text="${assignment.content}">
-                    과제 설명...
-                </div>
+        <!-- Assignments Grid -->
+        <div id="assignmentsContainer">
+            <div th:if="${#lists.isEmpty(assignments)}" class="empty-state">
+                <div class="empty-state-icon">📝</div>
+                <h3>아직 과제가 없습니다</h3>
+                <p>수업을 등록하면 과제를 확인할 수 있어요!</p>
+                <a th:href="@{/student/main}" class="btn-primary">메인으로 돌아가기</a>
+            </div>
 
-                <div class="assignment-dates">
-                    <div class="date-item">
-                        <span class="date-icon">📅</span>
-                        <span th:text="'생성: ' + ${#temporals.format(assignment.createdDate, 'yyyy-MM-dd HH:mm')}">생성일</span>
+            <div th:unless="${#lists.isEmpty(assignments)}" class="assignments-grid" id="assignmentsGrid">
+                <a th:each="assignment : ${assignments}"
+                   class="assignment-card"
+                   th:href="@{/student/assignment/{code}(code=${assignment.assignmentCode})}"
+                   th:data-status="${assignment.isSubmitted() ? 'submitted' : (assignment.isOverdue() ? 'overdue' : 'pending')}"
+                   th:data-course="${assignment.course.courseCode}"
+                   th:data-due-date="${assignment.dueDate}"
+                   th:data-created-date="${assignment.createdDate}"
+                   th:data-title="${assignment.title}">
+
+                    <div class="assignment-header">
+                        <h3 class="assignment-title" th:text="${assignment.title}">과제 제목</h3>
+                        <span class="status-badge"
+                              th:class="${'status-badge ' + (assignment.isSubmitted() ? 'status-submitted' : (assignment.isOverdue() ? 'status-overdue' : 'status-pending'))}"
+                              th:text="${assignment.isSubmitted() ? '제출완료' : (assignment.isOverdue() ? '기한초과' : '미제출')}">상태</span>
                     </div>
-                    <div class="date-item">
-                        <span class="date-icon">⏰</span>
-                        <span th:text="'마감: ' + ${#temporals.format(assignment.dueDate, 'yyyy-MM-dd HH:mm')}">마감일</span>
-                    </div>
-                </div>
 
-                <div class="time-remaining"
-                     th:data-due-date="${assignment.dueDate}"
-                     th:data-is-submitted="${assignment.isSubmitted()}">
-                    시간 계산 중...
-                </div>
-            </a>
+                    <div class="course-info">
+                        <span>📚</span>
+                        <span th:text="${assignment.course.courseName}">강의명</span>
+                        <span th:text="'(' + ${assignment.course.courseCode} + ')'">강의코드</span>
+                    </div>
+
+                    <div class="assignment-description" th:text="${assignment.content}">
+                        과제 설명...
+                    </div>
+
+                    <div class="assignment-dates">
+                        <div class="date-item">
+                            <span class="date-icon">📅</span>
+                            <span th:text="'생성: ' + ${#temporals.format(assignment.createdDate, 'yyyy-MM-dd HH:mm')}">생성일</span>
+                        </div>
+                        <div class="date-item">
+                            <span class="date-icon">⏰</span>
+                            <span th:text="'마감: ' + ${#temporals.format(assignment.dueDate, 'yyyy-MM-dd HH:mm')}">마감일</span>
+                        </div>
+                    </div>
+
+                    <div class="time-remaining"
+                         th:data-due-date="${assignment.dueDate}"
+                         th:data-is-submitted="${assignment.isSubmitted()}">
+                        시간 계산 중...
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 </div>

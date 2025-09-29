@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>수업 목록 - Ploytech 과제 제출 시스템</title>
-    <link rel="stylesheet" th:href="@{/css/student/studentCoursesStyleSheet.css}">
+    <link rel="stylesheet" th:href="@{/css/student/studentStyleSheet.css}">
+    <link rel="stylesheet" th:href="@{/css/student/studentCoursesSpecific.css}">
 </head>
 <body>
 <div class="header">
@@ -21,93 +22,113 @@
 </div>
 
 <div class="container">
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="page-title">📚 수업 목록</div>
-        <div class="page-subtitle">수강 중인 과목을 확인하고 새로운 수업을 등록하세요</div>
-
-        <!-- Enrollment Section -->
-        <div class="enroll-section">
-            <div class="enroll-title">🎯 새 수업 등록</div>
-            <form class="enroll-form" th:action="@{/student/enroll}" method="post">
-                <div class="form-group">
-                    <label for="courseCode">수업 코드</label>
-                    <input type="text" id="courseCode" name="courseCode" class="form-control"
-                           placeholder="교수님이 제공한 수업 코드를 입력하세요" required>
-                </div>
-                <button type="submit" class="btn-primary">등록하기</button>
-            </form>
-        </div>
-
-        <!-- Success/Error Messages -->
-        <div th:if="${param.enrolled != null and param.enrolled[0] == 'success'}" class="alert alert-success">
-            ✅ 수업이 성공적으로 등록되었습니다!
-        </div>
-        <div th:if="${param.enrolled != null and param.enrolled[0] == 'error'}" class="alert alert-danger">
-            ❌ 수업 등록에 실패했습니다. 수업 코드를 확인해주세요.
-        </div>
-        <div th:if="${param.unenrolled != null}" class="alert alert-success">
-            ✅ 수업 등록이 해제되었습니다.
-        </div>
+    <div class="sidebar">
+        <a th:href="@{/student/main}" class="sidebar-item-container">
+            <div class="sidebar-item">메인메뉴</div>
+        </a>
+        <a th:href="@{/student/courses}" class="sidebar-item-container">
+            <div class="sidebar-item active">수업목록</div>
+        </a>
+        <a th:href="@{/student/assignments}" class="sidebar-item-container">
+            <div class="sidebar-item">과제 목록</div>
+        </a>
+        <a th:href="@{/student/submissions}" class="sidebar-item-container">
+            <div class="sidebar-item">제출 관리</div>
+        </a>
+        <a th:href="@{/student/questions}" class="sidebar-item-container">
+            <div class="sidebar-item">질문 관리</div>
+        </a>
     </div>
 
-    <!-- Statistics -->
-    <div class="stats-section">
-        <div class="stat-card">
-            <div class="stat-number" th:text="${#lists.size(courses)}">0</div>
-            <div class="stat-label">수강 과목</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number" id="totalAssignments">0</div>
-            <div class="stat-label">전체 과제</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number" id="totalProfessors">0</div>
-            <div class="stat-label">담당 교수</div>
-        </div>
-    </div>
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-title">📚 수업 목록</div>
+            <div class="page-subtitle">수강 중인 과목을 확인하고 새로운 수업을 등록하세요</div>
 
-    <!-- Courses Section -->
-    <div class="courses-section">
-        <div class="section-title">
-            📖 수강 중인 과목
-        </div>
-
-        <div th:if="${#lists.isEmpty(courses)}" class="empty-state">
-            <div class="empty-state-icon">📚</div>
-            <div class="empty-state-text">아직 등록된 수업이 없습니다</div>
-            <div class="empty-state-subtext">위의 입력 창에 수업 코드를 입력하여 새 수업을 등록해보세요!</div>
-        </div>
-
-        <div th:unless="${#lists.isEmpty(courses)}" class="courses-grid">
-            <div th:each="course : ${courses}" class="course-card">
-                <div class="course-title" th:text="${course.courseName}">강의명</div>
-                <div class="course-info">
-                    🏷️ 수업 코드: <strong th:text="${course.courseCode}">CS101</strong>
-                </div>
-                <div class="course-info">
-                    👨‍🏫 담당 교수: <strong th:text="${course.professor?.name ?: '교수님'}">교수님</strong>
-                </div>
-                <div class="course-info">
-                    📋 과제 수: <span class="assignment-count" th:text="${course.assignments?.size() ?: 0} + '개'">0개</span>
-                </div>
-
-                <div class="course-description">
-                    <p>📖 <strong th:text="${course.courseName}">강의명</strong> 수업에 참여하고 있습니다.</p>
-                    <p>과제 제출, 질문 등록 등 다양한 학습 활동을 진행해보세요!</p>
-                </div>
-
-                <div class="course-footer">
-                    <div class="enrollment-date">
-                        📅 등록일: <span th:text="${#lists.isEmpty(course.enrollments) ? '정보 없음' : course.enrollments.get(0).enrollmentDate}">정보 없음</span>
+            <!-- Enrollment Section -->
+            <div class="enroll-section">
+                <div class="enroll-title">🎯 새 수업 등록</div>
+                <form class="enroll-form" th:action="@{/student/enroll}" method="post">
+                    <div class="form-group">
+                        <label for="courseCode">수업 코드</label>
+                        <input type="text" id="courseCode" name="courseCode" class="form-control"
+                               placeholder="교수님이 제공한 수업 코드를 입력하세요" required>
                     </div>
-                    <form th:action="@{/student/unenroll}" method="post" style="display: inline;">
-                        <input type="hidden" name="courseCode" th:value="${course.courseCode}">
-                        <button type="submit" class="unenroll-btn"
-                                onclick="return confirm('정말로 이 수업을 등록 해제하시겠습니까?')">
-                            수강 취소
-                        </button>
-                    </form>
+                    <button type="submit" class="btn-primary">등록하기</button>
+                </form>
+            </div>
+
+            <!-- Success/Error Messages -->
+            <div th:if="${param.enrolled != null and param.enrolled[0] == 'success'}" class="alert alert-success">
+                ✅ 수업이 성공적으로 등록되었습니다!
+            </div>
+            <div th:if="${param.enrolled != null and param.enrolled[0] == 'error'}" class="alert alert-danger">
+                ❌ 수업 등록에 실패했습니다. 수업 코드를 확인해주세요.
+            </div>
+            <div th:if="${param.unenrolled != null}" class="alert alert-success">
+                ✅ 수업 등록이 해제되었습니다.
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-number" th:text="${#lists.size(courses)}">0</div>
+                <div class="stat-label">수강 과목</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalAssignments">0</div>
+                <div class="stat-label">전체 과제</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalProfessors">0</div>
+                <div class="stat-label">담당 교수</div>
+            </div>
+        </div>
+
+        <!-- Courses Section -->
+        <div class="courses-section">
+            <div class="section-title">
+                📖 수강 중인 과목
+            </div>
+
+            <div th:if="${#lists.isEmpty(courses)}" class="empty-state">
+                <div class="empty-state-icon">📚</div>
+                <div class="empty-state-text">아직 등록된 수업이 없습니다</div>
+                <div class="empty-state-subtext">위의 입력 창에 수업 코드를 입력하여 새 수업을 등록해보세요!</div>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(courses)}" class="courses-grid">
+                <div th:each="course : ${courses}" class="course-card">
+                    <div class="course-title" th:text="${course.courseName}">강의명</div>
+                    <div class="course-info">
+                        🏷️ 수업 코드: <strong th:text="${course.courseCode}">CS101</strong>
+                    </div>
+                    <div class="course-info">
+                        👨‍🏫 담당 교수: <strong th:text="${course.professor?.name ?: '교수님'}">교수님</strong>
+                    </div>
+                    <div class="course-info">
+                        📋 과제 수: <span class="assignment-count" th:text="${course.assignments?.size() ?: 0} + '개'">0개</span>
+                    </div>
+
+                    <div class="course-description">
+                        <p>📖 <strong th:text="${course.courseName}">강의명</strong> 수업에 참여하고 있습니다.</p>
+                        <p>과제 제출, 질문 등록 등 다양한 학습 활동을 진행해보세요!</p>
+                    </div>
+
+                    <div class="course-footer">
+                        <div class="enrollment-date">
+                            📅 등록일: <span th:text="${#lists.isEmpty(course.enrollments) ? '정보 없음' : course.enrollments.get(0).enrollmentDate}">정보 없음</span>
+                        </div>
+                        <form th:action="@{/student/unenroll}" method="post" style="display: inline;">
+                            <input type="hidden" name="courseCode" th:value="${course.courseCode}">
+                            <button type="submit" class="unenroll-btn"
+                                    onclick="return confirm('정말로 이 수업을 등록 해제하시겠습니까?')">
+                                수강 취소
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>과제 상세 - Ploytech</title>
-    <link rel="stylesheet" th:href="@{/css/student/studentAssignmentDetailStyleSheet.css}">
+    <link rel="stylesheet" th:href="@{/css/student/studentStyleSheet.css}">
+    <link rel="stylesheet" th:href="@{/css/student/studentAssignmentDetailSpecific.css}">
 </head>
 <body>
 <div class="header">
@@ -20,195 +21,197 @@
 </div>
 
 <div class="container">
-    <div id="loadingSpinner" class="loading">
-        과제 정보를 불러오는 중...
-    </div>
-
-    <div id="errorAlert" class="alert alert-danger" style="display: none;">
-        <strong>오류!</strong> <span id="errorMessage"></span>
-    </div>
-
-    <div id="successAlert" class="alert alert-success" style="display: none;">
-        <strong>성공!</strong> <span id="successMessage"></span>
-    </div>
-
-    <div id="mainContent" style="display: none;">
-        <!-- Assignment Header -->
-        <div class="assignment-header">
-            <div class="assignment-title" id="assignmentTitle">과제 제목</div>
-            <div class="assignment-meta">
-                <div class="meta-item">
-                    <span class="meta-icon">📚</span>
-                    <span id="courseName">강의명</span>
-                </div>
-                <div class="meta-item">
-                    <span class="meta-icon">📅</span>
-                    <span>생성일: <span id="createdDate"></span></span>
-                </div>
-                <div class="meta-item">
-                    <span class="meta-icon">⏰</span>
-                    <span>마감일: <span id="dueDate"></span></span>
-                </div>
-                <div class="status-badge" id="statusBadge">상태</div>
-            </div>
+    <div class="main-content">
+        <div id="loadingSpinner" class="loading">
+            과제 정보를 불러오는 중...
         </div>
 
-        <!-- Main Content Grid -->
-        <div class="main-grid">
-            <!-- Left Side - Assignment Content & Submission -->
-            <div class="content-section">
-                <div class="section-title">
-                    📝 과제 설명
+        <div id="errorAlert" class="alert alert-danger" style="display: none;">
+            <strong>오류!</strong> <span id="errorMessage"></span>
+        </div>
+
+        <div id="successAlert" class="alert alert-success" style="display: none;">
+            <strong>성공!</strong> <span id="successMessage"></span>
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            <!-- Assignment Header -->
+            <div class="assignment-header">
+                <div class="assignment-title" id="assignmentTitle">과제 제목</div>
+                <div class="assignment-meta">
+                    <div class="meta-item">
+                        <span class="meta-icon">📚</span>
+                        <span id="courseName">강의명</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-icon">📅</span>
+                        <span>생성일: <span id="createdDate"></span></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-icon">⏰</span>
+                        <span>마감일: <span id="dueDate"></span></span>
+                    </div>
+                    <div class="status-badge" id="statusBadge">상태</div>
                 </div>
-                <div class="assignment-description" id="assignmentContent">
-                    과제 내용을 불러오는 중...
-                </div>
+            </div>
 
-                <!-- Submission Area -->
-                <div class="section-title">
-                    📋 과제 제출
-                </div>
-
-                <div id="submissionArea" class="submission-area">
-                    <div id="noSubmission">
-                        <h3>📤 과제를 제출해주세요</h3>
-                        <p>아직 제출하지 않은 과제입니다.</p>
-
-                        <!-- 텍스트 입력 -->
-                        <textarea id="submissionContent" class="textarea-large" placeholder="과제 내용을 여기에 작성해주세요..."></textarea>
-
-                        <!-- 파일 업로드 -->
-                        <div style="margin: 15px 0;">
-                            <label for="submissionFile" style="display: block; margin-bottom: 8px; font-weight: bold; color: #2c3e50;">
-                                📎 파일 첨부 (선택사항)
-                            </label>
-                            <input type="file"
-                                   id="submissionFile"
-                                   accept=".pdf,.doc,.docx,.txt,.hwp,.zip,.jpg,.jpeg,.png">
-                            <div id="submissionFileDisplay"></div>
-                            <small style="color: #7f8c8d;">
-                                허용 형식: PDF, DOC, DOCX, TXT, HWP, ZIP, JPG, PNG (최대 10MB)
-                            </small>
-                        </div>
-
-                        <div style="margin-top: 15px;">
-                            <button class="btn-primary" onclick="submitAssignment()">제출하기</button>
-                        </div>
+            <!-- Main Content Grid -->
+            <div class="main-grid">
+                <!-- Left Side - Assignment Content & Submission -->
+                <div class="content-section">
+                    <div class="section-title">
+                        📝 과제 설명
+                    </div>
+                    <div class="assignment-description" id="assignmentContent">
+                        과제 내용을 불러오는 중...
                     </div>
 
-                    <div id="hasSubmission" style="display: none;">
-                        <h3>✅ 제출 완료</h3>
-                        <p>제출일: <span id="submittedDate"></span></p>
+                    <!-- Submission Area -->
+                    <div class="section-title">
+                        📋 과제 제출
+                    </div>
 
-                        <!-- 제출된 내용 표시 -->
-                        <div class="submission-content" id="submittedContent">
-                            제출된 내용...
-                        </div>
+                    <div id="submissionArea" class="submission-area">
+                        <div id="noSubmission">
+                            <h3>📤 과제를 제출해주세요</h3>
+                            <p>아직 제출하지 않은 과제입니다.</p>
 
-                        <!-- 제출된 파일 정보 표시 -->
-                        <div id="submittedFileInfo" style="display: none;">
-                            <div class="submitted-file-info">
-                                <div class="file-details">
-                                    <div class="file-name">📎 <span id="submittedFileName">파일명</span></div>
-                                    <div class="file-size" id="submittedFileSize">파일 크기</div>
-                                </div>
-                                <div class="file-actions">
-                                    <button class="btn-download" onclick="downloadFile()">📥 다운로드</button>
-                                </div>
+                            <!-- 텍스트 입력 -->
+                            <textarea id="submissionContent" class="textarea-large" placeholder="과제 내용을 여기에 작성해주세요..."></textarea>
+
+                            <!-- 파일 업로드 -->
+                            <div style="margin: 15px 0;">
+                                <label for="submissionFile" style="display: block; margin-bottom: 8px; font-weight: bold; color: #2c3e50;">
+                                    📎 파일 첨부 (선택사항)
+                                </label>
+                                <input type="file"
+                                       id="submissionFile"
+                                       accept=".pdf,.doc,.docx,.txt,.hwp,.zip,.jpg,.jpeg,.png">
+                                <div id="submissionFileDisplay"></div>
+                                <small style="color: #7f8c8d;">
+                                    허용 형식: PDF, DOC, DOCX, TXT, HWP, ZIP, JPG, PNG (최대 10MB)
+                                </small>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <button class="btn-primary" onclick="submitAssignment()">제출하기</button>
                             </div>
                         </div>
 
-                        <div style="margin-top: 15px;">
-                            <button class="btn-secondary" onclick="editSubmission()">수정하기</button>
-                            <button class="btn-danger" onclick="deleteSubmission()">삭제하기</button>
+                        <div id="hasSubmission" style="display: none;">
+                            <h3>✅ 제출 완료</h3>
+                            <p>제출일: <span id="submittedDate"></span></p>
+
+                            <!-- 제출된 내용 표시 -->
+                            <div class="submission-content" id="submittedContent">
+                                제출된 내용...
+                            </div>
+
+                            <!-- 제출된 파일 정보 표시 -->
+                            <div id="submittedFileInfo" style="display: none;">
+                                <div class="submitted-file-info">
+                                    <div class="file-details">
+                                        <div class="file-name">📎 <span id="submittedFileName">파일명</span></div>
+                                        <div class="file-size" id="submittedFileSize">파일 크기</div>
+                                    </div>
+                                    <div class="file-actions">
+                                        <button class="btn-download" onclick="downloadFile()">📥 다운로드</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <button class="btn-secondary" onclick="editSubmission()">수정하기</button>
+                                <button class="btn-danger" onclick="deleteSubmission()">삭제하기</button>
+                            </div>
+                        </div>
+
+                        <div id="editSubmission" style="display: none;">
+                            <h3>✏️ 과제 수정</h3>
+
+                            <!-- 텍스트 수정 -->
+                            <textarea id="editSubmissionContent" class="textarea-large"></textarea>
+
+                            <!-- 파일 수정 -->
+                            <div style="margin: 15px 0;">
+                                <label for="editSubmissionFile" style="display: block; margin-bottom: 8px; font-weight: bold; color: #2c3e50;">
+                                    📎 파일 변경 (선택사항)
+                                </label>
+                                <input type="file"
+                                       id="editSubmissionFile"
+                                       accept=".pdf,.doc,.docx,.txt,.hwp,.zip,.jpg,.jpeg,.png">
+                                <div id="editSubmissionFileDisplay"></div>
+                                <small style="color: #7f8c8d;">
+                                    파일을 선택하지 않으면 기존 파일이 유지됩니다.
+                                </small>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <button class="btn-primary" onclick="updateSubmission()">수정 완료</button>
+                                <button class="btn-secondary" onclick="cancelEdit()">취소</button>
+                            </div>
                         </div>
                     </div>
 
-                    <div id="editSubmission" style="display: none;">
-                        <h3>✏️ 과제 수정</h3>
+                    <!-- Questions Section -->
+                    <div class="section-title">
+                        ❓ 질문하기
+                    </div>
 
-                        <!-- 텍스트 수정 -->
-                        <textarea id="editSubmissionContent" class="textarea-large"></textarea>
-
-                        <!-- 파일 수정 -->
-                        <div style="margin: 15px 0;">
-                            <label for="editSubmissionFile" style="display: block; margin-bottom: 8px; font-weight: bold; color: #2c3e50;">
-                                📎 파일 변경 (선택사항)
-                            </label>
-                            <input type="file"
-                                   id="editSubmissionFile"
-                                   accept=".pdf,.doc,.docx,.txt,.hwp,.zip,.jpg,.jpeg,.png">
-                            <div id="editSubmissionFileDisplay"></div>
-                            <small style="color: #7f8c8d;">
-                                파일을 선택하지 않으면 기존 파일이 유지됩니다.
-                            </small>
+                    <div class="question-form">
+                        <div class="form-group">
+                            <label for="questionContent">질문 내용</label>
+                            <textarea id="questionContent" class="textarea-large" placeholder="궁금한 점을 자유롭게 질문해주세요..." style="min-height: 120px;"></textarea>
                         </div>
+                        <button class="btn-primary" onclick="submitQuestion()">질문 등록</button>
+                    </div>
 
-                        <div style="margin-top: 15px;">
-                            <button class="btn-primary" onclick="updateSubmission()">수정 완료</button>
-                            <button class="btn-secondary" onclick="cancelEdit()">취소</button>
+                    <!-- Questions List -->
+                    <div class="question-list" id="questionList">
+                        <h3>내가 한 질문들</h3>
+                        <div id="questionsContainer">
+                            <div class="loading">질문을 불러오는 중...</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Questions Section -->
-                <div class="section-title">
-                    ❓ 질문하기
-                </div>
-
-                <div class="question-form">
-                    <div class="form-group">
-                        <label for="questionContent">질문 내용</label>
-                        <textarea id="questionContent" class="textarea-large" placeholder="궁금한 점을 자유롭게 질문해주세요..." style="min-height: 120px;"></textarea>
+                <!-- Right Side - Assignment Info -->
+                <div class="sidebar-section">
+                    <div class="section-title">
+                        ℹ️ 과제 정보
                     </div>
-                    <button class="btn-primary" onclick="submitQuestion()">질문 등록</button>
-                </div>
 
-                <!-- Questions List -->
-                <div class="question-list" id="questionList">
-                    <h3>내가 한 질문들</h3>
-                    <div id="questionsContainer">
-                        <div class="loading">질문을 불러오는 중...</div>
+                    <div class="sidebar-item">
+                        <h4>📊 제출 현황</h4>
+                        <p id="submissionStatus">미제출</p>
                     </div>
-                </div>
-            </div>
 
-            <!-- Right Side - Assignment Info -->
-            <div class="sidebar-section">
-                <div class="section-title">
-                    ℹ️ 과제 정보
-                </div>
+                    <div class="sidebar-item">
+                        <h4>⏱️ 남은 시간</h4>
+                        <p id="timeRemaining">계산 중...</p>
+                    </div>
 
-                <div class="sidebar-item">
-                    <h4>📊 제출 현황</h4>
-                    <p id="submissionStatus">미제출</p>
-                </div>
+                    <div class="sidebar-item">
+                        <h4>📋 제출 안내</h4>
+                        <p>• 마감일 전까지 수정 가능<br>
+                            • 텍스트 형태 또는 파일로 제출<br>
+                            • 질문은 언제든지 가능</p>
+                    </div>
 
-                <div class="sidebar-item">
-                    <h4>⏱️ 남은 시간</h4>
-                    <p id="timeRemaining">계산 중...</p>
-                </div>
+                    <div class="sidebar-item">
+                        <h4>💬 질문 현황</h4>
+                        <p><span id="questionCount">0</span>개의 질문</p>
+                    </div>
 
-                <div class="sidebar-item">
-                    <h4>📋 제출 안내</h4>
-                    <p>• 마감일 전까지 수정 가능<br>
-                        • 텍스트 형태 또는 파일로 제출<br>
-                        • 질문은 언제든지 가능</p>
-                </div>
+                    <div class="sidebar-item">
+                        <h4>💯 취득 점수</h4>
+                        <p><span id="studentScore">미채점</span>점</p>
+                    </div>
 
-                <div class="sidebar-item">
-                    <h4>💬 질문 현황</h4>
-                    <p><span id="questionCount">0</span>개의 질문</p>
-                </div>
-
-                <div class="sidebar-item">
-                    <h4>💯 취득 점수</h4>
-                    <p><span id="studentScore">미채점</span>점</p>
-                </div>
-
-                <div class="sidebar-item">
-                    <h4>💬 피드백</h4>
-                    <p><span id="feedback">피드백 없음</span></p>
+                    <div class="sidebar-item">
+                        <h4>💬 피드백</h4>
+                        <p><span id="feedback">피드백 없음</span></p>
+                    </div>
                 </div>
             </div>
         </div>

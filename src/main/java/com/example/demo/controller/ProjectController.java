@@ -490,7 +490,7 @@ public class ProjectController {
             return "redirect:/";
         }
         model.addAttribute("professor", professor);
-        return "professor/create-course";
+        return "professor/professor-create-course";
     }
 
     @PostMapping("/create-course")
@@ -508,13 +508,13 @@ public class ProjectController {
             if (courseName == null || courseName.trim().isEmpty()) {
                 model.addAttribute("professor", professor);
                 model.addAttribute("error", "강의명을 입력해주세요.");
-                return "professor/create-course";
+                return "professor/professor-create-course";
             }
 
             if (courseCode == null || courseCode.trim().isEmpty()) {
                 model.addAttribute("professor", professor);
                 model.addAttribute("error", "강의 코드를 입력해주세요.");
-                return "professor/create-course";
+                return "professor/professor-create-course";
             }
 
             // XSS 검증
@@ -525,27 +525,27 @@ public class ProjectController {
             if (courseName.length() > 100) {
                 model.addAttribute("professor", professor);
                 model.addAttribute("error", "강의명이 너무 깁니다. (최대 100자)");
-                return "professor/create-course";
+                return "professor/professor-create-course";
             }
 
             if (courseCode.length() > 20) {
                 model.addAttribute("professor", professor);
                 model.addAttribute("error", "강의 코드가 너무 깁니다. (최대 20자)");
-                return "professor/create-course";
+                return "professor/professor-create-course";
             }
 
             // 강의 코드 형식 검증 (영문, 숫자, 하이픈, 언더스코어만 허용)
             if (!courseCode.matches("^[A-Za-z0-9_-]+$")) {
                 model.addAttribute("professor", professor);
                 model.addAttribute("error", "강의 코드는 영문, 숫자, 하이픈(-), 언더스코어(_)만 사용할 수 있습니다.");
-                return "professor/create-course";
+                return "professor/professor-create-course";
             }
 
             // 강의 코드 중복 체크
             if (courseRepository.existsByCourseCode(courseCode.trim())) {
                 model.addAttribute("professor", professor);
                 model.addAttribute("error", "이미 사용 중인 강의 코드입니다.");
-                return "professor/create-course";
+                return "professor/professor-create-course";
             }
 
             Course newCourse = new Course();
@@ -561,11 +561,11 @@ public class ProjectController {
             // XSS 검증 실패
             model.addAttribute("professor", professor);
             model.addAttribute("error", e.getMessage());
-            return "professor/create-course";
+            return "professor/professor-create-course";
         } catch (Exception e) {
             model.addAttribute("professor", professor);
             model.addAttribute("error", "강의 생성 중 오류가 발생했습니다: " + e.getMessage());
-            return "professor/create-course";
+            return "professor/professor-create-course";
         }
     }
 
@@ -582,7 +582,7 @@ public class ProjectController {
 
         model.addAttribute("professor", professor);
         model.addAttribute("courses", courses);
-        return "professor/create-assignment";
+        return "professor/professor-create-assignment";
     }
 
     @PostMapping("/create-assignment")
@@ -609,7 +609,7 @@ public class ProjectController {
                 List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
                 model.addAttribute("professor", professor);
                 model.addAttribute("courses", courses);
-                return "professor/create-assignment";
+                return "professor/professor-create-assignment";
             }
 
             if (content.length() > 5000) {
@@ -617,7 +617,7 @@ public class ProjectController {
                 List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
                 model.addAttribute("professor", professor);
                 model.addAttribute("courses", courses);
-                return "professor/create-assignment";
+                return "professor/professor-create-assignment";
             }
 
             Course course = courseRepository.findById(courseId).orElse(null);
@@ -626,7 +626,7 @@ public class ProjectController {
                 List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
                 model.addAttribute("professor", professor);
                 model.addAttribute("courses", courses);
-                return "professor/create-assignment";
+                return "professor/professor-create-assignment";
             }
 
             // 교수 권한 확인 (해당 강의의 담당 교수인지)
@@ -635,7 +635,7 @@ public class ProjectController {
                 List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
                 model.addAttribute("professor", professor);
                 model.addAttribute("courses", courses);
-                return "professor/create-assignment";
+                return "professor/professor-create-assignment";
             }
 
             Assignment newAssignment = new Assignment();
@@ -655,7 +655,7 @@ public class ProjectController {
                 List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
                 model.addAttribute("professor", professor);
                 model.addAttribute("courses", courses);
-                return "professor/create-assignment";
+                return "professor/professor-create-assignment";
             }
 
             newAssignment.setDueDate(dueDateTime);
@@ -671,13 +671,13 @@ public class ProjectController {
             List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
             model.addAttribute("professor", professor);
             model.addAttribute("courses", courses);
-            return "professor/create-assignment";
+            return "professor/professor-create-assignment";
         } catch (Exception e) {
             model.addAttribute("error", "과제 생성 중 오류가 발생했습니다: " + e.getMessage());
             List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
             model.addAttribute("professor", professor);
             model.addAttribute("courses", courses);
-            return "professor/create-assignment";
+            return "professor/professor-create-assignment";
         }
     }
 }

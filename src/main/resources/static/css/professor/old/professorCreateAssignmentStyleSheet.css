@@ -1,0 +1,231 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #a8e6cf, #7fcdcd);
+    font-family: 'Arial', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    background-color: #7fcdcd;
+    padding: 15px 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.logo::before {
+    content: "💡";
+    font-size: 24px;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+.back-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.back-btn:hover {
+    background: #5a6268;
+}
+
+.container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.form-container {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 700px;
+}
+
+.form-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 25px;
+    flex: 1;
+}
+
+.form-group.full-width {
+    flex: none;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 16px;
+}
+
+.form-control, .form-select {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: #7fcdcd;
+    box-shadow: 0 0 0 3px rgba(127, 205, 205, 0.1);
+}
+
+.form-control::placeholder {
+    color: #a0a0a0;
+    font-style: italic;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 140px;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(127, 205, 205, 0.3);
+}
+
+.btn-primary:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.error-message {
+    color: #e74c3c;
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fdf2f2;
+    border-radius: 8px;
+    border: 1px solid #fecaca;
+}
+
+.form-help {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-top: 5px;
+}
+
+.required {
+    color: #e74c3c;
+}
+
+.no-courses-message {
+    background: #fff3cd;
+    color: #856404;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ffeaa7;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.datetime-container {
+    display: flex;
+    gap: 15px;
+    align-items: end;
+}
+
+.datetime-group {
+    flex: 1;
+}
+
+.datetime-icon {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.logout-btn {
+    text-decoration: none;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.logout-btn:hover {
+    background: #c0392b;
+}

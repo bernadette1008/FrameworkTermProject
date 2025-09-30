@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ploytech 과제 제출 시스템</title>
+    <link rel="stylesheet" th:href="@{/css/professor/old/professorCreateAssignmentStyleSheet.css}">
+</head>
+<body>
+<div class="header">
+    <a class="header-left" th:href="@{/professor-main}" style="text-decoration: none">
+        <div class="logo"></div>
+        <div class="title">Ploytech 과제 제출 시스템</div>
+    </a>
+    <div class="user-info">
+        <span th:text="${professor.name + ' 교수님'}">교수님</span>
+        <a th:href="@{/professor-main}" class="back-btn">← 메인으로</a>
+        <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="form-container">
+        <div class="form-title">새 과제 등록</div>
+
+        <div th:if="${error}" class="error-message" th:text="${error}"></div>
+
+        <div th:if="${#lists.isEmpty(courses)}" class="no-courses-message">
+            <strong>등록된 강의가 없습니다!</strong><br>
+            과제를 등록하려면 먼저 강의를 개설해야 합니다.<br>
+            <a th:href="@{/create-course}" style="color: #007bff; text-decoration: none;">→ 강의 개설하기</a>
+        </div>
+
+        <form th:action="@{/create-assignment}" method="post" th:unless="${#lists.isEmpty(courses)}">
+            <div class="form-group">
+                <label for="courseId">강의 선택 <span class="required">*</span></label>
+                <select class="form-select" id="courseId" name="courseId" required>
+                    <option value="">과제를 등록할 강의를 선택해주세요</option>
+                    <option th:each="course : ${courses}"
+                            th:value="${course.courseCode}"
+                            th:text="${course.courseName + ' (' + course.courseCode + ')'}">
+                        강의명 (강의코드)
+                    </option>
+                </select>
+                <div class="form-help">과제가 속할 강의를 선택해주세요.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="title">과제 제목 <span class="required">*</span></label>
+                <input type="text" class="form-control" id="title" name="title"
+                       placeholder="예: 1차 프로젝트 - 웹사이트 구현" required>
+                <div class="form-help">학생들에게 표시될 과제 제목을 입력해주세요.</div>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="content">과제 설명 <span class="required">*</span></label>
+                <textarea class="form-control" id="content" name="content"
+                          placeholder="과제의 상세 내용, 요구사항, 제출 형식 등을 입력해주세요..." required></textarea>
+                <div class="form-help">과제 요구사항, 평가 기준, 제출 방법 등을 자세히 작성해주세요.</div>
+            </div>
+
+            <div class="form-group full-width">
+                <label>과제 마감일시 <span class="required">*</span></label>
+                <div class="datetime-container">
+                    <div class="datetime-group">
+                        <div class="datetime-icon">📅</div>
+                        <input type="date" class="form-control" id="dueDate" name="dueDate" required>
+                        <div class="form-help">마감 날짜</div>
+                    </div>
+                    <div class="datetime-group">
+                        <div class="datetime-icon">🕐</div>
+                        <input type="time" class="form-control" id="dueTime" name="dueTime" value="23:59" required>
+                        <div class="form-help">마감 시간</div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">과제 등록하기</button>
+        </form>
+
+        <div th:if="${#lists.isEmpty(courses)}" style="text-align: center; margin-top: 20px;">
+            <a th:href="@{/professor-main}" class="back-btn">메인으로 돌아가기</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 오늘 날짜를 최소값으로 설정
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('dueDate');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+
+            // 기본값을 내일로 설정
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dateInput.value = tomorrow.toISOString().split('T')[0];
+        }
+    });
+</script>
+</body>
+</html>

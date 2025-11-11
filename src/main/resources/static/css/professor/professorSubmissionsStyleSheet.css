@@ -1,0 +1,200 @@
+/* professorSubmissionsStyleSheet.css - 고유 스타일만 */
+
+.assignment-info {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+}
+
+.assignment-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.assignment-meta {
+    display: flex;
+    gap: 30px;
+    color: #7f8c8d;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.assignment-description {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    color: #5a6c7d;
+    line-height: 1.6;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.submissions-table {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.table-header {
+    background: #f8f9fa;
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.table-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+th {
+    background: #f8f9fa;
+    color: #2c3e50;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+tr:hover {
+    background: #f8f9fa;
+}
+
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.student-avatar {
+    width: 35px;
+    height: 35px;
+    background: #7fcdcd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.student-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.student-name {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.student-id {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.submission-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-submitted {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-graded {
+    background: #cce5ff;
+    color: #0066cc;
+}
+
+.status-late {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.score-display {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.score-good {
+    color: #28a745;
+}
+
+.score-average {
+    color: #ffc107;
+}
+
+.score-poor {
+    color: #dc3545;
+}
+
+.action-btn {
+    background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s;
+    margin-right: 5px;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .assignment-meta {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 10px 8px;
+    }
+}

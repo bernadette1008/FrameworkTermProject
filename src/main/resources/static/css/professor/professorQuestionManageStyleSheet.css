@@ -1,0 +1,255 @@
+/* professorQuestionManageStyleSheet.css - 고유 스타일만 */
+.page-title {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.filter-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-label {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.filter-select {
+    padding: 8px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    min-width: 120px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #7fcdcd;
+}
+
+.filter-btn {
+    background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.filter-btn:hover {
+    transform: translateY(-1px);
+}
+
+.questions-container {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 500px;
+}
+
+.questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.question-item {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left: 4px solid #7fcdcd;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
+
+.question-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.question-item.answered {
+    border-left-color: #28a745;
+}
+
+.question-item.pending {
+    border-left-color: #ffc107;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.question-meta {
+    flex: 1;
+}
+
+.course-name {
+    font-size: 14px;
+    color: #7fcdcd;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.assignment-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.student-info {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.question-date {
+    font-size: 12px;
+    color: #95a5a6;
+    text-align: right;
+    line-height: 1.3;
+}
+
+.question-content {
+    font-size: 14px;
+    color: #2c3e50;
+    line-height: 1.5;
+    margin: 15px 0;
+    padding-left: 15px;
+    border-left: 2px solid #e9ecef;
+}
+
+.question-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-answered {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.answer-preview {
+    margin-top: 10px;
+    padding: 10px 15px;
+    background: #e8f5e8;
+    border-radius: 6px;
+    border-left: 3px solid #28a745;
+    font-size: 13px;
+}
+
+.answer-author {
+    font-size: 11px;
+    color: #28a745;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.answer-text {
+    color: #2c3e50;
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .sidebar-item {
+        min-width: 120px;
+        flex-shrink: 0;
+    }
+
+    .filter-section {
+        display: flex;
+        gap: 40px;
+        align-items: center;
+        justify-content: flex-start;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        max-width: 800px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .filter-group {
+        display: flex;
+        flex: 1 1 300px;
+        align-items: center;
+        gap: 10px;
+        min-width: 250px;
+        box-sizing: border-box;
+    }
+
+    .filter-label {
+        flex-shrink: 0;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .filter-select {
+        flex: 1;
+        width: 180px;
+        min-width: 180px;
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background-color: #fff;
+        font-size: 14px;
+        color: #333;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+    .filter-select:focus {
+        border-color: #4a90e2;
+    }
+}

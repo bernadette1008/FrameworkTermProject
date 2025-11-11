@@ -1,0 +1,265 @@
+/* professorSubmissionDetailStyleSheet.css - 고유 스타일만 */
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+}
+
+.submission-content, .grading-panel {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.submission-header {
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+}
+
+.submission-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.submission-meta {
+    display: flex;
+    gap: 25px;
+    color: #7f8c8d;
+    flex-wrap: wrap;
+}
+
+.student-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.student-avatar {
+    width: 50px;
+    height: 50px;
+    background: #7fcdcd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.student-details h3 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+}
+
+.student-id {
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.submission-text {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    border-left: 4px solid #7fcdcd;
+    line-height: 1.8;
+    color: #2c3e50;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    min-height: 200px;
+}
+
+.current-grade {
+    background: #e8f5e8;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.current-score {
+    font-size: 32px;
+    font-weight: bold;
+    color: #28a745;
+    margin-bottom: 5px;
+}
+
+.grade-label {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.grading-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.score-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.score-slider {
+    flex: 1;
+}
+
+.score-display {
+    min-width: 50px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+    color: #2c3e50;
+}
+
+.btn-primary {
+    padding: 15px 25px;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.submission-status {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.status-graded {
+    background: #cce5ff;
+    color: #0066cc;
+}
+
+.status-submitted {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-late {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.grade-quick-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.quick-grade-btn {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.quick-grade-btn:hover {
+    background: #e9ecef;
+    border-color: #7fcdcd;
+}
+
+.quick-grade-btn.active {
+    background: #7fcdcd;
+    border-color: #7fcdcd;
+    color: white;
+}
+
+.submitted-file-info {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.file-details {
+    flex: 1;
+}
+
+.file-name {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.file-size, .file-type {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-bottom: 3px;
+}
+
+.file-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-download {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-download:hover {
+    background: #138496;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .submission-meta {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .grade-quick-buttons {
+        justify-content: center;
+    }
+
+    .submitted-file-info {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .file-actions {
+        justify-content: center;
+    }
+}

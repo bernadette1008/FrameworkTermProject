@@ -1,0 +1,116 @@
+/* professorCreateCourseStyleSheet.css - 고유 스타일만 */
+
+.form-container {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 600px;
+}
+
+.form-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+.form-title::before {
+    content: "📚";
+    display: block;
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.form-control.error {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.btn-primary {
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px 30px;
+    font-size: 18px;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 4px 20px rgba(127, 205, 205, 0.3);
+}
+
+.btn-primary:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.validation-error {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 5px;
+    display: none;
+}
+
+.form-group.half {
+    flex: 1;
+}
+
+.code-preview {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #495057;
+    margin-top: 5px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+}
+
+.code-preview.empty {
+    color: #adb5bd;
+    font-style: italic;
+}
+
+.code-preview.error {
+    background: #fdf2f2;
+    border-color: #fecaca;
+    color: #e74c3c;
+}
+
+.preview-label {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 5px;
+    font-weight: normal;
+}
+
+.info-box {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.info-box h4 {
+    color: #1976d2;
+    margin: 0 0 10px 0;
+    font-size: 16px;
+}
+
+.info-box p {
+    color: #1565c0;
+    margin: 0;
+    font-size: 14px;
+}

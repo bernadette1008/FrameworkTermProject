@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>과제 제출물 관리 - Ploytech</title>
-  <link rel="stylesheet" th:href="@{/css/professor/old/professorSubmissionsStyleSheet.css}">
+  <title>과제 제출물 관리 - Poly</title>
+  <link rel="stylesheet" th:href="@{/css/professor/professorStyleSheet.css}">
+  <link rel="stylesheet" th:href="@{/css/professor/professorSubmissionsStyleSheet.css}">
 </head>
 <body>
 <div class="header">
   <a class="header-left" th:href="@{/professor-main}" style="text-decoration: none">
     <div class="logo"></div>
-    <div class="title">Ploytech 과제 제출 시스템</div>
+    <div class="title">Poly</div>
   </a>
   <div class="user-info">
     <span th:text="${professor.name + ' 교수님'}">교수님</span>
@@ -18,7 +19,7 @@
   </div>
 </div>
 
-<div class="container">
+<div class="main-content" style="max-width: 1200px; width: 100%; margin: 0 auto;">
   <!-- Success/Error Messages -->
   <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
   <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>

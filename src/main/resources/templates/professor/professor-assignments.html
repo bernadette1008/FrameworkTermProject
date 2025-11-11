@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>과제 관리 - Ploytech</title>
-    <link rel="stylesheet" th:href="@{/css/professor/old/professorAssignmentsStyleSheet.css}">
+    <title>과제 관리 - Poly</title>
+    <link rel="stylesheet" th:href="@{/css/professor/professorStyleSheet.css}">
+    <link rel="stylesheet" th:href="@{/css/professor/professorAssignmentsStyleSheet.css}">
+<!--    <link rel="stylesheet" th:href="@{/css/professor/old/professorAssignmentsStyleSheet.css}">-->
 </head>
 <body>
 <div class="header">
     <a class="header-left" th:href="@{/professor-main}" style="text-decoration: none">
         <div class="logo"></div>
-        <div class="title">Ploytech 과제 제출 시스템</div>
+        <div class="title">Poly</div>
     </a>
     <div class="user-info">
         <span th:text="${professor.name + ' 교수님'}">교수님</span>
@@ -58,66 +60,68 @@
         </div>
 
         <div th:unless="${#lists.isEmpty(assignments)}" class="assignments-grid">
-            <div th:each="assignment : ${assignments}" class="assignment-card"
-                 th:onclick="|viewAssignmentSubmissions('${assignment.assignmentCode}')|">
+            <a style="text-decoration: none;" th:each="assignment : ${assignments}" th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/submissions'}">
+                <div class="assignment-card">
 
-                <div class="assignment-header">
-                    <h3 class="assignment-title" th:text="${assignment.title}">과제 제목</h3>
-                    <span class="assignment-code" th:text="${'#' + assignment.assignmentCode}">#001</span>
-                </div>
-
-                <div class="course-info">
-                    <span>📚</span>
-                    <span th:text="${assignment.course.courseName + ' (' + assignment.course.courseCode + ')'}">강의명 (코드)</span>
-                </div>
-
-                <div class="assignment-dates">
-                    <div class="date-item">
-                        <span>📅</span>
-                        <span th:text="'등록: ' + ${#temporals.format(assignment.createdDate, 'MM-dd HH:mm')}">등록일</span>
+                    <div class="assignment-header">
+                        <h3 class="assignment-title" th:text="${assignment.title}">과제 제목</h3>
+                        <span class="assignment-code" th:text="${'#' + assignment.assignmentCode}">#001</span>
                     </div>
-                    <div class="date-item">
-                        <span>⏰</span>
-                        <span th:text="'마감: ' + ${#temporals.format(assignment.dueDate, 'MM-dd HH:mm')}">마감일</span>
+
+                    <div class="course-info">
+                        <span>📚</span>
+                        <span th:text="${assignment.course.courseName + ' (' + assignment.course.courseCode + ')'}">강의명 (코드)</span>
+                    </div>
+
+                    <div class="assignment-dates">
+                        <div class="date-item">
+                            <span>📅</span>
+                            <span th:text="'등록: ' + ${#temporals.format(assignment.createdDate, 'MM-dd HH:mm')}">등록일</span>
+                        </div>
+                        <div class="date-item">
+                            <span>⏰</span>
+                            <span th:text="'마감: ' + ${#temporals.format(assignment.dueDate, 'MM-dd HH:mm')}">마감일</span>
+                        </div>
+                    </div>
+
+                    <div class="stats-section">
+                        <div class="stat-item">
+                            <div class="stat-number" th:text="${#lists.size(assignment.submissions) ?: '0'}">0</div>
+                            <div class="stat-label">제출물</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" th:text="${assignment.submissions != null ? #lists.size(assignment.submissions.?[score != null]) : '0'}">0</div>
+                            <div class="stat-label">채점완료</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" th:text="${#lists.size(assignment.questions) ?: '0'}">0</div>
+                            <div class="stat-label">질문</div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons" onclick="event.stopPropagation();">
+                        <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/submissions'}" class="btn-primary">
+                            📋 제출물 보기
+                        </a>
+                        <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/edit'}" class="btn-secondary">
+                            ✏️ 수정
+                        </a>
+                        <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/questions'}" class="btn-secondary">
+                            ❓ 질문 보기
+                        </a>
+
+                        <form th:action="@{/professor/assignment/{code}/delete(code=${assignment.assignmentCode})}"
+                              method="post"
+                              onsubmit="return confirm('정말 삭제하시겠습니까?');"
+                              style="display:inline;">
+                            <button type="submit" class="btn-danger">
+                                🗑️ 과제 삭제
+                            </button>
+                        </form>
                     </div>
                 </div>
+            </a>
 
-                <div class="stats-section">
-                    <div class="stat-item">
-                        <div class="stat-number" th:text="${#lists.size(assignment.submissions) ?: '0'}">0</div>
-                        <div class="stat-label">제출물</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" th:text="${assignment.submissions != null ? #lists.size(assignment.submissions.?[score != null]) : '0'}">0</div>
-                        <div class="stat-label">채점완료</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" th:text="${#lists.size(assignment.questions) ?: '0'}">0</div>
-                        <div class="stat-label">질문</div>
-                    </div>
-                </div>
-
-                <div class="action-buttons" onclick="event.stopPropagation();">
-                    <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/submissions'}" class="btn-primary">
-                        📋 제출물 보기
-                    </a>
-                    <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/edit'}" class="btn-secondary">
-                        ✏️ 수정
-                    </a>
-                    <a th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/questions'}" class="btn-secondary">
-                        ❓ 질문 보기
-                    </a>
-
-                    <form th:action="@{/professor/assignment/{code}/delete(code=${assignment.assignmentCode})}"
-                          method="post"
-                          onsubmit="return confirm('정말 삭제하시겠습니까?');"
-                          style="display:inline;">
-                        <button type="submit" class="btn-danger">
-                            🗑️ 과제 삭제
-                        </button>
-                    </form>
-                </div>
-            </div>
         </div>
     </div>
 </div>

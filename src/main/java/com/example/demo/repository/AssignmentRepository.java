@@ -19,4 +19,16 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Integer>
     @Query("SELECT a FROM Assignment a WHERE a.courseCode IN " +
             "(SELECT c.courseCode FROM Course c WHERE c.professorId = :professorId)")
     List<Assignment> findByProfessorId(@Param("professorId") String professorId);
+
+    @Query("""
+    SELECT a FROM Assignment a
+    WHERE a.courseCode IN (
+        SELECT DISTINCT c.courseCode
+        FROM Course c
+        LEFT JOIN c.subProfessors sp
+        WHERE c.professorId = :professorId
+           OR :professorId MEMBER OF c.subProfessors
+    )
+""")
+    List<Assignment> findByProfessorIdOrSubProfessorsId(@Param("professorId") String professorId);
 }

@@ -45,7 +45,7 @@ public class ProfessorService {
 
     // 교수의 과제 목록 조회
     public List<Assignment> getProfessorAssignments(String professorId) {
-        return assignmentRepository.findByProfessorId(professorId);
+        return assignmentRepository.findByProfessorIdOrSubProfessorsId(professorId);
     }
 
     // 특정 과제의 제출물 목록 조회

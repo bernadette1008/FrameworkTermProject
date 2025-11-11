@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -464,9 +465,10 @@ public class ProjectController {
         }
 
         // 교수가 담당하는 강의 목록 조회
-        List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+        List<Course> courses = courseRepository.findByProfessorOrSubProfessor(professor.getProfessorId());
+
         // 교수가 등록한 과제 목록 조회
-        List<Assignment> assignments = assignmentRepository.findByProfessorId(professor.getProfessorId());
+        List<Assignment> assignments = assignmentRepository.findByProfessorIdOrSubProfessorsId(professor.getProfessorId());
 
         int enrollments = 0;
 

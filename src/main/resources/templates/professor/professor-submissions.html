@@ -87,7 +87,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr th:each="submission : ${submissions}">
+      <tr th:each="submission : ${submissions}" th:onclick="'location.href=\'/professor/submission/' + ${submission.submissionCode} + '\''" style="cursor: pointer;">
         <td>
           <div class="student-info">
             <div class="student-avatar" th:text="${submission.student.name.substring(0,1)}">학</div>

@@ -23,6 +23,32 @@ public class ProfessorController {
     @Autowired
     private ProfessorService professorService;
 
+    private boolean hasPermissionForCourse(Professor professor, Course course) {
+        if (course == null || professor == null) {
+            return false;
+        }
+
+        // 메인 교수인 경우
+        if (course.getProfessorId().equals(professor.getProfessorId())) {
+            return true;
+        }
+
+        // 부교수인 경우
+        if (course.getSubProfessors() != null &&
+                course.getSubProfessors().contains(professor.getProfessorId())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isMainProfessor(Professor professor, Course course) {
+        if (course == null || professor == null) {
+            return false;
+        }
+        return course.getProfessorId().equals(professor.getProfessorId());
+    }
+
     // 과제 관리 메인 페이지
     @GetMapping("/assignments")
     public String assignmentManagement(Model model, HttpSession session) {
@@ -103,7 +129,7 @@ public class ProfessorController {
         return "professor/professor-assignment-questions";
     }
 
-    // 강의 상세 관리 페이지
+    // 강의 상세 정보 페이지 (수정)
     @GetMapping("/course/{courseCode}/manage")
     public String courseDetail(@PathVariable String courseCode,
                                Model model,
@@ -116,8 +142,8 @@ public class ProfessorController {
         try {
             Course course = professorService.getCourseDetails(courseCode);
 
-            // 교수 권한 확인
-            if (!course.getProfessorId().equals(professor.getProfessorId())) {
+            // 권한 확인 (메인 교수 또는 부교수)
+            if (!hasPermissionForCourse(professor, course)) {
                 model.addAttribute("error", "접근 권한이 없습니다.");
                 return "error";
             }
@@ -129,6 +155,8 @@ public class ProfessorController {
             model.addAttribute("course", course);
             model.addAttribute("students", students);
             model.addAttribute("assignments", assignments);
+            model.addAttribute("isMainProfessor", isMainProfessor(professor, course)); // 추가
+
         } catch (Exception e) {
             model.addAttribute("error", "강의 정보를 불러오는데 실패했습니다.");
             return "error";
@@ -137,7 +165,7 @@ public class ProfessorController {
         return "professor/professor-course-detail";
     }
 
-    // 강의 삭제
+    // 강의 삭제 (수정 - 메인 교수만 가능)
     @PostMapping("/course/{courseCode}/delete")
     public String deleteCourse(@PathVariable String courseCode,
                                HttpSession session,
@@ -150,9 +178,9 @@ public class ProfessorController {
         try {
             Course course = professorService.getCourseDetails(courseCode);
 
-            // 교수 권한 확인
-            if (!course.getProfessorId().equals(professor.getProfessorId())) {
-                redirectAttributes.addFlashAttribute("errorMessage", "권한이 없습니다.");
+            // 메인 교수만 삭제 가능
+            if (!isMainProfessor(professor, course)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "강의 삭제는 메인 교수만 가능합니다.");
                 return "redirect:/professor/courses";
             }
 
@@ -165,7 +193,7 @@ public class ProfessorController {
         return "redirect:/professor/courses";
     }
 
-    // 과제 삭제
+    // 과제 삭제 (수정)
     @PostMapping("/assignment/{assignmentCode}/delete")
     public String deleteAssignment(@PathVariable int assignmentCode,
                                    HttpSession session,
@@ -178,8 +206,8 @@ public class ProfessorController {
         try {
             Assignment assignment = professorService.getAssignmentDetails(assignmentCode);
 
-            // 교수 권한 확인
-            if (!assignment.getCourse().getProfessorId().equals(professor.getProfessorId())) {
+            // 권한 확인 (메인 교수 또는 부교수)
+            if (!hasPermissionForCourse(professor, assignment.getCourse())) {
                 redirectAttributes.addFlashAttribute("errorMessage", "권한이 없습니다.");
                 return "redirect:/professor/assignments";
             }
@@ -362,7 +390,7 @@ public class ProfessorController {
         return "professor/professor-submissions";
     }
 
-    // 과제 수정 페이지
+    // 과제 수정 페이지 (수정)
     @GetMapping("/assignment/{assignmentCode}/edit")
     public String editAssignmentForm(@PathVariable int assignmentCode,
                                      Model model,
@@ -375,13 +403,13 @@ public class ProfessorController {
         try {
             Assignment assignment = professorService.getAssignmentDetails(assignmentCode);
 
-            // 교수 권한 확인
-            if (!assignment.getCourse().getProfessorId().equals(professor.getProfessorId())) {
+            // 권한 확인 (메인 교수 또는 부교수)
+            if (!hasPermissionForCourse(professor, assignment.getCourse())) {
                 model.addAttribute("error", "접근 권한이 없습니다.");
                 return "error";
             }
 
-            // 교수가 담당하는 강의 목록 (과제를 다른 강의로 이동할 수 있도록)
+            // 교수가 담당하는 강의 목록
             List<Course> courses = professorService.getProfessorCourses(professor.getProfessorId());
 
             model.addAttribute("professor", professor);
@@ -395,7 +423,7 @@ public class ProfessorController {
         return "professor/professor-assignment-edit";
     }
 
-    // 과제 수정 처리 (XSS 방어 추가)
+    // 과제 수정 처리 (수정)
     @PostMapping("/assignment/{assignmentCode}/edit")
     public String updateAssignment(@PathVariable int assignmentCode,
                                    @RequestParam String courseCode,
@@ -413,15 +441,15 @@ public class ProfessorController {
         try {
             Assignment assignment = professorService.getAssignmentDetails(assignmentCode);
 
-            // 교수 권한 확인
-            if (!assignment.getCourse().getProfessorId().equals(professor.getProfessorId())) {
+            // 권한 확인 (메인 교수 또는 부교수)
+            if (!hasPermissionForCourse(professor, assignment.getCourse())) {
                 redirectAttributes.addFlashAttribute("errorMessage", "권한이 없습니다.");
                 return "redirect:/professor/assignments";
             }
 
-            // 선택한 강의도 해당 교수의 강의인지 확인
+            // 선택한 강의도 해당 교수가 접근 가능한지 확인
             Course selectedCourse = professorService.getCourseDetails(courseCode);
-            if (!selectedCourse.getProfessorId().equals(professor.getProfessorId())) {
+            if (!hasPermissionForCourse(professor, selectedCourse)) {
                 redirectAttributes.addFlashAttribute("errorMessage", "선택한 강의에 대한 권한이 없습니다.");
                 return "redirect:/professor/assignment/" + assignmentCode + "/edit";
             }
@@ -537,9 +565,8 @@ public class ProfessorController {
         try {
             Submission submission = professorService.getSubmissionDetails(submissionCode);
 
-            // 권한 체크 (해당 과제를 담당하는 교수인지 확인)
-            if (!submission.getAssignment().getCourse().getProfessorId()
-                    .equals(professor.getProfessorId())) {
+            // 권한 확인 (메인 교수 또는 부교수)
+            if (!hasPermissionForCourse(professor, submission.getAssignment().getCourse())) {
                 redirectAttributes.addFlashAttribute("error", "권한이 없습니다.");
                 return "redirect:/professor/assignments";
             }
@@ -631,6 +658,14 @@ public class ProfessorController {
         }
 
         try {
+            Question question = professorService.getQuestionDetails(questionCode);
+
+            // 권한 확인 (메인 교수 또는 부교수)
+            if (!hasPermissionForCourse(professor, question.getAssignment().getCourse())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "권한이 없습니다.");
+                return "redirect:/professor/questions";
+            }
+
             // 빈 내용 체크
             if (content == null || content.trim().isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "답변 내용을 입력해주세요.");

@@ -42,7 +42,17 @@ public class ProjectController {
     @Autowired
     private AuthenticationService authenticationService;
 
-    // === 로그인 및 인증 ===
+    // 권한 체크 메서드 추가
+    private boolean checkProfessorAccess(Course course, String professorId) {
+        if (course.getProfessorId().equals(professorId)) {
+            return true; // 메인 교수
+        }
+        if (course.getSubProfessors() != null && course.getSubProfessors().contains(professorId)) {
+            return true; // 부교수
+        }
+        return false;
+    }
+
 
     // 메인 로그인 페이지
     @GetMapping("/")
@@ -571,7 +581,7 @@ public class ProjectController {
         }
     }
 
-    // 과제 생성 페이지
+    // 과제 생성 페이지 - 메인 교수와 부교수 모두 접근 가능한 강의 목록 표시
     @GetMapping("/create-assignment")
     public String createAssignmentForm(Model model, HttpSession session) {
         Professor professor = (Professor) session.getAttribute("user");
@@ -579,14 +589,15 @@ public class ProjectController {
             return "redirect:/";
         }
 
-        // 교수가 담당하는 강의 목록
-        List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+        // 메인 교수 또는 부교수로 있는 강의 목록
+        List<Course> courses = courseRepository.findByProfessorOrSubProfessor(professor.getProfessorId());
 
         model.addAttribute("professor", professor);
         model.addAttribute("courses", courses);
         return "professor/professor-create-assignment";
     }
 
+    // 과제 생성 처리
     @PostMapping("/create-assignment")
     public String processCreateAssignment(@RequestParam String courseId,
                                           @RequestParam String title,
@@ -608,7 +619,7 @@ public class ProjectController {
             // 입력값 길이 제한
             if (title.length() > 200) {
                 model.addAttribute("error", "과제 제목이 너무 깁니다. (최대 200자)");
-                List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+                List<Course> courses = courseRepository.findByProfessorOrSubProfessor(professor.getProfessorId());
                 model.addAttribute("professor", professor);
                 model.addAttribute("courses", courses);
                 return "professor/professor-create-assignment";
@@ -616,7 +627,7 @@ public class ProjectController {
 
             if (content.length() > 5000) {
                 model.addAttribute("error", "과제 내용이 너무 깁니다. (최대 5,000자)");
-                List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+                List<Course> courses = courseRepository.findByProfessorOrSubProfessor(professor.getProfessorId());
                 model.addAttribute("professor", professor);
                 model.addAttribute("courses", courses);
                 return "professor/professor-create-assignment";
@@ -625,16 +636,16 @@ public class ProjectController {
             Course course = courseRepository.findById(courseId).orElse(null);
             if (course == null) {
                 model.addAttribute("error", "잘못된 강의를 선택했습니다.");
-                List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+                List<Course> courses = courseRepository.findByProfessorOrSubProfessor(professor.getProfessorId());
                 model.addAttribute("professor", professor);
                 model.addAttribute("courses", courses);
                 return "professor/professor-create-assignment";
             }
 
-            // 교수 권한 확인 (해당 강의의 담당 교수인지)
-            if (!course.getProfessorId().equals(professor.getProfessorId())) {
+            // 교수 권한 확인 (메인 교수 또는 부교수)
+            if (!checkProfessorAccess(course, professor.getProfessorId())) {
                 model.addAttribute("error", "해당 강의에 대한 권한이 없습니다.");
-                List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+                List<Course> courses = courseRepository.findByProfessorOrSubProfessor(professor.getProfessorId());
                 model.addAttribute("professor", professor);
                 model.addAttribute("courses", courses);
                 return "professor/professor-create-assignment";
@@ -643,8 +654,8 @@ public class ProjectController {
             Assignment newAssignment = new Assignment();
             newAssignment.setCourseCode(courseId);
             newAssignment.setCourse(course);
-            newAssignment.setTitle(XSSUtils.sanitizeInput(title.trim())); // XSS 정제
-            newAssignment.setContent(XSSUtils.sanitizeInput(content.trim())); // XSS 정제
+            newAssignment.setTitle(XSSUtils.sanitizeInput(title.trim()));
+            newAssignment.setContent(XSSUtils.sanitizeInput(content.trim()));
 
             // 날짜와 시간을 합쳐서 LocalDateTime으로 변환
             LocalDate date = LocalDate.parse(dueDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -654,7 +665,7 @@ public class ProjectController {
             // 마감일이 현재 시간보다 이전인지 확인
             if (dueDateTime.isBefore(LocalDateTime.now())) {
                 model.addAttribute("error", "마감일은 현재 시간보다 이후여야 합니다.");
-                List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+                List<Course> courses = courseRepository.findByProfessorOrSubProfessor(professor.getProfessorId());
                 model.addAttribute("professor", professor);
                 model.addAttribute("courses", courses);
                 return "professor/professor-create-assignment";
@@ -670,13 +681,13 @@ public class ProjectController {
         } catch (IllegalArgumentException e) {
             // XSS 검증 실패
             model.addAttribute("error", e.getMessage());
-            List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+            List<Course> courses = courseRepository.findByProfessorOrSubProfessor(professor.getProfessorId());
             model.addAttribute("professor", professor);
             model.addAttribute("courses", courses);
             return "professor/professor-create-assignment";
         } catch (Exception e) {
             model.addAttribute("error", "과제 생성 중 오류가 발생했습니다: " + e.getMessage());
-            List<Course> courses = courseRepository.findByProfessorId(professor.getProfessorId());
+            List<Course> courses = courseRepository.findByProfessorOrSubProfessor(professor.getProfessorId());
             model.addAttribute("professor", professor);
             model.addAttribute("courses", courses);
             return "professor/professor-create-assignment";

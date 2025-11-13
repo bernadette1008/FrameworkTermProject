@@ -195,6 +195,9 @@
         if (event.target.id === 'deleteModal') {
             closeDeleteModal();
         }
+        if (event.target.id === 'addCourseModal') {
+            closeAddCourseModal();
+        }
     });
 
     // 성공 메시지 자동 숨기기
@@ -210,29 +213,84 @@
         }
     });
 
+    // 강의 추가 모달 열기
     function openAddCourseModal() {
         document.getElementById('addCourseModal').style.display = 'block';
+        document.getElementById('courseCodeInput').focus();
     }
 
+    // 강의 추가 모달 닫기
     function closeAddCourseModal() {
         document.getElementById('addCourseModal').style.display = 'none';
         document.getElementById('courseCodeInput').value = '';
     }
 
+    // 강의 코드 제출 (부교수로 추가)
     function submitCourseCode() {
-        const code = document.getElementById('courseCodeInput').value.trim();
+        const code = document.getElementById('courseCodeInput').value.trim().toUpperCase();
+
         if (code === '') {
             alert('강의 코드를 입력해주세요!');
             return;
         }
-        window.location.href = '/professor/course/' + code + '/manage';
-        closeAddCourseModal();
+
+        // 강의 코드 형식 검증 (영문, 숫자만)
+        if (!/^[A-Z0-9]+$/.test(code)) {
+            alert('강의 코드는 영문과 숫자만 입력 가능합니다.');
+            return;
+        }
+
+        // 버튼 비활성화 (중복 클릭 방지)
+        const confirmBtn = document.querySelector('.modal-add-actions .btn-primary');
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = '처리 중...';
+        }
+
+        // 서버에 부교수 추가 요청
+        fetch('/professor/join-course', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'courseCode=' + encodeURIComponent(code)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || '강의에 부교수로 추가되었습니다!');
+                    window.location.reload();
+                } else {
+                    alert(data.message || '강의 추가에 실패했습니다.');
+                    if (confirmBtn) {
+                        confirmBtn.disabled = false;
+                        confirmBtn.textContent = '확인';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('강의 추가 중 오류가 발생했습니다.');
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = '확인';
+                }
+            })
+            .finally(() => {
+                closeAddCourseModal();
+            });
     }
 
-    // 모달 외부 클릭 시 닫기
-    document.addEventListener('click', function(event) {
-        if (event.target.id === 'addCourseModal') {
-            closeAddCourseModal();
+    // 엔터키로 제출 가능하도록
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('courseCodeInput');
+        if (input) {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submitCourseCode();
+                }
+            });
         }
     });
 </script>

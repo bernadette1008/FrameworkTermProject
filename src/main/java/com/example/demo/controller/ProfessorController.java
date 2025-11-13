@@ -5,6 +5,8 @@ import com.example.demo.dto.SubmissionDTO;
 import com.example.demo.service.ProfessorService;
 import com.example.demo.util.XSSUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +15,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -98,12 +102,16 @@ public class ProfessorController {
 
     // 강의 코드로 부교수 추가
     @PostMapping("/join-course")
-    public String joinCourse(@RequestParam String courseCode,
-                             HttpSession session,
-                             RedirectAttributes redirectAttributes) {
+    @ResponseBody  // JSON 응답을 위해 추가
+    public ResponseEntity<Map<String, Object>> joinCourse(@RequestParam String courseCode,
+                                                          HttpSession session) {
         Professor professor = (Professor) session.getAttribute("user");
+        Map<String, Object> response = new HashMap<>();
+
         if (professor == null) {
-            return "redirect:/";
+            response.put("success", false);
+            response.put("message", "로그인이 필요합니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
         try {
@@ -111,14 +119,19 @@ public class ProfessorController {
             XSSUtils.validateInput(courseCode, "강의 코드");
 
             professorService.addSubProfessorToCourse(courseCode.trim().toUpperCase(), professor.getProfessorId());
-            redirectAttributes.addFlashAttribute("successMessage", "강의에 부교수로 추가되었습니다.");
-            return "redirect:/professor/courses?joined=success";
+
+            response.put("success", true);
+            response.put("message", "강의에 부교수로 추가되었습니다.");
+            return ResponseEntity.ok(response);
+
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/professor/courses?joined=error";
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "강의 추가 중 오류가 발생했습니다.");
-            return "redirect:/professor/courses?joined=error";
+            response.put("success", false);
+            response.put("message", "강의 추가 중 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 

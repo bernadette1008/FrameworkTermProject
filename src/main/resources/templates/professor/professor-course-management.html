@@ -39,7 +39,10 @@
     <div class="main-content">
         <div class="page-header">
             <div class="page-title">강의 관리</div>
-            <a th:href="@{/create-course}" class="create-btn">+ 새 강의 개설</a>
+            <div>
+                <button class="create-btn" onclick="openAddCourseModal()">+ 강의 추가</button>
+                <a th:href="@{/create-course}" class="create-btn">+ 새 강의 개설</a>
+            </div>
         </div>
 
         <!-- 성공/에러 메시지 -->
@@ -141,6 +144,20 @@
     </div>
 </div>
 
+<!-- 강의 추가(부교수) 모달 -->
+<div id="addCourseModal" class="modal-add">
+    <div class="modal-add-content">
+        <div class="modal-add-title">🧾 강의 추가</div>
+        <div class="modal-add-text">강의 코드를 입력해주세요.</div>
+        <input type="text" id="courseCodeInput" placeholder="예: CS101" class="modal-add-input">
+
+        <div class="modal-add-actions">
+            <button class="btn btn-primary" onclick="submitCourseCode()">확인</button>
+            <button class="btn btn-secondary" onclick="closeAddCourseModal()">취소</button>
+        </div>
+    </div>
+</div>
+
 <script>
     function toggleDropdown(index) {
         const dropdown = document.getElementById('dropdown-' + index);
@@ -190,6 +207,32 @@
                     successMessage.style.display = 'none';
                 }, 300);
             }, 3000);
+        }
+    });
+
+    function openAddCourseModal() {
+        document.getElementById('addCourseModal').style.display = 'block';
+    }
+
+    function closeAddCourseModal() {
+        document.getElementById('addCourseModal').style.display = 'none';
+        document.getElementById('courseCodeInput').value = '';
+    }
+
+    function submitCourseCode() {
+        const code = document.getElementById('courseCodeInput').value.trim();
+        if (code === '') {
+            alert('강의 코드를 입력해주세요!');
+            return;
+        }
+        window.location.href = '/professor/course/' + code + '/manage';
+        closeAddCourseModal();
+    }
+
+    // 모달 외부 클릭 시 닫기
+    document.addEventListener('click', function(event) {
+        if (event.target.id === 'addCourseModal') {
+            closeAddCourseModal();
         }
     });
 </script>

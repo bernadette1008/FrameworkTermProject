@@ -68,8 +68,6 @@ public class ProfessorController {
         return "professor/professor-assignments";
     }
 
-    // ProfessorController.java에 추가할 메서드들
-
     // 강의 관리 메인 페이지
     @GetMapping("/courses")
     public String courseManagement(Model model, HttpSession session) {
@@ -96,6 +94,52 @@ public class ProfessorController {
         }
 
         return "professor/professor-course-management";
+    }
+
+    // 강의 코드로 부교수 추가
+    @PostMapping("/join-course")
+    public String joinCourse(@RequestParam String courseCode,
+                             HttpSession session,
+                             RedirectAttributes redirectAttributes) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            return "redirect:/";
+        }
+
+        try {
+            // XSS 검증
+            XSSUtils.validateInput(courseCode, "강의 코드");
+
+            professorService.addSubProfessorToCourse(courseCode.trim().toUpperCase(), professor.getProfessorId());
+            redirectAttributes.addFlashAttribute("successMessage", "강의에 부교수로 추가되었습니다.");
+            return "redirect:/professor/courses?joined=success";
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/professor/courses?joined=error";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "강의 추가 중 오류가 발생했습니다.");
+            return "redirect:/professor/courses?joined=error";
+        }
+    }
+
+    // 부교수로 등록된 강의에서 나가기
+    @PostMapping("/leave-course/{courseCode}")
+    public String leaveCourse(@PathVariable String courseCode,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            return "redirect:/";
+        }
+
+        try {
+            professorService.removeSubProfessorFromCourse(courseCode, professor.getProfessorId());
+            redirectAttributes.addFlashAttribute("successMessage", "강의에서 나갔습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/professor/courses";
     }
 
     // 특정 과제의 질문 목록 조회

@@ -182,7 +182,54 @@ public class ProfessorService {
 
     // 교수의 강의 목록 조회
     public List<Course> getProfessorCourses(String professorId) {
-        return courseRepository.findByProfessorId(professorId);
+//        return courseRepository.findByProfessorId(professorId);
+        return courseRepository.findByProfessorOrSubProfessor(professorId);
+    }
+
+    // 강의 코드로 부교수 추가
+    @Transactional
+    public void addSubProfessorToCourse(String courseCode, String professorId) {
+        Course course = courseRepository.findByCourseCode(courseCode);
+
+        if (course == null) {
+            throw new RuntimeException("존재하지 않는 강의 코드입니다.");
+        }
+
+        // 이미 메인 교수인 경우
+        if (course.getProfessorId().equals(professorId)) {
+            throw new RuntimeException("이미 해당 강의의 메인 교수입니다.");
+        }
+
+        // 이미 부교수로 등록된 경우
+        if (course.getSubProfessors() != null && course.getSubProfessors().contains(professorId)) {
+            throw new RuntimeException("이미 해당 강의의 부교수로 등록되어 있습니다.");
+        }
+
+        // 부교수 목록이 null이면 초기화
+        if (course.getSubProfessors() == null) {
+            course.setSubProfessors(new ArrayList<>());
+        }
+
+        // 부교수 추가
+        course.getSubProfessors().add(professorId);
+        courseRepository.save(course);
+    }
+
+    // 부교수 제거 (자신만 제거 가능)
+    @Transactional
+    public void removeSubProfessorFromCourse(String courseCode, String professorId) {
+        Course course = courseRepository.findByCourseCode(courseCode);
+
+        if (course == null) {
+            throw new RuntimeException("존재하지 않는 강의입니다.");
+        }
+
+        if (course.getSubProfessors() == null || !course.getSubProfessors().contains(professorId)) {
+            throw new RuntimeException("해당 강의의 부교수가 아닙니다.");
+        }
+
+        course.getSubProfessors().remove(professorId);
+        courseRepository.save(course);
     }
 
     // 강의 상세 정보 조회
@@ -389,4 +436,6 @@ public class ProfessorService {
         // 3. 과제 삭제
         assignmentRepository.delete(assignment);
     }
+
+
 }

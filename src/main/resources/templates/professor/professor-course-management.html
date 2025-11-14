@@ -96,10 +96,19 @@
                             <a th:href="@{'/professor/course/' + ${course.courseCode} + '/manage'}" class="dropdown-item">
                                 📊 상세 관리
                             </a>
-                            <a href="#" class="dropdown-item danger"
+                            <!-- 메인 교수인 경우: 강의 삭제 -->
+                            <a th:if="${course.professorId == professor.professorId}"
+                               href="#" class="dropdown-item danger"
                                th:attr="data-code=${course.courseCode}, data-name=${course.courseName}"
                                onclick="showDeleteModal(this.dataset.code, this.dataset.name)">
                                 🗑️ 강의 삭제
+                            </a>
+                            <!-- 부교수인 경우: 강의 나가기 -->
+                            <a th:if="${course.professorId != professor.professorId}"
+                               href="#" class="dropdown-item danger"
+                               th:attr="data-code=${course.courseCode}, data-name=${course.courseName}"
+                               onclick="showLeaveModal(this.dataset.code, this.dataset.name)">
+                                🚪 강의 나가기
                             </a>
                         </div>
                     </div>
@@ -144,6 +153,22 @@
     </div>
 </div>
 
+<!-- 삭제 확인 모달 -->
+<div id="leaveModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-title">⚠️ 강의 삭제 확인</div>
+        <div class="modal-text">
+            <strong id="courseNameToLeave"></strong> 강의를 정말 나가시겠습니까?<br><br>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeLeaveModal()">취소</button>
+            <form id="leaveForm" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-danger">나가기</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- 강의 추가(부교수) 모달 -->
 <div id="addCourseModal" class="modal-add">
     <div class="modal-add-content">
@@ -183,6 +208,16 @@
         document.getElementById('deleteModal').style.display = 'none';
     }
 
+    function showLeaveModal(courseCode, courseName) {
+        document.getElementById('courseNameToLeave').textContent = courseName;
+        document.getElementById('leaveForm').action = '/professor/leave-course/' + courseCode;
+        document.getElementById('leaveModal').style.display = 'block';
+    }
+
+    function closeLeaveModal() {
+        document.getElementById('leaveModal').style.display = 'none';
+    }
+
     // 드롭다운 외부 클릭시 닫기
     document.addEventListener('click', function(event) {
         if (!event.target.matches('.dropdown-btn')) {
@@ -194,6 +229,9 @@
         // 모달 외부 클릭시 닫기
         if (event.target.id === 'deleteModal') {
             closeDeleteModal();
+        }
+        if (event.target.id === 'leaveModal') {
+            closeLeaveModal();
         }
         if (event.target.id === 'addCourseModal') {
             closeAddCourseModal();
@@ -293,6 +331,7 @@
             });
         }
     });
+
 </script>
 </body>
 </html>

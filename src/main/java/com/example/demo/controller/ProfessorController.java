@@ -135,26 +135,6 @@ public class ProfessorController {
         }
     }
 
-    // 부교수로 등록된 강의에서 나가기
-    @PostMapping("/leave-course/{courseCode}")
-    public String leaveCourse(@PathVariable String courseCode,
-                              HttpSession session,
-                              RedirectAttributes redirectAttributes) {
-        Professor professor = (Professor) session.getAttribute("user");
-        if (professor == null) {
-            return "redirect:/";
-        }
-
-        try {
-            professorService.removeSubProfessorFromCourse(courseCode, professor.getProfessorId());
-            redirectAttributes.addFlashAttribute("successMessage", "강의에서 나갔습니다.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        }
-
-        return "redirect:/professor/courses";
-    }
-
     // 특정 과제의 질문 목록 조회
     @GetMapping("/assignment/{assignmentCode}/questions")
     public String assignmentQuestions(@PathVariable int assignmentCode,
@@ -243,6 +223,34 @@ public class ProfessorController {
 
             professorService.deleteCourse(courseCode);
             redirectAttributes.addFlashAttribute("successMessage", "강의가 삭제되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/professor/courses";
+    }
+
+    // 부교수로 등록된 강의에서 나가기
+    @PostMapping("/leave-course/{courseCode}")
+    public String leaveCourse(@PathVariable String courseCode,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        Professor professor = (Professor) session.getAttribute("user");
+        if (professor == null) {
+            return "redirect:/";
+        }
+
+        try {
+            Course course = professorService.getCourseDetails(courseCode);
+
+            // 메인 교수는 나갈 수 없음
+            if (course.getProfessorId().equals(professor.getProfessorId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "메인 교수는 강의에서 나갈 수 없습니다. 강의를 삭제해주세요.");
+                return "redirect:/professor/courses";
+            }
+
+            professorService.removeSubProfessorFromCourse(courseCode, professor.getProfessorId());
+            redirectAttributes.addFlashAttribute("successMessage", "강의에서 나갔습니다.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }

@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,6 +15,8 @@ import java.util.List;
 @Data
 @Getter
 @Setter
+@ToString(exclude = {"course", "submissions", "questions"})  // 순환 참조 방지
+@EqualsAndHashCode(exclude = {"course", "submissions", "questions"})  // 순환 참조 방지
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Assignment {
     @Id

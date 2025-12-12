@@ -6,13 +6,12 @@
     <title>과제 관리 - Poly</title>
     <link rel="stylesheet" th:href="@{/css/professor/professorStyleSheet.css}">
     <link rel="stylesheet" th:href="@{/css/professor/professorAssignmentsStyleSheet.css}">
-<!--    <link rel="stylesheet" th:href="@{/css/professor/old/professorAssignmentsStyleSheet.css}">-->
 </head>
 <body>
 <div class="header">
     <a class="header-left" th:href="@{/professor-main}" style="text-decoration: none">
         <div class="logo"></div>
-        <div class="title">Poly</div>
+        <div class="title">AISW</div>
     </a>
     <div class="user-info">
         <span th:text="${professor.name + ' 교수님'}">교수님</span>
@@ -37,13 +36,12 @@
         </a>
     </div>
 
-    <!-- Page Header -->
     <div class="main-content">
         <div class="page-header">
             <div class="page-title">📋 과제 관리</div>
             <div class="page-subtitle">과제별 제출 현황을 확인하고 채점하세요</div>
         </div>
-        <!-- Error Message -->
+
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
         <div class="button-container">
@@ -51,7 +49,31 @@
             <a th:href="@{/create-assignment}" class="btn-primary" style="display: block;">과제 등록하기</a>
         </div>
 
-        <!-- Assignments Grid -->
+        <!-- Search Section -->
+        <div class="search-section" style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <input type="text"
+                       id="searchInput"
+                       placeholder="🔍 과제 제목 또는 강의명으로 검색..."
+                       style="flex: 1; min-width: 250px; padding: 12px 15px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px;"
+                       onkeyup="searchAssignments()">
+                <select id="courseFilter"
+                        onchange="searchAssignments()"
+                        style="padding: 12px 15px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; min-width: 200px;">
+                    <option value="">모든 강의</option>
+                </select>
+                <button onclick="resetSearch()"
+                        style="padding: 12px 20px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: background 0.3s;"
+                        onmouseover="this.style.background='#5a6268'"
+                        onmouseout="this.style.background='#6c757d'">
+                    초기화
+                </button>
+            </div>
+            <div id="searchResultInfo" style="margin-top: 10px; color: #7f8c8d; font-size: 14px;">
+                <!-- 검색 결과 정보 -->
+            </div>
+        </div>
+
         <div th:if="${#lists.isEmpty(assignments)}" class="empty-state">
             <div class="empty-state-icon">📝</div>
             <h3>등록된 과제가 없습니다</h3>
@@ -59,10 +81,15 @@
             <a th:href="@{/create-assignment}" class="btn-primary">과제 등록하기</a>
         </div>
 
-        <div th:unless="${#lists.isEmpty(assignments)}" class="assignments-grid">
-            <a style="text-decoration: none;" th:each="assignment : ${assignments}" th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/submissions'}">
+        <div th:unless="${#lists.isEmpty(assignments)}" class="assignments-grid" id="assignmentsGrid">
+            <a style="text-decoration: none;"
+               th:each="assignment : ${assignments}"
+               th:href="@{'/professor/assignment/' + ${assignment.assignmentCode} + '/submissions'}"
+               class="assignment-card-link"
+               th:data-title="${assignment.title}"
+               th:data-course="${assignment.course.courseName}"
+               th:data-course-code="${assignment.course.courseCode}">
                 <div class="assignment-card">
-
                     <div class="assignment-header">
                         <h3 class="assignment-title" th:text="${assignment.title}">과제 제목</h3>
                         <span class="assignment-code" th:text="${'#' + assignment.assignmentCode}">#001</span>
@@ -121,9 +148,113 @@
                     </div>
                 </div>
             </a>
+        </div>
 
+        <div id="noResults" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">🔍</div>
+            <h3>검색 결과가 없습니다</h3>
+            <p>다른 검색어를 입력해보세요.</p>
         </div>
     </div>
 </div>
+
+<script>
+    let allAssignmentCards = [];
+    let allCourses = new Set();
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // 모든 과제 카드 저장
+        allAssignmentCards = Array.from(document.querySelectorAll('.assignment-card-link'));
+
+        // 강의 필터 옵션 생성
+        allAssignmentCards.forEach(card => {
+            const courseCode = card.dataset.courseCode;
+            const courseName = card.dataset.course;
+            if (courseCode && courseName) {
+                allCourses.add(JSON.stringify({code: courseCode, name: courseName}));
+            }
+        });
+
+        const courseFilter = document.getElementById('courseFilter');
+        Array.from(allCourses).sort().forEach(courseStr => {
+            const course = JSON.parse(courseStr);
+            const option = document.createElement('option');
+            option.value = course.code;
+            option.textContent = `${course.name} (${course.code})`;
+            courseFilter.appendChild(option);
+        });
+
+        updateSearchInfo();
+    });
+
+    function searchAssignments() {
+        const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+        const selectedCourse = document.getElementById('courseFilter').value;
+
+        let visibleCount = 0;
+
+        allAssignmentCards.forEach(card => {
+            const title = card.dataset.title.toLowerCase();
+            const course = card.dataset.course.toLowerCase();
+            const courseCode = card.dataset.courseCode;
+
+            const matchesSearch = !searchText || title.includes(searchText) || course.includes(searchText);
+            const matchesCourse = !selectedCourse || courseCode === selectedCourse;
+
+            if (matchesSearch && matchesCourse) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // 검색 결과 정보 업데이트
+        updateSearchInfo(visibleCount, searchText, selectedCourse);
+
+        // 결과 없음 메시지 표시
+        const noResults = document.getElementById('noResults');
+        const assignmentsGrid = document.getElementById('assignmentsGrid');
+
+        if (visibleCount === 0 && allAssignmentCards.length > 0) {
+            if (assignmentsGrid) assignmentsGrid.style.display = 'none';
+            if (noResults) noResults.style.display = 'block';
+        } else {
+            if (assignmentsGrid) assignmentsGrid.style.display = 'grid';
+            if (noResults) noResults.style.display = 'none';
+        }
+    }
+
+    function updateSearchInfo(visibleCount, searchText, selectedCourse) {
+        const info = document.getElementById('searchResultInfo');
+        if (!info) return;
+
+        if (visibleCount === undefined) {
+            visibleCount = allAssignmentCards.length;
+        }
+
+        let infoText = `총 ${allAssignmentCards.length}개 중 ${visibleCount}개 표시`;
+
+        if (searchText || selectedCourse) {
+            infoText += ' | 필터: ';
+            const filters = [];
+            if (searchText) filters.push(`검색어 "${searchText}"`);
+            if (selectedCourse) {
+                const courseFilter = document.getElementById('courseFilter');
+                const selectedOption = courseFilter.options[courseFilter.selectedIndex];
+                filters.push(`강의 "${selectedOption.textContent}"`);
+            }
+            infoText += filters.join(', ');
+        }
+
+        info.textContent = infoText;
+    }
+
+    function resetSearch() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('courseFilter').value = '';
+        searchAssignments();
+    }
+</script>
 </body>
 </html>

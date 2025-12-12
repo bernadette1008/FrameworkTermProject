@@ -6,12 +6,69 @@
   <title>과제 제출물 관리 - Poly</title>
   <link rel="stylesheet" th:href="@{/css/professor/professorStyleSheet.css}">
   <link rel="stylesheet" th:href="@{/css/professor/professorSubmissionsStyleSheet.css}">
+  <style>
+    .search-section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .search-controls {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+      padding: 12px 15px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #7fcdcd;
+    }
+    .filter-select {
+      padding: 12px 15px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 14px;
+      min-width: 150px;
+    }
+    .reset-btn {
+      padding: 12px 20px;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .reset-btn:hover {
+      background: #5a6268;
+    }
+    .search-info {
+      margin-top: 10px;
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+    .highlight {
+      background-color: #fff3cd;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+  </style>
 </head>
 <body>
 <div class="header">
   <a class="header-left" th:href="@{/professor-main}" style="text-decoration: none">
     <div class="logo"></div>
-    <div class="title">Poly</div>
+    <div class="title">AISW</div>
   </a>
   <div class="user-info">
     <span th:text="${professor.name + ' 교수님'}">교수님</span>
@@ -20,7 +77,6 @@
 </div>
 
 <div class="main-content" style="max-width: 1200px; width: 100%; margin: 0 auto;">
-  <!-- Success/Error Messages -->
   <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
   <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
@@ -47,20 +103,54 @@
   <!-- Statistics -->
   <div class="stats-cards">
     <div class="stat-card">
-      <div class="stat-number" th:text="${#lists.size(submissions)}">0</div>
+      <div class="stat-number" id="totalCount" th:text="${#lists.size(submissions)}">0</div>
       <div class="stat-label">총 제출물</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number" th:text="${submissions != null ? #lists.size(submissions.?[score != null]) : '0'}">0</div>
+      <div class="stat-number" id="gradedCount" th:text="${submissions != null ? #lists.size(submissions.?[score != null]) : '0'}">0</div>
       <div class="stat-label">채점 완료</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number" th:text="${submissions != null ? #lists.size(submissions.?[score == null]) : '0'}">0</div>
+      <div class="stat-number" id="pendingCount" th:text="${submissions != null ? #lists.size(submissions.?[score == null]) : '0'}">0</div>
       <div class="stat-label">채점 대기</div>
     </div>
     <div class="stat-card">
       <div class="stat-number" th:text="${submissions != null and !#lists.isEmpty(submissions.?[score != null]) ? (#numbers.formatDecimal((#aggregates.sum(submissions.?[score != null].![score]) / #lists.size(submissions.?[score != null])), 1, 1)) : '0.0'}">0.0</div>
       <div class="stat-label">평균 점수</div>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-section">
+    <div class="search-controls">
+      <input type="text"
+             id="searchInput"
+             class="search-input"
+             placeholder="🔍 학생 이름 또는 학번으로 검색..."
+             onkeyup="searchSubmissions()">
+
+      <select id="statusFilter" class="filter-select" onchange="searchSubmissions()">
+        <option value="">모든 상태</option>
+        <option value="graded">채점 완료</option>
+        <option value="submitted">제출 완료</option>
+        <option value="late">지각 제출</option>
+      </select>
+
+      <select id="sortFilter" class="filter-select" onchange="sortSubmissions()">
+        <option value="date-desc">최근 제출순</option>
+        <option value="date-asc">오래된 순</option>
+        <option value="name-asc">이름순 (가나다)</option>
+        <option value="name-desc">이름순 (역순)</option>
+        <option value="score-desc">점수 높은순</option>
+        <option value="score-asc">점수 낮은순</option>
+      </select>
+
+      <button class="reset-btn" onclick="resetSearch()">
+        초기화
+      </button>
+    </div>
+    <div id="searchInfo" class="search-info">
+      <!-- 검색 결과 정보 -->
     </div>
   </div>
 
@@ -70,13 +160,19 @@
       <div class="table-title">제출물 목록</div>
     </div>
 
-    <div th:if="${#lists.isEmpty(submissions)}" class="empty-state">
+    <div th:if="${#lists.isEmpty(submissions)}" class="empty-state" id="emptyState">
       <div class="empty-state-icon">📋</div>
       <h3>제출된 과제가 없습니다</h3>
       <p>아직 학생들이 과제를 제출하지 않았습니다.</p>
     </div>
 
-    <table th:unless="${#lists.isEmpty(submissions)}">
+    <div id="noResults" class="empty-state" style="display: none;">
+      <div class="empty-state-icon">🔍</div>
+      <h3>검색 결과가 없습니다</h3>
+      <p>다른 검색어를 입력해보세요.</p>
+    </div>
+
+    <table th:unless="${#lists.isEmpty(submissions)}" id="submissionsTable">
       <thead>
       <tr>
         <th>학생</th>
@@ -86,8 +182,16 @@
         <th>관리</th>
       </tr>
       </thead>
-      <tbody>
-      <tr th:each="submission : ${submissions}" th:onclick="'location.href=\'/professor/submission/' + ${submission.submissionCode} + '\''" style="cursor: pointer;">
+      <tbody id="submissionsBody">
+      <tr th:each="submission : ${submissions}"
+          class="submission-row"
+          th:data-student-name="${submission.student.name}"
+          th:data-student-id="${submission.student.studentId}"
+          th:data-status="${submission.score != null ? 'graded' : (submission.submissionTime.isBefore(assignment.dueDate) ? 'submitted' : 'late')}"
+          th:data-score="${submission.score}"
+          th:data-date="${submission.submissionTime}"
+          th:onclick="'location.href=\'/professor/submission/' + ${submission.submissionCode} + '\''"
+          style="cursor: pointer;">
         <td>
           <div class="student-info">
             <div class="student-avatar" th:text="${submission.student.name.substring(0,1)}">학</div>
@@ -106,13 +210,13 @@
                 class="submission-status status-late">지각제출</span>
         </td>
         <td>
-                        <span th:if="${submission.score != null}"
-                              th:class="${'score-display ' + (submission.score >= 90 ? 'score-good' : (submission.score >= 70 ? 'score-average' : 'score-poor'))}"
-                              th:text="${submission.score + '점'}">점수</span>
+          <span th:if="${submission.score != null}"
+                th:class="${'score-display ' + (submission.score >= 90 ? 'score-good' : (submission.score >= 70 ? 'score-average' : 'score-poor'))}"
+                th:text="${submission.score + '점'}">점수</span>
           <span th:if="${submission.score == null}" class="submission-status" style="background: #e9ecef; color: #6c757d;">미채점</span>
         </td>
         <td>
-          <a th:href="@{'/professor/submission/' + ${submission.submissionCode}}" class="action-btn">
+          <a th:href="@{'/professor/submission/' + ${submission.submissionCode}}" class="action-btn" onclick="event.stopPropagation();">
             📝 채점하기
           </a>
         </td>
@@ -121,5 +225,170 @@
     </table>
   </div>
 </div>
+
+<script>
+  let allRows = [];
+  const dueDate = new Date('[[${assignment.dueDate}]]');
+
+  document.addEventListener('DOMContentLoaded', function() {
+    allRows = Array.from(document.querySelectorAll('.submission-row'));
+    updateSearchInfo();
+  });
+
+  function searchSubmissions() {
+    const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+    const statusFilter = document.getElementById('statusFilter').value;
+
+    let visibleCount = 0;
+
+    allRows.forEach(row => {
+      const studentName = row.dataset.studentName.toLowerCase();
+      const studentId = row.dataset.studentId.toLowerCase();
+      const status = row.dataset.status;
+
+      const matchesSearch = !searchText ||
+              studentName.includes(searchText) ||
+              studentId.includes(searchText);
+      const matchesStatus = !statusFilter || status === statusFilter;
+
+      if (matchesSearch && matchesStatus) {
+        row.style.display = '';
+        visibleCount++;
+
+        // 검색어 하이라이트
+        if (searchText) {
+          highlightText(row, searchText);
+        } else {
+          removeHighlight(row);
+        }
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    updateSearchInfo(visibleCount, searchText, statusFilter);
+    updateStatistics(visibleCount);
+
+    // 결과 없음 메시지
+    const table = document.getElementById('submissionsTable');
+    const noResults = document.getElementById('noResults');
+    const emptyState = document.getElementById('emptyState');
+
+    if (visibleCount === 0 && allRows.length > 0) {
+      if (table) table.style.display = 'none';
+      if (noResults) noResults.style.display = 'block';
+      if (emptyState) emptyState.style.display = 'none';
+    } else {
+      if (table) table.style.display = 'table';
+      if (noResults) noResults.style.display = 'none';
+    }
+  }
+
+  function sortSubmissions() {
+    const sortBy = document.getElementById('sortFilter').value;
+    const tbody = document.getElementById('submissionsBody');
+
+    const sortedRows = [...allRows].sort((a, b) => {
+      switch(sortBy) {
+        case 'date-desc':
+          return new Date(b.dataset.date) - new Date(a.dataset.date);
+        case 'date-asc':
+          return new Date(a.dataset.date) - new Date(b.dataset.date);
+        case 'name-asc':
+          return a.dataset.studentName.localeCompare(b.dataset.studentName, 'ko');
+        case 'name-desc':
+          return b.dataset.studentName.localeCompare(a.dataset.studentName, 'ko');
+        case 'score-desc':
+          return (parseFloat(b.dataset.score) || 0) - (parseFloat(a.dataset.score) || 0);
+        case 'score-asc':
+          return (parseFloat(a.dataset.score) || 0) - (parseFloat(b.dataset.score) || 0);
+        default:
+          return 0;
+      }
+    });
+
+    sortedRows.forEach(row => tbody.appendChild(row));
+  }
+
+  function highlightText(row, searchText) {
+    const nameEl = row.querySelector('.student-name');
+    const idEl = row.querySelector('.student-id');
+
+    if (nameEl) {
+      const name = nameEl.dataset.originalText || nameEl.textContent;
+      nameEl.dataset.originalText = name;
+      nameEl.innerHTML = name.replace(new RegExp(searchText, 'gi'), match => `<span class="highlight">${match}</span>`);
+    }
+
+    if (idEl) {
+      const id = idEl.dataset.originalText || idEl.textContent;
+      idEl.dataset.originalText = id;
+      idEl.innerHTML = id.replace(new RegExp(searchText, 'gi'), match => `<span class="highlight">${match}</span>`);
+    }
+  }
+
+  function removeHighlight(row) {
+    const nameEl = row.querySelector('.student-name');
+    const idEl = row.querySelector('.student-id');
+
+    if (nameEl && nameEl.dataset.originalText) {
+      nameEl.textContent = nameEl.dataset.originalText;
+    }
+    if (idEl && idEl.dataset.originalText) {
+      idEl.textContent = idEl.dataset.originalText;
+    }
+  }
+
+  function updateSearchInfo(visibleCount, searchText, statusFilter) {
+    const info = document.getElementById('searchInfo');
+    if (!info) return;
+
+    if (visibleCount === undefined) {
+      visibleCount = allRows.length;
+    }
+
+    let infoText = `총 ${allRows.length}개 중 ${visibleCount}개 표시`;
+
+    if (searchText || statusFilter) {
+      infoText += ' | 필터: ';
+      const filters = [];
+      if (searchText) filters.push(`검색어 "${searchText}"`);
+      if (statusFilter) {
+        const statusNames = {
+          'graded': '채점 완료',
+          'submitted': '제출 완료',
+          'late': '지각 제출'
+        };
+        filters.push(`상태 "${statusNames[statusFilter]}"`);
+      }
+      infoText += filters.join(', ');
+    }
+
+    info.textContent = infoText;
+  }
+
+  function updateStatistics(visibleCount) {
+    const visibleRows = allRows.filter(row => row.style.display !== 'none');
+    const graded = visibleRows.filter(row => row.dataset.status === 'graded').length;
+    const pending = visibleRows.length - graded;
+
+    document.getElementById('totalCount').textContent = visibleCount;
+    document.getElementById('gradedCount').textContent = graded;
+    document.getElementById('pendingCount').textContent = pending;
+  }
+
+  function resetSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('sortFilter').value = 'date-desc';
+
+    allRows.forEach(row => {
+      removeHighlight(row);
+    });
+
+    searchSubmissions();
+    sortSubmissions();
+  }
+</script>
 </body>
 </html>
